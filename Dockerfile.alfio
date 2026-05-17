@@ -1,0 +1,16 @@
+FROM openjdk:11-jre-slim
+
+WORKDIR /app
+
+# Download ALFIO latest release
+RUN apt-get update && apt-get install -y wget unzip && \
+    wget https://github.com/alfio-event/alf.io/releases/download/2.0.0-RC1/alfio-2.0.0-RC1.zip && \
+    unzip alfio-2.0.0-RC1.zip && \
+    rm alfio-2.0.0-RC1.zip && \
+    apt-get remove -y wget unzip && \
+    apt-get clean
+
+EXPOSE 8080
+
+# Start ALFIO with Spring Boot
+ENTRYPOINT ["java", "-Xmx1024m", "-jar", "alfio-2.0.0-RC1.jar"]

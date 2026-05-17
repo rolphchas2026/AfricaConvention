@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Africa Convention 2026 - Training Academy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; line-height: 1.6; }
+    .training-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    .training-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; }
+    .training-header h1 { font-size: 32px; margin-bottom: 10px; }
+    .training-header p { opacity: 0.9; font-size: 16px; }
+    .section { background: white; padding: 25px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .section h2 { color: #667eea; font-size: 24px; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+    .section h3 { color: #764ba2; font-size: 18px; margin-top: 20px; margin-bottom: 10px; }
+    .feature-list { list-style: none; margin: 15px 0; }
+    .feature-list li { padding: 10px; margin: 8px 0; background: #f5f5f5; border-left: 4px solid #667eea; border-radius: 4px; }
+    .feature-list li:before { content: "✓ "; color: #28a745; font-weight: bold; margin-right: 8px; }
+    .step { background: #e3f2fd; padding: 15px; margin: 15px 0; border-radius: 4px; border-left: 4px solid #2196F3; }
+    .step strong { color: #1976D2; }
+    .code-block { background: #f5f5f5; padding: 15px; border-radius: 4px; font-family: monospace; overflow-x: auto; margin: 10px 0; border-left: 4px solid #FF9800; }
+    .warning { background: #fff3cd; padding: 15px; border-radius: 4px; border-left: 4px solid #ffc107; margin: 15px 0; }
+    .warning:before { content: "⚠ "; font-weight: bold; }
+    .success { background: #d4edda; padding: 15px; border-radius: 4px; border-left: 4px solid #28a745; margin: 15px 0; }
+    .success:before { content: "✓ "; font-weight: bold; color: #28a745; }
+    .table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    .table th { background: #667eea; color: white; padding: 12px; text-align: left; }
+    .table td { padding: 12px; border-bottom: 1px solid #ddd; }
+    .table tr:hover { background: #f5f5f5; }
+    .faq { margin: 20px 0; }
+    .faq-item { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 4px; }
+    .faq-question { font-weight: bold; color: #667eea; cursor: pointer; user-select: none; }
+    .faq-answer { margin-top: 10px; display: none; padding-top: 10px; border-top: 1px solid #ddd; }
+    .version { background: #e8f5e9; padding: 10px; border-radius: 4px; margin-top: 20px; font-size: 12px; color: #2e7d32; }
+    .image-placeholder { background: #f0f0f0; width: 100%; height: 200px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; color: #999; border-radius: 4px; margin: 15px 0; }
+    .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .two-column { grid-template-columns: 1fr; } }
+    .toc { background: #f5f5f5; padding: 20px; border-radius: 4px; margin-bottom: 20px; }
+    .toc h3 { margin-bottom: 15px; color: #667eea; }
+    .toc ol { margin-left: 20px; }
+    .toc a { color: #667eea; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="training-container">
+
+<!-- HEADER -->
+<div class="training-header">
+  <h1>🎓 Africa Convention 2026 - Event Management System Training</h1>
+  <p>Complete Supervisor & Staff Training Guide</p>
+  <p style="margin-top: 10px; font-size: 12px;">Event Date: June 18-22, 2026 | Location: Arusha, Tanzania</p>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <h3>📋 Table of Contents</h3>
+  <ol>
+    <li><a href="#overview">System Overview</a></li>
+    <li><a href="#features">Core Features</a></li>
+    <li><a href="#dashboard">Dashboard Guide</a></li>
+    <li><a href="#checkin">Check-in/Check-out Operations</a></li>
+    <li><a href="#badges">ID Badge System</a></li>
+    <li><a href="#statistics">Analytics & Reporting</a></li>
+    <li><a href="#operations">Daily Operations Checklist</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contacts">Support Contacts</a></li>
+  </ol>
+</div>
+
+<!-- 1. OVERVIEW -->
+<div class="section" id="overview">
+  <h2>1. System Overview</h2>
+  <p>The <strong>Africa Convention 2026 Event Management System</strong> is a real-time digital platform designed for managing attendance, credentials, and analytics for large-scale events.</p>
+  
+  <h3>Event Information</h3>
+  <table class="table">
+    <tr>
+      <th>Field</th>
+      <th>Details</th>
+    </tr>
+    <tr>
+      <td>Event Name</td>
+      <td>Africa Convention 2026</td>
+    </tr>
+    <tr>
+      <td>Theme</td>
+      <td>"Doing Business and Bearing Fruitful"</td>
+    </tr>
+    <tr>
+      <td>Location</td>
+      <td>Arusha, Tanzania</td>
+    </tr>
+    <tr>
+      <td>Dates</td>
+      <td>June 18-22, 2026</td>
+    </tr>
+    <tr>
+      <td>Expected Attendance</td>
+      <td>400-600 participants</td>
+    </tr>
+    <tr>
+      <td>Organizers</td>
+      <td>Living Hope Mission / WCCM / YWAM</td>
+    </tr>
+  </table>
+
+  <h3>System Purpose</h3>
+  <p>This system enables:</p>
+  <ul class="feature-list">
+    <li>Real-time attendee registration</li>
+    <li>QR code-based check-in/check-out</li>
+    <li>Professional ID badge generation</li>
+    <li>Live event statistics and analytics</li>
+    <li>Attendance tracking by category</li>
+    <li>Complete activity logging</li>
+  </ul>
+</div>
+
+<!-- 2. FEATURES -->
+<div class="section" id="features">
+  <h2>2. Core Features</h2>
+  
+  <h3>📊 Live Dashboard</h3>
+  <ul class="feature-list">
+    <li>Real-time attendee count (Total, In Event, Checked Out)</li>
+    <li>Check-in rate percentage</li>
+    <li>Recent activity log (last 20 actions)</li>
+    <li>Category-based breakdown with progress indicators</li>
+    <li>Auto-refresh every 5 seconds</li>
+  </ul>
+
+  <h3>✅ Check-in/Check-out System</h3>
+  <ul class="feature-list">
+    <li>Register new attendees on-site</li>
+    <li>QR code or manual ID scanning</li>
+    <li>Automatic timestamp recording</li>
+    <li>Staff attribution (who checked them in)</li>
+    <li>Duplicate prevention</li>
+    <li>Real-time activity logging</li>
+  </ul>
+
+  <h3>🎫 Badge Generation</h3>
+  <ul class="feature-list">
+    <li>PDF format for email distribution</li>
+    <li>HTML format for on-site printing</li>
+    <li>Embedded QR codes</li>
+    <li>Event branding and sponsor logos</li>
+    <li>Batch generation capability</li>
+  </ul>
+
+  <h3>📈 Statistics & Analytics</h3>
+  <ul class="feature-list">
+    <li>Category breakdown with progress bars</li>
+    <li>Detailed attendance reports</li>
+    <li>Status tracking (Waiting/In/Out)</li>
+    <li>Real-time data updates</li>
+  </ul>
+
+  <h3>🔐 Data Security</h3>
+  <ul class="feature-list">
+    <li>Duplicate detection (email, QR codes)</li>
+    <li>Error handling with friendly messages</li>
+    <li>No technical backend exposure</li>
+    <li>Complete audit logging</li>
+  </ul>
+</div>
+
+<!-- 3. DASHBOARD GUIDE -->
+<div class="section" id="dashboard">
+  <h2>3. Live Dashboard Guide</h2>
+  
+  <h3>Dashboard Components</h3>
+  <p>The dashboard is your real-time event control center.</p>
+
+  <h4>📊 Statistics Cards (4 Metrics)</h4>
+  <table class="table">
+    <tr>
+      <th>Metric</th>
+      <th>Meaning</th>
+      <th>Purpose</th>
+    </tr>
+    <tr>
+      <td>Total Registered</td>
+      <td>All attendees in the system</td>
+      <td>Expected attendance count</td>
+    </tr>
+    <tr>
+      <td>In Event</td>
+      <td>Currently checked in</td>
+      <td>Live event population</td>
+    </tr>
+    <tr>
+      <td>Checked Out</td>
+      <td>Departed/left the event</td>
+      <td>Tracks departures</td>
+    </tr>
+    <tr>
+      <td>Check-in Rate %</td>
+      <td>In Event / Total × 100</td>
+      <td>Event success metric</td>
+    </tr>
+  </table>
+
+  <h3>Activity Log</h3>
+  <p>Shows the 20 most recent actions with:</p>
+  <ul style="margin-left: 20px;">
+    <li>Attendee name</li>
+    <li>Action type (✓ Check In or ✗ Check Out)</li>
+    <li>Exact time (HH:MM:SS)</li>
+    <li>Staff member who processed it</li>
+  </ul>
+
+  <h3>Category Breakdown</h3>
+  <p>Visual progress bars for each participant category:</p>
+  <ul style="margin-left: 20px;">
+    <li><strong>Youth:</strong> Young adult category</li>
+    <li><strong>Speaker:</strong> Presenters and keynotes</li>
+    <li><strong>Business:</strong> Business leaders and entrepreneurs</li>
+    <li><strong>Staff:</strong> Event team members</li>
+  </ul>
+
+  <div class="success">Auto-refresh: Dashboard updates every 5 seconds automatically!</div>
+</div>
+
+<!-- 4. CHECK-IN/CHECK-OUT OPERATIONS -->
+<div class="section" id="checkin">
+  <h2>4. Check-in/Check-out Operations</h2>
+
+  <h3>Register New Attendee (On-Site)</h3>
+  <p>Use this if attendee wasn't pre-registered:</p>
+  
+  <div class="step">
+    <strong>Step 1: Fill Required Fields</strong>
+    <div class="code-block">
+Name:     John Mwangi (minimum 2 characters)
+Email:    john@example.com (must be valid)
+Phone:    +255700000001 (optional)
+Category: Youth / Speaker / Business / Staff (optional)
+    </div>
+  </div>
+
+  <div class="step">
+    <strong>Step 2: Click "✅ Register"</strong>
+    <p>System automatically generates QR code</p>
+  </div>
+
+  <div class="success">✓ Registration successful! ID and QR code displayed</div>
+
+  <h3>Check-In Process</h3>
+  <p>When attendee arrives at venue:</p>
+
+  <div class="step">
+    <strong>Step 1: Scan QR Code</strong>
+    <p>Use QR scanner or manually type attendee ID</p>
+  </div>
+
+  <div class="step">
+    <strong>Step 2: Enter Your Name</strong>
+    <p>Staff name (who is checking them in)</p>
+  </div>
+
+  <div class="step">
+    <strong>Step 3: Click "✅ CHECK IN"</strong>
+  </div>
+
+  <div class="success">✓ System records exact check-in time and staff name</div>
+
+  <h3>Check-Out Process</h3>
+  <p>When attendee leaves the event:</p>
+
+  <div class="step">
+    <strong>Step 1: Scan QR Code or Enter ID</strong>
+  </div>
+
+  <div class="step">
+    <strong>Step 2: Click "❌ CHECK OUT"</strong>
+  </div>
+
+  <div class="success">✓ System records exact check-out time</div>
+
+  <h3>Status Indicators</h3>
+  <table class="table">
+    <tr>
+      <th>Status</th>
+      <th>Badge Color</th>
+      <th>Meaning</th>
+    </tr>
+    <tr>
+      <td>⏳ Waiting</td>
+      <td>Yellow</td>
+      <td>Registered but not yet checked in</td>
+    </tr>
+    <tr>
+      <td>✓ In Event</td>
+      <td>Green</td>
+      <td>Currently at the event</td>
+    </tr>
+    <tr>
+      <td>✗ Checked Out</td>
+      <td>Red</td>
+      <td>Has departed the event</td>
+    </tr>
+  </table>
+
+  <div class="warning">Prevention: System prevents duplicate check-ins. If "Already checked in" message appears, attendee is still in event.</div>
+</div>
+
+<!-- 5. ID BADGE SYSTEM -->
+<div class="section" id="badges">
+  <h2>5. ID Badge System</h2>
+
+  <h3>Badge Generation Steps</h3>
+
+  <div class="step">
+    <strong>Step 1: Choose Format</strong>
+    <ul style="margin-top: 10px; margin-left: 20px;">
+      <li><strong>📄 PDF:</strong> Email to attendees (printable at home)</li>
+      <li><strong>🖨️ HTML:</strong> Print on-site on badge cards</li>
+    </ul>
+  </div>
+
+  <div class="step">
+    <strong>Step 2: Select Attendees</strong>
+    <ul style="margin-top: 10px; margin-left: 20px;">
+      <li>Click individual checkboxes for specific attendees</li>
+      <li>Or click "✓ All" to select everyone</li>
+      <li>Click "✗ Clear" to deselect</li>
+    </ul>
+  </div>
+
+  <div class="step">
+    <strong>Step 3: Click "⬇️ Generate Badges"</strong>
+    <ul style="margin-top: 10px; margin-left: 20px;">
+      <li>PDF: File downloads to computer</li>
+      <li>HTML: Opens in new print window</li>
+    </ul>
+  </div>
+
+  <h3>Badge Information Included</h3>
+  <ul class="feature-list">
+    <li>Attendee Full Name</li>
+    <li>Email Address</li>
+    <li>Participant Category</li>
+    <li>QR Code (for scanning)</li>
+    <li>Event branding</li>
+    <li>Sponsor logos</li>
+  </ul>
+
+  <h3>Badge Formats</h3>
+  <table class="table">
+    <tr>
+      <th>Format</th>
+      <th>Best For</th>
+      <th>Size</th>
+    </tr>
+    <tr>
+      <td>PDF</td>
+      <td>Email distribution</td>
+      <td>A4 or Letter</td>
+    </tr>
+    <tr>
+      <td>HTML</td>
+      <td>On-site printing</td>
+      <td>3.5" × 2.2" cards</td>
+    </tr>
+  </table>
+
+  <div class="success">Pro Tip: Generate badges in batches before event day for efficiency</div>
+</div>
+
+<!-- 6. STATISTICS & REPORTING -->
+<div class="section" id="statistics">
+  <h2>6. Analytics & Reporting</h2>
+
+  <h3>Statistics Overview</h3>
+  <p>Real-time data snapshot:</p>
+  <ul class="feature-list">
+    <li>Total Registered: All attendees</li>
+    <li>In Event: Currently present</li>
+    <li>Checked Out: Departed</li>
+    <li>Pending: Not yet checked in</li>
+  </ul>
+
+  <h3>Category Analytics</h3>
+  <p>Breakdown by participant type with visual progress bars:</p>
+  <table class="table">
+    <tr>
+      <th>Category</th>
+      <th>Total</th>
+      <th>In Event</th>
+      <th>Out</th>
+      <th>Pending</th>
+      <th>Rate %</th>
+    </tr>
+    <tr>
+      <td>Youth</td>
+      <td>200</td>
+      <td>180</td>
+      <td>15</td>
+      <td>5</td>
+      <td>90%</td>
+    </tr>
+    <tr>
+      <td>Speaker</td>
+      <td>50</td>
+      <td>48</td>
+      <td>2</td>
+      <td>0</td>
+      <td>96%</td>
+    </tr>
+    <tr>
+      <td>Business</td>
+      <td>200</td>
+      <td>160</td>
+      <td>30</td>
+      <td>10</td>
+      <td>80%</td>
+    </tr>
+    <tr>
+      <td>Staff</td>
+      <td>50</td>
+      <td>50</td>
+      <td>0</td>
+      <td>0</td>
+      <td>100%</td>
+    </tr>
+  </table>
+
+  <h3>Detailed Report</h3>
+  <p>Complete attendee status table with:</p>
+  <ul style="margin-left: 20px;">
+    <li>Name</li>
+    <li>Email</li>
+    <li>Category</li>
+    <li>Status (Waiting / In Event / Checked Out)</li>
+    <li>Check-in Time (if applicable)</li>
+    <li>Check-out Time (if applicable)</li>
+  </ul>
+
+  <div class="success">✓ Data updates every 5 seconds automatically</div>
+</div>
+
+<!-- 7. DAILY OPERATIONS -->
+<div class="section" id="operations">
+  <h2>7. Daily Operations Checklist</h2>
+
+  <h3>Before Event Day</h3>
+  <div style="margin: 15px 0;">
+    <input type="checkbox"> Pre-register all known attendees
+    <br><input type="checkbox"> Generate and print/email all badges
+    <br><input type="checkbox"> Test QR scanners at entry gates
+    <br><input type="checkbox"> Train all check-in staff
+    <br><input type="checkbox"> Verify system connectivity
+  </div>
+
+  <h3>Event Day Morning</h3>
+  <div style="margin: 15px 0;">
+    <input type="checkbox"> Boot up system 1 hour before opening
+    <br><input type="checkbox"> Verify database connection
+    <br><input type="checkbox"> Test check-in system at each gate
+    <br><input type="checkbox"> Brief all staff on procedures
+    <br><input type="checkbox"> Monitor dashboard for issues
+  </div>
+
+  <h3>During Event</h3>
+  <div style="margin: 15px 0;">
+    <input type="checkbox"> Monitor live dashboard every 30 minutes
+    <br><input type="checkbox"> Check internet connectivity
+    <br><input type="checkbox"> Note any system issues
+    <br><input type="checkbox"> Register walk-in attendees
+    <br><input type="checkbox"> Track check-in rate
+  </div>
+
+  <h3>End of Each Day</h3>
+  <div style="margin: 15px 0;">
+    <input type="checkbox"> Export daily statistics
+    <br><input type="checkbox"> Verify all check-outs processed
+    <br><input type="checkbox"> Report any issues to admin
+    <br><input type="checkbox"> Backup system logs
+    <br><input type="checkbox"> Check system health
+  </div>
+
+  <h3>Post-Event</h3>
+  <div style="margin: 15px 0;">
+    <input type="checkbox"> Generate final attendance report
+    <br><input type="checkbox"> Export attendance data
+    <br><input type="checkbox"> Archive system logs
+    <br><input type="checkbox"> Thank staff team
+  </div>
+</div>
+
+<!-- 8. TROUBLESHOOTING -->
+<div class="section" id="troubleshooting">
+  <h2>8. Troubleshooting Guide</h2>
+
+  <h3>Common Issues & Solutions</h3>
+
+  <h4>❌ "Email already registered"</h4>
+  <div class="step">
+    <strong>Problem:</strong> Cannot register attendee
+    <br><strong>Solutions:</strong>
+    <ul style="margin-top: 10px; margin-left: 20px;">
+      <li>Check if attendee already exists in system</li>
+      <li>Use different email address</li>
+      <li>Contact admin for account issues</li>
+    </ul>
+  </div>
+
+  <h4>❌ "Attendee not found"</h4>
+  <div class="step">
+    <strong>Problem:</strong> Cannot find attendee during check-in
+    <br><strong>Solutions:</strong>
+    <ul style="margin-top: 10px; margin-left: 20px;">
+      <li>Verify QR code is correct</li>
+      <li>Check attendee ID number</li>
+      <li>Register attendee on-the-fly if needed</li>
+      <li>Check spelling if entering manually</li>
+    </ul>
+  </div>
+
+  <h4>❌ "Already checked in"</h4>
+  <div class="step">
+    <strong>Problem:</strong> Cannot check in attendee twice
+    <br><strong>Solution:</strong>
+    <p>This is by design - prevents duplicate check-ins. Check out the attendee first if re-entry is needed.</p>
+  </div>
+
+  <h4>❌ "Database connection failed"</h4>
+  <div class="step">
+    <strong>Problem:</strong> System cannot reach database
+    <br><strong>Solutions:</strong>
+    <ul style="margin-top: 10px; margin-left: 20px;">
+      <li>Check internet connection</li>
+      <li>Wait 30 seconds and retry</li>
+      <li>Refresh the page</li>
+      <li>Check if Docker containers are running</li>
+      <li>Contact IT support</li>
+    </ul>
+  </div>
+
+  <h4>❌ Dashboard Not Loading</h4>
+  <div class="step">
+    <strong>Solutions:</strong>
+    <ol style="margin-left: 20px;">
+      <li>Clear browser cache (Ctrl+Shift+Delete)</li>
+      <li>Close browser completely</li>
+      <li>Reopen and go to http://localhost:3000</li>
+      <li>Check Docker containers are running</li>
+    </ol>
+  </div>
+
+  <div class="warning">QR Scanner Not Working: You can always type the Attendee ID manually in the scan field</div>
+</div>
+
+<!-- 9. FAQ -->
+<div class="section" id="faq">
+  <h2>9. Frequently Asked Questions</h2>
+
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ Can we register attendees before the event?</div>
+      <div class="faq-answer">Yes! Pre-register attendees to create records and generate QR codes. At the event, simply scan and check them in. This is the recommended approach.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ What if an attendee loses their badge?</div>
+      <div class="faq-answer">Go to Badge Generator, select that attendee, and generate a new badge. Print and give it to them. You can regenerate anytime.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ Can multiple staff members use the system simultaneously?</div>
+      <div class="faq-answer">Yes! Multiple devices can check in at the same time. The system is designed for concurrent use and tracks who checked in each person.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ What if the QR scanner doesn't work?</div>
+      <div class="faq-answer">Simply type the Attendee ID manually in the scan field. The system accepts both QR scans and manual ID entry.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ Are times recorded accurately?</div>
+      <div class="faq-answer">Yes! Every check-in and check-out records the exact time to the second. This provides accurate attendance analytics.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ Can badges be printed on regular paper?</div>
+      <div class="faq-answer">Yes! Use HTML format for regular paper printing. For professional badges, use badge card stock (3.5" × 2.2").</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ What categories can we use?</div>
+      <div class="faq-answer">Default categories: Youth, Speaker, Business, Staff. Custom categories can be added by system administrators if needed.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ How often does the dashboard refresh?</div>
+      <div class="faq-answer">The dashboard automatically refreshes every 5 seconds. No manual refresh needed.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ Can we export attendance reports?</div>
+      <div class="faq-answer">Yes! The Statistics tab shows all data that can be copied to Excel, printed, or screenshotted for reporting.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">❓ Is our data secure?</div>
+      <div class="faq-answer">Yes. The system uses role-based access control, data validation, and complete audit logging for security.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. CONTACTS -->
+<div class="section" id="contacts" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+  <h2 style="color: white; border-bottom-color: white;">10. Support & Contact Information</h2>
+  
+  <div class="two-column" style="color: white;">
+    <div>
+      <h3 style="color: white;">🤝 Primary Contacts</h3>
+      <p><strong>Phone 1:</strong> +255 787 576 900</p>
+      <p><strong>Phone 2:</strong> +255 713 276 655</p>
+      <p><strong>Email:</strong> wccm.tz@gmail.com</p>
+      <p><strong>Website:</strong> www.livinghope.or.tz</p>
+    </div>
+    <div>
+      <h3 style="color: white;">🏢 Organizing Bodies</h3>
+      <p><strong>Living Hope Mission</strong></p>
+      <p>World Christian Council Movement (WCCM)</p>
+      <p>Youth With A Mission (YWAM)</p>
+      <p>Arusha, Tanzania</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.3);">
+    <h3 style="color: white;">⏰ Support Hours</h3>
+    <p>Monday - Friday: 8:00 AM - 6:00 PM (EAT)</p>
+    <p>Saturday - Sunday: Emergency support only</p>
+  </div>
+</div>
+
+<!-- VERSION INFO -->
+<div class="section">
+  <h2>System Version & Updates</h2>
+  
+  <div class="version">
+    <strong>Current Version: 3.0.0</strong><br>
+    Released: May 2026<br>
+    <strong>Latest Features:</strong>
+    <ul style="margin-left: 20px; margin-top: 10px;">
+      <li>✓ Complete training academy</li>
+      <li>✓ Check-in/Check-out with timestamps</li>
+      <li>✓ PDF & HTML badge generation</li>
+      <li>✓ Real-time statistics dashboard</li>
+      <li>✓ Image integration support</li>
+      <li>✓ Sponsor logo integration</li>
+      <li>✓ Comprehensive error handling</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleFAQ(element) {
+  const answer = element.nextElementSibling;
+  if (answer.style.display === 'none' || answer.style.display === '') {
+    answer.style.display = 'block';
+  } else {
+    answer.style.display = 'none';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+services:
+  shared-db:
+    image: postgres:15-alpine
+    container_name: shared-db
+    environment:
+      POSTGRES_DB: africa_convention
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ArushaPassword2026
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - convention-network
+    restart: unless-stopped
+
+  qr-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.qr
+    container_name: qr-checkin-api
+    depends_on:
+      - shared-db
+    environment:
+      DB_HOST: shared-db
+      DB_PORT: 5432
+      DB_USER: admin
+      DB_PASSWORD: ArushaPassword2026
+      DB_NAME: africa_convention
+      NODE_ENV: production
+      PORT: 3000
+      ADMIN_KEY: africa_convention_2026_secret_key
+    ports:
+      - "3000:3000"
+    networks:
+      - convention-network
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.qr
+    container_name: supervisor-dashboard
+    depends_on:
+      - qr-api
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      REACT_APP_API_URL: http://localhost:3000
+    ports:
+      - "4000:4000"
+    networks:
+      - convention-network
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  convention-network:
+    driver: bridge

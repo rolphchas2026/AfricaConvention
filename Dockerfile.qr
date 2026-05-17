@@ -1,0 +1,19 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install production dependencies only
+RUN npm install --omit=dev
+
+# Copy application code
+COPY qr-server-api.js .
+COPY badge-generation-api.js .
+
+# Expose port
+EXPOSE 3000 4000
+
+# Start application
+CMD ["node", "qr-server-api.js"]

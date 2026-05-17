@@ -1,0 +1,338 @@
+# POWER UP
+cd C:\data\projects\faith-and-will
+
+# Allow all connections in the config:
+docker exec -it faith-and-will-db sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /var/lib/postgresql/data/postgresql.conf
+
+# Trust the Docker Gateway:
+docker exec -it faith-and-will-db sh -c "echo 'host all all 0.0.0.0/0 md5' >> /var/lib/postgresql/data/pg_hba.conf"
+
+# Restart the DB to apply the rules:
+docker restart faith-and-will-db
+
+
+
+
+
+
+
+
+# TO CLEAR THE TERMINAL
+mkdir C:\AfricaConvention
+
+# 1. The Standard Command
+# Type this and press Enter:
+
+# PowerShell
+cls
+
+2. The Shortcut Key
+While your cursor is in the terminal, press:
+Ctrl + L
+
+
+
+
+# CREATE A TEMPORARY PRESENTATION FOLDER
+
+cd C:\AfricaConvention
+notepad docker-compose.yml
+
+
+# 2. The Final Configuration (Bypassing Registry Blocks)
+
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: alfio
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ArushaPassword2026
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  alfio:
+    image: ghcr.io/alfio-event/alfio:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/alfio
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=ArushaPassword2026
+      - ALFIO_DATABASE_TYPE=POSTGRES
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
+
+
+# 3. Deploy the Model
+docker compose up -d
+
+
+# Solution 5: The Emergency Fallback (Pre-built Image)
+ docker pull eclipse-temurin:17-jre-alpine
+
+# The "Custom Build" Solution
+Invoke-WebRequest -Uri "https://github.com/alfio-event/alfio/releases/download/v2.0-M4-2402/alfio-2.0-M4-2402-boot.war" -OutFile "C:\AfricaConvention\alfio.war"
+
+
+
+# Alfio War download
+# Create the Dockerfile (if you haven't yet):
+cd C:\AfricaConvention
+
+notepad C:\AfricaConvention\Dockerfile
+
+# Paste this and save:
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY alfio.war app.war
+EXPOSE 8080
+ENTRYPOINT ["java", "-Xmx512m", "-Dspring.profiles.active=prod", "-jar", "app.war"]
+
+
+# ALTERNATIVE
+
+FROM dockerfile/java:oracle-java8
+MAINTAINER info@exteso.com
+ADD https://github.com/exteso/alf.io/releases/download/alfio-1.3-beta1/alfio-1.3-beta1-jetty-console.war /usr/local/apps/alfio.war
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/usr/local/apps/alfio.war", "--headless"]
+
+
+# ALTERNATIVE 
+
+> scp target/alfio.war [YOUR_SSH_USERNAME]@[YOUR_APP_NAME]-[YOUR_DOMAIN].rhcloud.com:wildfly/standalone/deployments/ROOT
+> scp target/alfio.war [YOUR_SSH_USERNAME]@[YOUR_APP_NAME]-[YOUR_DOMAIN].rhcloud.com:wildfly/standalone/deployments/ROOT
+
+
+# RESTART DOCKER DESKTOP
+Restart-Service *docker*
+
+Restart-Service *docker*
+# Launch the Local Model:
+
+docker compose up -d --build
+
+# 1. Identify and Kill the Conflicting Process
+tasklist /FI "PID eq 2636"
+
+# Once you identify it, kill it to free up the port:
+taskkill /F /PID 2636
+
+# 2. Check the Application Logs
+docker logs africaconvention-alfio-1
+
+# 3. Look for these specific lines:
+
+	Initializing Spring EmbeddedDatabaseTypes
+
+	Tomcat started on port(s): 8080 (http)
+
+# 1. Check the Full Error Trace
+docker logs africaconvention-alfio-1 | Select-Object -Last 50
+
+# 2. Verify Database Health
+docker ps
+Both africaconvention-alfio-1 and africaconvention-db-1 must show "Up". If the db container is restarting, the app will never start.
+
+#3. The "Lead Programmer" Troubleshooting Steps
+
+# The Corrected File Structure
+# Copy and paste this into your notepad docker-compose.yml to fix the indentation:
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: alfio
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ArushaPassword2026
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  alfio:
+    build: .
+    container_name: africaconvention-alfio-1
+    depends_on:
+      - db
+    restart: always
+    ports:
+      - "8080:8080"
+    entrypoint:
+      - java
+      - -Xmx1024m
+      - -Dspring.profiles.active=prod
+      - -Ddatasource.url=jdbc:postgresql://db:5432/alfio
+      - -Ddatasource.username=admin
+      - -Ddatasource.password=ArushaPassword2026
+      - -Dalfio.database-type=POSTGRESQL
+      - -jar
+      - app.jar
+
+volumes:
+  pgdata:
+
+# 
+
+#1. Clear the failed state:
+docker compose down
+
+#2.  **Start the database first**:
+    ```powershell
+    docker compose up -d db
+    ```
+#3.  **Wait for the "Ready" Signal**: Run `docker logs africaconvention-db-1` and wait until you see `database system is ready to accept connections`.
+#4.  **Start the Portal**:
+    ```powershell
+    docker compose up -d alfio
+    ```
+
+### **Project Impact for Arusha**
+Stabilizing this handshake is the final technical requirement for your firm's deployment at the **Living Hope Mission Center**. Once these credentials align, the **Africa Convention** portal will move past the startup warning and begin serving the registration UI on port **8080**.
+
+**What does the "Caused by:" log entry specifically say?**
+
+# Rebuild and Start:
+docker compose up -d --build
+
+
+###################     CLAUDE AI TAKE OVER     ##################
+
+🐳 Docker Desktop — Clean Initialization (Windows 10, Virtualization Enabled)
+## PHASE 1 — Kill All Lingering Processes First
+## This is critical given your prior dirty-shutdown history.
+## Step 1. Open Task Manager → Ctrl + Shift + Esc
+## Step 2. In the Details tab, end ALL of these if they appear:
+
+com.docker.build.exe
+com.docker.backend.exe
+Docker Desktop.exe
+dockerd.exe
+wsl.exe ## (Docker-related ones)
+
+## Right-click each → End Task
+## step 3. Open PowerShell as Administrator and run:
+powershellwsl --shutdown
+
+## This forcefully clears any WSL/VHDX file locks that cause "Engine Status Unknown."
+
+## PHASE 2 — Verify Prerequisites
+## Step 4. In the same Admin PowerShell, confirm virtualization features are active:
+
+## powershell
+
+Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V
+Get-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
+Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+
+## All three should say State : Enabled. If any says Disabled, run:
+
+# powershell
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+
+## Then restart the machine before continuing.
+## Step 5. Confirm WSL 2 is the default:
+## powershell
+wsl --set-default-version 2
+wsl --list --verbose
+
+## Your Docker distro should show VERSION 2.
+
+## PHASE 3 — Launch Docker Desktop Cleanly
+## Step 6. Right-click the Docker Desktop icon → Run as Administrator
+## Step 7. Wait — do NOT click anything. The whale icon in the system tray will animate. Give it 90–120 seconds on your 2014 iMac hardware (legacy disk I/O is slower).
+## Step 8. When the tray icon turns solid white/green (stops animating), open the Docker Desktop UI. You should see:
+
+## ✅ "Docker Desktop is running"
+
+## If you still see "Engine Starting..." after 3 minutes, proceed to the recovery step below.
+
+## PHASE 4 — Recovery (If Engine Hangs Again)
+## Step 9. In the Docker Desktop UI → click ⚙️ Settings → Troubleshoot → click "Restart Docker Desktop"
+## If that fails:
+## Step 10. Open Admin PowerShell and run:
+
+powershellStop-Service com.docker.service -Force
+Start-Service com.docker.service
+
+## Then relaunch Docker Desktop.
+
+
+## PHASE 5 — Verify & Bring Up Your Africa Convention Stack
+## Step 11. Open PowerShell or Windows Terminal, navigate to your project folder:
+
+## # Create the Dockerfile (if you haven't yet):
+cd C:\AfricaConvention
+notepad C:\AfricaConvention\Dockerfile
+
+## Step 12. Confirm Docker is responding:
+## powershelldocker version
+docker ps
+
+## Step 13. Bring your stack up:
+powershelldocker compose up -d
+
+## Step 14. Verify your two containers are running:
+powershelldocker ps
+## You should see:
+## africaconvention-alfio-1    → UP
+## africaconvention-db-1       → UP
+
+
+
+###################### BUILDING A NEW INSTANCE OF ALFIO.jar ########################
+ ##Debug this Compose error with Gordon → docker ai "help me fix this compose error"
+
+PS C:\AfricaConvention> @'
+>> FROM eclipse-temurin:17-jre-alpine
+>> RUN addgroup -S alfio && adduser -S alfio -G alfio
+>> WORKDIR /app
+>> RUN apk add --no-cache wget ca-certificates && \
+>>     wget -q \
+>>       "https://github.com/alfio-event/alf.io/releases/download/2.0-M5/alfio-2.0-M5-boot.jar" \
+>>       -O app.jar && \
+>>     echo "Downloaded OK" && \
+>>     ls -lh app.jar && \
+>>     apk del wget
+>> RUN chown alfio:alfio app.jar
+>> USER alfio
+>> EXPOSE 8080
+>> HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=5 \
+>>   CMD wget -qO- http://localhost:8080/api/v1/info || exit 1
+>> CMD ["java", "-jar", "app.jar"]
+>> '@ | Out-File -FilePath C:\AfricaConvention\Dockerfile -Encoding utf8
+PS C:\AfricaConvention> cd C:\AfricaConvention
+>> docker compose up -d --build
+
+
+## Now verify it's fully running
+## Step 1 — Watch the startup logs:
+powershelldocker logs -f africaconvention-alfio-1
+
+## Wait for this line (takes ~30–60 seconds on your hardware):
+## Started SpringBootLauncher in X seconds
+## Step 2 — Confirm both containers are healthy:
+
+powershelldocker ps
+
+## Step 3 — Open the Alfio admin panel:
+http://localhost:9090/admin
+
+## The first-run admin password will be printed in the logs — look for a line like:
+Admin password: xxxxxxxx
+Copy it before it scrolls away.
+
+## Yes, wait for it — 139 seconds startup is normal on your 2014 iMac. While it finishes, run this to open Chrome directly to the admin panel:
+powershellStart-Process "chrome.exe" "http://localhost:9090/admin"
+
+## If that doesn't find Chrome, use the full path:
+powershellStart-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" "http://localhost:9090/admin"
