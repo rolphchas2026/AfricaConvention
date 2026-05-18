@@ -691,3 +691,26 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('✓ Public Gallery: http://localhost:' + PORT);
   console.log('✓ Admin Login: http://localhost:' + PORT + '/admin\n');
 });
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+async function shutdown(signal) {
+  console.log(`Received ${signal}. Shutting down gracefully...`);
+  await pool.end().catch((err) => console.error('DB pool close error', err));
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+  setTimeout(() => {
+    console.error('Forcing exit');
+    process.exit(1);
+  }, 10000);
+}
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception', err);
+  shutdown('uncaughtException');
+});
