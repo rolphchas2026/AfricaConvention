@@ -19,14 +19,14 @@ app.use('/documentation', express.static(path.join(baseDir, 'documentation')));
 
 // Sessions
 const sessions = {};
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'Africa2026!';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Africa2026!';
 
 const pool = new Pool({
-  host: process.env.DB_HOST || 'shared-db',
+  host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 5432,
-  user: process.env.DB_USER || 'admin',
-  password: process.env.DB_PASSWORD || 'ArushaPassword2026',
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'africa_convention'
 });
 
