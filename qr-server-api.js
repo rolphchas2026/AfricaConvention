@@ -970,3 +970,5 @@ process.on('SIGINT', async () => {
 });
 
 start();
+// At the very bottom of qr.server-api.js
+module.exports = app;
