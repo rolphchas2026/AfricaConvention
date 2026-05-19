@@ -1,15 +1,20 @@
 # POWER UP
-cd C:\data\projects\faith-and-will
+## SUPABASE PASSWORDS
+## AFRICA CONVENTION DB
+<your-supabase-database-name>:africa-convention-db
+PASSWORD:choose one@1234
 
-# Allow all connections in the config:
-docker exec -it faith-and-will-db sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /var/lib/postgresql/data/postgresql.conf
+host:
+db.dwhnmiqjgebhyrbdkyho.supabase.co
 
-# Trust the Docker Gateway:
-docker exec -it faith-and-will-db sh -c "echo 'host all all 0.0.0.0/0 md5' >> /var/lib/postgresql/data/pg_hba.conf"
+port:
+5432
 
-# Restart the DB to apply the rules:
-docker restart faith-and-will-db
+database:
+postgres
 
+user:
+postgres
 
 
 
