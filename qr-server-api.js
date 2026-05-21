@@ -1058,10 +1058,22 @@ app.delete('/api/attendees/:ticket_id', async (req, res) => {
   }
 });
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  let count = null, dbErr = null, dbUser = null;
+  if (pool) {
+    try {
+      const r = await pool.query('SELECT COUNT(*) FROM attendees');
+      count = parseInt(r.rows[0].count, 10);
+      const u = await pool.query('SELECT current_user, current_database()');
+      dbUser = u.rows[0];
+    } catch(e) { dbErr = e.message; }
+  }
   res.json({
     status: 'ok',
     db: pool ? 'connected' : 'disconnected',
+    attendee_count: count,
+    db_user: dbUser,
+    db_error: dbErr,
     env: process.env.NODE_ENV || 'unknown',
     timestamp: new Date().toISOString()
   });
