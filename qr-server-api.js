@@ -159,15 +159,23 @@ app.get('/', (req, res) => {
     .section h2 { font-size: 36px; margin-bottom: 10px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     .section p { font-size: 16px; margin-bottom: 40px; color: rgba(255,255,255,0.85); }
     
-    .gallery-section { background: rgba(255, 255, 255, 0.95); border-radius: 24px; padding: 60px 40px; margin: 40px auto; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
-    .gallery-section h2 { color: #333; text-shadow: none; }
-    .gallery-section p { color: #666; }
-
-    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
-    .gallery-item { cursor: pointer; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.1); transition: all 0.35s; background: #fff; }
-    .gallery-item:hover { transform: translateY(-10px); box-shadow: 0 18px 45px rgba(102,126,234,0.25); }
+    .gallery-section { position:relative; overflow:hidden; border-radius:32px; padding:80px 40px; margin:40px auto; background:linear-gradient(135deg,#2d0057 0%,#6a0dad 20%,#c2185b 55%,#ff4081 75%,#9c27b0 100%); box-shadow:0 0 0 1px rgba(255,120,220,0.2),0 25px 60px rgba(160,0,255,0.45),0 0 120px rgba(233,30,140,0.25); }
+    .orb { position:absolute; border-radius:50%; pointer-events:none; filter:blur(55px); animation:orbFloat 8s ease-in-out infinite; }
+    .orb-1 { width:320px; height:320px; background:radial-gradient(circle,rgba(255,80,200,0.75),transparent 70%); top:-70px; left:-50px; animation-duration:9s; }
+    .orb-2 { width:380px; height:380px; background:radial-gradient(circle,rgba(140,0,255,0.65),transparent 70%); bottom:-90px; right:-60px; animation-duration:11s; animation-delay:-3s; }
+    .orb-3 { width:220px; height:220px; background:radial-gradient(circle,rgba(255,170,230,0.6),transparent 70%); top:45%; left:35%; animation-duration:7s; animation-delay:-5s; }
+    .orb-4 { width:180px; height:180px; background:radial-gradient(circle,rgba(255,60,160,0.55),transparent 70%); top:15%; right:12%; animation-duration:10s; animation-delay:-2s; }
+    .orb-5 { width:140px; height:140px; background:radial-gradient(circle,rgba(200,100,255,0.7),transparent 70%); bottom:18%; left:18%; animation-duration:8s; animation-delay:-4s; }
+    @keyframes orbFloat { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(18px,-22px) scale(1.09)} 66%{transform:translate(-12px,14px) scale(0.94)} }
+    .gallery-heading { position:relative; z-index:1; text-align:center; margin-bottom:48px; }
+    .gallery-heading h2 { font-size:44px; font-weight:800; color:white; text-shadow:0 0 40px rgba(255,150,255,0.9),0 0 80px rgba(200,0,255,0.55),0 4px 15px rgba(0,0,0,0.35); letter-spacing:0.02em; animation:glowPulse 3s ease-in-out infinite; margin-bottom:0; }
+    .gallery-heading p { font-size:17px; color:rgba(255,220,255,0.92); text-shadow:0 0 20px rgba(200,100,255,0.7); margin-top:12px; margin-bottom:0; }
+    @keyframes glowPulse { 0%,100%{text-shadow:0 0 40px rgba(255,150,255,0.9),0 0 80px rgba(200,0,255,0.55),0 4px 15px rgba(0,0,0,0.35)} 50%{text-shadow:0 0 65px rgba(255,180,255,1),0 0 130px rgba(220,50,255,0.75),0 4px 15px rgba(0,0,0,0.35)} }
+    .gallery { position:relative; z-index:1; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+    .gallery-item { cursor: pointer; border-radius: 20px; overflow: hidden; box-shadow:0 0 0 1px rgba(255,120,220,0.3),0 8px 30px rgba(150,0,200,0.35); transition: all 0.35s; background:rgba(255,255,255,0.07); backdrop-filter:blur(12px); }
+    .gallery-item:hover { transform: translateY(-10px) scale(1.02); box-shadow:0 0 0 1px rgba(255,160,255,0.55),0 22px 55px rgba(200,0,255,0.55),0 0 65px rgba(255,100,220,0.3); }
     .gallery-item img { width: 100%; height: 250px; object-fit: cover; display: block; }
-    .gallery-caption { padding: 14px 16px 20px; font-size: 15px; font-weight: 700; color: #333; text-align: center; background: #fff; border-top: 1px solid #eee; }
+    .gallery-caption { padding: 14px 16px 20px; font-size: 15px; font-weight: 700; color:rgba(255,220,255,0.95); text-align: center; background:rgba(80,0,120,0.45); backdrop-filter:blur(10px); border-top:1px solid rgba(255,150,255,0.2); }
 
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
     .modal.active { display: flex; }
@@ -225,8 +233,15 @@ app.get('/', (req, res) => {
   </div>
     
   <div class="gallery-section">
-    <h2>Event Gallery</h2>
-    <p>Experience the Africa Convention 2026</p>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+    <div class="orb orb-5"></div>
+    <div class="gallery-heading">
+      <h2>Event Gallery</h2>
+      <p>Experience the Africa Convention 2026</p>
+    </div>
     <div class="gallery" id="gallery"></div>
   </div>
 
@@ -444,7 +459,7 @@ app.get('/admin-login', (req, res) => {
   <div class="login">
     <h1>Admin Login</h1>
     <p>Africa Convention 2026</p>
-    \${req.query.error ? '<div class="error">Invalid credentials</div>' : ''}
+    ${req.query.error ? '<div class="error">Invalid credentials</div>' : ''}
     <form method=\"POST\" action=\"/api/admin-login\">
       <input type="text" name="username" placeholder="Username" required>
       <input type="password" name="password" placeholder="Password" required>
