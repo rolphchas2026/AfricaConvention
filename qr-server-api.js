@@ -17,6 +17,8 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const QRCode = require('qrcode');
+const PDFDocument = require('pdfkit');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -137,6 +139,11 @@ async function initializeDatabase() {
         );
       `);
       
+      // Add columns introduced after initial deploy (idempotent)
+      await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS payment_proof TEXT`);
+      await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS payment_proof_name VARCHAR(255)`);
+      await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS documents JSONB DEFAULT '[]'`);
+
       console.log('✅ Database dynamic storage schemas verified and ready');
       return true;
     } catch (error) {
@@ -147,6 +154,107 @@ async function initializeDatabase() {
   }
   return false;
 }
+
+// ─── SHARED HELPERS ───────────────────────────────────────────────────────────
+
+const TICKET_TYPE_COLORS = {
+  general: '#9b59b6', foreigners: '#e91e8c', youth: '#27ae60',
+  speaker: '#f39c12', business: '#2980b9'
+};
+
+async function ensureQR(a) {
+  if (a.qr_code) return a.qr_code;
+  const qr = await QRCode.toDataURL(
+    JSON.stringify({ ticket_id: a.ticket_id, name: a.name, type: a.ticket_type }),
+    { width: 300, margin: 1 }
+  );
+  if (pool) await pool.query('UPDATE attendees SET qr_code=$1 WHERE ticket_id=$2', [qr, a.ticket_id]);
+  a.qr_code = qr;
+  return qr;
+}
+
+async function generateBadgePDF(a) {
+  const qrDataURL = await ensureQR(a);
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ size: 'A5', margin: 0 });
+      const chunks = [];
+      doc.on('data', c => chunks.push(c));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+
+      const W = 419, H = 595;
+      const accent = TICKET_TYPE_COLORS[a.ticket_type] || '#7b1fa2';
+
+      // Background
+      doc.rect(0, 0, W, H).fill('#12002a');
+      // Header band
+      doc.rect(0, 0, W, 115).fill('#3d0075');
+      // Accent stripe
+      doc.rect(0, 115, W, 6).fill(accent);
+
+      // Event title
+      doc.font('Helvetica-Bold').fontSize(17).fillColor('white')
+        .text('AFRICA CONVENTION 2026', 20, 22, { align: 'center', width: W - 40 });
+      doc.font('Helvetica').fontSize(10).fillColor('rgba(220,180,255,0.82)')
+        .text('Arusha, Tanzania  ·  June 18–22, 2026', 20, 46, { align: 'center', width: W - 40 });
+      doc.font('Helvetica').fontSize(9).fillColor('rgba(200,150,255,0.65)')
+        .text('Doing Business and Bearing Fruitful', 20, 64, { align: 'center', width: W - 40 });
+      doc.font('Helvetica-Bold').fontSize(9).fillColor(accent)
+        .text((a.ticket_type || 'GENERAL').toUpperCase() + ' PASS', 20, 84, { align: 'center', width: W - 40 });
+
+      // Name
+      const nameSize = a.name.length > 22 ? 22 : 28;
+      doc.font('Helvetica-Bold').fontSize(nameSize).fillColor('white')
+        .text(a.name, 20, 138, { align: 'center', width: W - 40 });
+
+      let yPos = 138 + nameSize + 8;
+      if (a.title) {
+        doc.font('Helvetica').fontSize(12).fillColor('rgba(220,180,255,0.8)')
+          .text(a.title, 20, yPos, { align: 'center', width: W - 40 });
+        yPos += 18;
+      }
+      if (a.organization) {
+        doc.font('Helvetica-Bold').fontSize(11).fillColor('rgba(196,77,255,0.85)')
+          .text(a.organization, 20, yPos, { align: 'center', width: W - 40 });
+        yPos += 18;
+      }
+
+      // QR Code centred
+      const qrBuf = Buffer.from(qrDataURL.split(',')[1], 'base64');
+      const qrSize = 150;
+      const qrX = (W - qrSize) / 2;
+      const qrY = Math.max(yPos + 16, 230);
+      doc.rect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20).fill('white');
+      doc.image(qrBuf, qrX, qrY, { width: qrSize, height: qrSize });
+
+      // Ticket ID below QR
+      doc.font('Helvetica-Bold').fontSize(9).fillColor('rgba(196,77,255,0.8)')
+        .text(a.ticket_id, 20, qrY + qrSize + 16, { align: 'center', width: W - 40 });
+      doc.font('Helvetica').fontSize(8).fillColor('rgba(180,130,220,0.55)')
+        .text('Scan to verify entry', 20, qrY + qrSize + 30, { align: 'center', width: W - 40 });
+
+      // Info row
+      const infoY = H - 80;
+      doc.moveTo(30, infoY - 6).lineTo(W - 30, infoY - 6).strokeColor('rgba(196,77,255,0.2)').stroke();
+      doc.font('Helvetica').fontSize(8).fillColor('rgba(200,160,255,0.6)')
+        .text('✉ ' + a.email, 30, infoY, { width: W - 60 });
+      if (a.phone) {
+        doc.text('✆ ' + a.phone, 30, infoY + 13, { width: W - 60 });
+      }
+
+      // Footer
+      doc.rect(0, H - 32, W, 32).fill('#3d0075');
+      doc.font('Helvetica').fontSize(7.5).fillColor('rgba(220,180,255,0.6)')
+        .text('Africa Convention 2026  ·  WCCM Tanzania  ·  wccm.tz@gmail.com  ·  www.livinghope.or.tz',
+          20, H - 21, { align: 'center', width: W - 40 });
+
+      doc.end();
+    } catch (e) { reject(e); }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 app.get('/', (req, res) => {
   res.send(`
@@ -694,6 +802,7 @@ app.get('/admin', (req, res) => {
 <head>
   <meta charset="UTF-8">
   <title>Admin — Africa Convention 2026</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     html,body { height:100%; }
@@ -735,9 +844,14 @@ app.get('/admin', (req, res) => {
     iframe { width:100%; height:680px; border:1px solid rgba(196,77,255,0.2); border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.3); }
     .preview-btn { display:inline-block; margin-bottom:18px; padding:10px 22px; background:linear-gradient(135deg,#11998e,#38ef7d); color:#003d2e; text-decoration:none; border-radius:20px; font-weight:700; font-size:13px; }
     .preview-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(17,153,142,0.4); }
-    .btn-edit { padding:4px 10px; background:linear-gradient(135deg,#4facfe,#00f2fe); color:#003d5c; border:none; border-radius:6px; cursor:pointer; font-size:11px; font-weight:700; margin-right:4px; transition:all 0.2s; }
-    .btn-del  { padding:4px 10px; background:linear-gradient(135deg,#fa709a,#fee140); color:#7b1226; border:none; border-radius:6px; cursor:pointer; font-size:11px; font-weight:700; transition:all 0.2s; }
-    .btn-edit:hover,.btn-del:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(0,0,0,0.2); }
+    .btn-edit   { padding:4px 9px; background:linear-gradient(135deg,#4facfe,#00f2fe); color:#003d5c; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; }
+    .btn-del    { padding:4px 9px; background:linear-gradient(135deg,#fa709a,#fee140); color:#7b1226; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; }
+    .btn-badge  { padding:4px 9px; background:linear-gradient(135deg,#c44dff,#ff4da6); color:white; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; }
+    .btn-email  { padding:4px 9px; background:linear-gradient(135deg,#11998e,#38ef7d); color:#003d2e; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; }
+    .btn-files  { padding:4px 9px; background:rgba(196,77,255,0.15); color:#e879f9; border:1px solid rgba(196,77,255,0.3); border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; transition:all 0.2s; }
+    .btn-edit:hover,.btn-del:hover,.btn-badge:hover,.btn-email:hover,.btn-files:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(0,0,0,0.25); }
+    #qr-reader video { border-radius:12px; }
+    #qr-reader { background:#000; }
     .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; }
     .modal-overlay.open { display:flex; }
     .modal-box { background:white; border-radius:16px; padding:32px; width:540px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:fadeInUp 0.25s ease-out; }
@@ -766,6 +880,7 @@ app.get('/admin', (req, res) => {
     <button class="tab-btn" data-tab="approval">✅ Approval</button>
     <button class="tab-btn" data-tab="checkin">📥 Check-in</button>
     <button class="tab-btn" data-tab="checkout">📤 Check-out</button>
+    <button class="tab-btn" data-tab="scanner">📷 QR Scanner</button>
     <button class="tab-btn" data-tab="statistics">📈 Statistics</button>
   </div>
   <div class="content-wrapper">
@@ -784,7 +899,7 @@ app.get('/admin', (req, res) => {
       <div class="stat-box"><div class="stat-number" id="stat-checked">—</div><div class="stat-label">Checked In</div></div>
       <div class="stat-box"><div class="stat-number" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
       <h3>All Registrations</h3>
-      <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead>
+      <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Registered</th><th>Status</th><th>Badge</th><th>Actions</th></tr></thead>
       <tbody id="overviewList"></tbody></table>
     </div>
 
@@ -822,6 +937,34 @@ app.get('/admin', (req, res) => {
       <tbody id="checkoutList"></tbody></table>
     </div>
 
+    <div id="scanner" class="tab-content">
+      <h2>📷 QR Check-in Scanner</h2>
+      <p style="color:rgba(200,160,255,0.65);font-size:14px;margin-bottom:24px">Point camera at a delegate's QR badge to check them in instantly.</p>
+      <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
+        <div>
+          <div id="qr-reader" style="width:300px;border-radius:16px;overflow:hidden;border:2px solid rgba(196,77,255,0.3)"></div>
+          <div style="margin-top:12px;display:flex;gap:10px">
+            <button id="scanStartBtn" onclick="startScanner()" style="flex:1">▶ Start Camera</button>
+            <button id="scanStopBtn" onclick="stopScanner()" style="flex:1;background:rgba(255,100,150,0.2);color:#fa709a;border:1px solid rgba(255,100,150,0.3)" disabled>⏹ Stop</button>
+          </div>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <div id="scanResult" style="min-height:120px;padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(196,77,255,0.15);border-radius:14px;color:rgba(200,160,255,0.55);font-size:14px">Scan result will appear here…</div>
+          <div style="margin-top:16px">
+            <p style="font-size:12px;color:rgba(200,160,255,0.5);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Manual Entry</p>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="manualTid" placeholder="Enter Ticket ID" style="flex:1">
+              <button onclick="manualCheckin()">Check In</button>
+            </div>
+          </div>
+          <div style="margin-top:20px">
+            <h3>Recent Scans</h3>
+            <div id="recentScans" style="font-size:13px;color:rgba(200,160,255,0.65)">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="statistics" class="tab-content">
       <h2>Statistics</h2>
       <h3>By Ticket Type</h3>
@@ -831,6 +974,33 @@ app.get('/admin', (req, res) => {
       <tbody id="attendeesList"></tbody></table>
     </div>
 
+  </div>
+</div>
+
+<div class="modal-overlay" id="fileModal">
+  <div class="modal-box" style="width:580px">
+    <h3>📁 Files — <span id="fileModalName"></span></h3>
+    <input type="hidden" id="fileModalTid">
+    <div style="margin-bottom:20px">
+      <p style="font-size:13px;font-weight:700;color:rgba(200,160,255,0.7);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">💳 Payment Proof</p>
+      <div id="paymentProofStatus" style="font-size:13px;color:rgba(180,140,220,0.6);margin-bottom:10px">—</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label style="padding:8px 14px;background:linear-gradient(135deg,#c44dff,#ff4da6);color:white;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0">
+          📎 Attach Payment<input type="file" id="paymentFile" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none" onchange="uploadPayment()">
+        </label>
+        <button id="viewPaymentBtn" onclick="viewPayment()" style="background:rgba(196,77,255,0.15);color:#e879f9;border:1px solid rgba(196,77,255,0.3);padding:8px 14px;font-size:12px" disabled>👁 View</button>
+        <button id="delPaymentBtn" onclick="deletePayment()" style="background:rgba(255,100,150,0.1);color:#fa709a;border:1px solid rgba(255,100,150,0.25);padding:8px 14px;font-size:12px" disabled>🗑 Remove</button>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px solid rgba(196,77,255,0.15);margin:20px 0">
+    <div>
+      <p style="font-size:13px;font-weight:700;color:rgba(200,160,255,0.7);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📂 Documents</p>
+      <div id="docList" style="margin-bottom:12px;min-height:40px;font-size:13px;color:rgba(180,140,220,0.6)">No documents uploaded.</div>
+      <label style="padding:8px 14px;background:rgba(196,77,255,0.12);color:#e879f9;border:1px solid rgba(196,77,255,0.3);border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0">
+        ➕ Upload Document<input type="file" id="docFile" accept=".pdf,.jpg,.jpeg,.png,.docx" style="display:none" onchange="uploadDocument()">
+      </label>
+    </div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeFileModal()">Close</button></div>
   </div>
 </div>
 
@@ -879,6 +1049,8 @@ app.get('/admin', (req, res) => {
 
 <script>
   const token = new URLSearchParams(window.location.search).get('token');
+  let qrScanner = null;
+  const recentScans = [];
 
   // Tab system
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -894,6 +1066,7 @@ app.get('/admin', (req, res) => {
       if (tab === 'statistics') loadStatistics();
       if (tab === 'checkin')    { loadCheckins();  document.getElementById('checkinInput').focus(); }
       if (tab === 'checkout')   { loadCheckouts(); document.getElementById('checkoutInput').focus(); }
+      if (tab !== 'scanner' && qrScanner) stopScanner();
     });
   });
 
@@ -912,8 +1085,18 @@ app.get('/admin', (req, res) => {
       document.getElementById('stat-checked').textContent  = data.filter(a => a.checked_in).length;
       document.getElementById('stat-pending').textContent  = data.filter(a => a.payment_status === 'PENDING').length;
       document.getElementById('overviewList').innerHTML = data.map(a =>
-        '<tr><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + new Date(a.created_at).toLocaleDateString() + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
-        '<td><button class="btn-edit" onclick="editAttendee(\'' + a.ticket_id + '\')">✏️ Edit</button><button class="btn-del" onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button></td></tr>'
+        '<tr><td><code style="font-size:11px;color:#e879f9">' + a.ticket_id + '</code></td>' +
+        '<td>' + a.name + '</td><td style="font-size:12px">' + a.email + '</td><td>' + a.ticket_type + '</td>' +
+        '<td style="font-size:12px">' + new Date(a.created_at).toLocaleDateString() + '</td>' +
+        '<td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
+        '<td style="font-size:12px">' + (a.badge_generated?'<span style="color:#84fab0">✅</span>':'—') + (a.badge_sent?' <span style="color:#84fab0;font-size:10px">📧</span>':'') + '</td>' +
+        '<td style="white-space:nowrap">' +
+          '<button class="btn-edit" onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
+          '<button class="btn-badge" onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
+          '<button class="btn-email" onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + a.name.replace(/'/g,"\\'") + '\')">📧</button>' +
+          '<button class="btn-files" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + a.name.replace(/'/g,"\\'") + '\')">📁</button>' +
+          '<button class="btn-del" onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
+        '</td></tr>'
       ).join('');
     } catch(e) { console.error(e); }
   }
@@ -945,8 +1128,15 @@ app.get('/admin', (req, res) => {
       document.getElementById('statsByType').innerHTML = Object.entries(counts)
         .map(([k,v]) => '<div class="stat-box"><div class="stat-number">' + v + '</div><div class="stat-label">' + k + '</div></div>').join('');
       document.getElementById('attendeesList').innerHTML = data.map(a =>
-        '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + (a.organization||'—') + '</td><td>' + (a.checked_in?'✅ Yes':'—') + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
-        '<td><button class="btn-edit" onclick="editAttendee(\'' + a.ticket_id + '\')">✏️ Edit</button><button class="btn-del" onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button></td></tr>'
+        '<tr><td>' + a.name + '</td><td style="font-size:12px">' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + (a.organization||'—') + '</td><td>' + (a.checked_in?'✅':'—') + '</td>' +
+        '<td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
+        '<td style="white-space:nowrap">' +
+          '<button class="btn-edit" onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
+          '<button class="btn-badge" onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
+          '<button class="btn-email" onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + a.name.replace(/'/g,"\\'") + '\')">📧</button>' +
+          '<button class="btn-files" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + a.name.replace(/'/g,"\\'") + '\')">📁</button>' +
+          '<button class="btn-del" onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
+        '</td></tr>'
       ).join('');
     } catch(e) { console.error(e); }
   }
@@ -1081,10 +1271,208 @@ app.get('/admin', (req, res) => {
     } catch(e) { alert('Network error'); }
   }
 
-  // Close modal when clicking the overlay background
-  document.getElementById('editModal').addEventListener('click', function(e) {
-    if (e.target === this) closeEdit();
-  });
+  document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEdit(); });
+  document.getElementById('fileModal').addEventListener('click', function(e) { if (e.target === this) closeFileModal(); });
+
+  // ── Badge actions ──────────────────────────────────────────────────────────
+
+  function downloadBadge(ticketId) {
+    window.open('/api/badge/' + encodeURIComponent(ticketId), '_blank');
+  }
+
+  async function sendBadgeEmail(ticketId, name) {
+    if (!confirm('Send badge email to ' + name + '?')) return;
+    try {
+      const res = await fetch('/api/send-badge/' + encodeURIComponent(ticketId), { method: 'POST' });
+      const r = await res.json();
+      if (r.success) {
+        alert('✅ Badge sent to ' + r.sent_to);
+        loadOverview();
+      } else {
+        alert('❌ ' + r.error);
+      }
+    } catch(e) { alert('Network error'); }
+  }
+
+  // ── File manager ───────────────────────────────────────────────────────────
+
+  async function openFileModal(ticketId, name) {
+    document.getElementById('fileModalTid').value = ticketId;
+    document.getElementById('fileModalName').textContent = name;
+    document.getElementById('fileModal').classList.add('open');
+    await refreshPaymentStatus(ticketId);
+    await refreshDocList(ticketId);
+  }
+
+  function closeFileModal() {
+    document.getElementById('fileModal').classList.remove('open');
+  }
+
+  async function refreshPaymentStatus(ticketId) {
+    const tid = ticketId || document.getElementById('fileModalTid').value;
+    const a = _allAttendees.find(x => x.ticket_id === tid);
+    const hasProof = a && a.payment_proof;
+    document.getElementById('paymentProofStatus').textContent = hasProof ? '✅ Payment proof on file: ' + (a.payment_proof_name || 'file') : '⚠️ No payment proof attached yet';
+    document.getElementById('viewPaymentBtn').disabled = !hasProof;
+    document.getElementById('delPaymentBtn').disabled = !hasProof;
+  }
+
+  async function uploadPayment() {
+    const file = document.getElementById('paymentFile').files[0];
+    const tid = document.getElementById('fileModalTid').value;
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: e.target.result, name: file.name, mimeType: file.type })
+        });
+        const r = await res.json();
+        if (r.success) {
+          await fetchAttendees();
+          await refreshPaymentStatus(tid);
+          alert('✅ Payment proof uploaded');
+        } else { alert('❌ ' + r.error); }
+      } catch(err) { alert('Network error'); }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function viewPayment() {
+    const tid = document.getElementById('fileModalTid').value;
+    window.open('/api/attendees/' + encodeURIComponent(tid) + '/payment', '_blank');
+  }
+
+  async function deletePayment() {
+    const tid = document.getElementById('fileModalTid').value;
+    if (!confirm('Remove payment proof?')) return;
+    const res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/payment', { method: 'DELETE' });
+    const r = await res.json();
+    if (r.success) { await fetchAttendees(); await refreshPaymentStatus(tid); }
+    else alert('❌ ' + r.error);
+  }
+
+  async function refreshDocList(ticketId) {
+    const tid = ticketId || document.getElementById('fileModalTid').value;
+    try {
+      const res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/documents');
+      const docs = await res.json();
+      document.getElementById('docList').innerHTML = docs.length
+        ? docs.map(d =>
+            '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(196,77,255,0.1)">' +
+            '<span style="flex:1;color:rgba(220,190,255,0.85);font-size:13px">📄 ' + d.name + '</span>' +
+            '<span style="font-size:11px;color:rgba(180,140,220,0.5)">' + (d.size||'') + '</span>' +
+            '<button onclick="viewDoc(\'' + tid + '\',' + d.index + ')" style="padding:4px 10px;font-size:11px;background:rgba(196,77,255,0.15);color:#e879f9;border:1px solid rgba(196,77,255,0.3)">View</button>' +
+            '<button onclick="deleteDoc(\'' + tid + '\',' + d.index + ')" style="padding:4px 10px;font-size:11px;background:rgba(255,100,150,0.1);color:#fa709a;border:1px solid rgba(255,100,150,0.25)">✕</button>' +
+            '</div>'
+          ).join('')
+        : '<span style="color:rgba(180,140,220,0.45);font-size:13px">No documents uploaded.</span>';
+    } catch(e) { /* ignore */ }
+  }
+
+  async function uploadDocument() {
+    const file = document.getElementById('docFile').files[0];
+    const tid = document.getElementById('fileModalTid').value;
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/documents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: e.target.result, name: file.name, mimeType: file.type })
+        });
+        const r = await res.json();
+        if (r.success) { await refreshDocList(tid); }
+        else alert('❌ ' + r.error);
+      } catch(err) { alert('Network error'); }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function viewDoc(tid, idx) {
+    window.open('/api/attendees/' + encodeURIComponent(tid) + '/documents/' + idx, '_blank');
+  }
+
+  async function deleteDoc(tid, idx) {
+    if (!confirm('Delete this document?')) return;
+    const res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/documents/' + idx, { method: 'DELETE' });
+    const r = await res.json();
+    if (r.success) await refreshDocList(tid);
+    else alert('❌ ' + r.error);
+  }
+
+  // ── QR Scanner (P2-B) ─────────────────────────────────────────────────────
+
+  function startScanner() {
+    if (typeof Html5Qrcode === 'undefined') {
+      alert('QR scanner library not loaded. Please refresh the page.');
+      return;
+    }
+    qrScanner = new Html5Qrcode('qr-reader');
+    qrScanner.start(
+      { facingMode: 'environment' },
+      { fps: 12, qrbox: { width: 220, height: 220 } },
+      onQRScan
+    ).then(() => {
+      document.getElementById('scanStartBtn').disabled = true;
+      document.getElementById('scanStopBtn').disabled = false;
+    }).catch(err => alert('Camera error: ' + err));
+  }
+
+  function stopScanner() {
+    if (qrScanner) {
+      qrScanner.stop().then(() => {
+        qrScanner = null;
+        document.getElementById('scanStartBtn').disabled = false;
+        document.getElementById('scanStopBtn').disabled = true;
+      });
+    }
+  }
+
+  async function onQRScan(decoded) {
+    let ticketId;
+    try { ticketId = JSON.parse(decoded).ticket_id; }
+    catch { ticketId = decoded.trim(); }
+    if (!ticketId) return;
+    await processCheckin(ticketId);
+  }
+
+  async function manualCheckin() {
+    const tid = document.getElementById('manualTid').value.trim();
+    if (!tid) return;
+    document.getElementById('manualTid').value = '';
+    await processCheckin(tid);
+  }
+
+  async function processCheckin(ticketId) {
+    try {
+      const res = await fetch('/api/checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticketId })
+      });
+      const r = await res.json();
+      const ok = r.success;
+      const msg = ok
+        ? '✅ <strong>' + r.name + '</strong> checked in successfully'
+        : '❌ ' + (r.error || 'Unknown error') + ' — ' + ticketId;
+      document.getElementById('scanResult').innerHTML =
+        '<div style="padding:16px;border-radius:10px;background:' + (ok?'rgba(132,250,176,0.1)':'rgba(250,112,154,0.1)') + ';border:1px solid ' + (ok?'rgba(132,250,176,0.3)':'rgba(250,112,154,0.3)') + ';color:' + (ok?'#84fab0':'#fa709a') + ';font-size:14px">' + msg + '</div>';
+      recentScans.unshift({ ticketId, ok, name: r.name || ticketId, time: new Date().toLocaleTimeString() });
+      if (recentScans.length > 8) recentScans.pop();
+      document.getElementById('recentScans').innerHTML = recentScans
+        .map(s => '<div style="padding:5px 0;border-bottom:1px solid rgba(196,77,255,0.08);color:' + (s.ok?'#84fab0':'#fa709a') + ';font-size:12px">' + s.time + ' · ' + s.name + (s.ok?' ✅':' ❌') + '</div>')
+        .join('');
+    } catch(e) {
+      document.getElementById('scanResult').innerHTML = '<div style="color:#fa709a">Network error</div>';
+    }
+  }
+
+  // Wire scanner tab
+  document.querySelector('[data-tab="scanner"]').addEventListener('click', function() {});
 
   // Load overview on mount
   loadOverview();
@@ -1105,9 +1493,12 @@ app.post('/api/register', async (req, res) => {
     const ticket = TICKET_TYPES[ticket_type];
     if (!ticket) return res.json({ success: false, error: 'Invalid ticket type' });
     const ticketId = 'TKT-' + ticket_type.toUpperCase().slice(0, 3) + '-' + Date.now();
+    const qrCode = await QRCode.toDataURL(
+      JSON.stringify({ ticket_id: ticketId, name, type: ticket_type }), { width: 300, margin: 1 }
+    );
     await pool.query(
-      'INSERT INTO attendees (ticket_id, name, email, phone, organization, title, ticket_type, ticket_price, currency, payment_status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
-      [ticketId, name, email, phone, organization || '', title || '', ticket_type, ticket.price, ticket.currency, 'APPROVED']
+      'INSERT INTO attendees (ticket_id, name, email, phone, organization, title, ticket_type, ticket_price, currency, payment_status, qr_code) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)',
+      [ticketId, name, email, phone, organization || '', title || '', ticket_type, ticket.price, ticket.currency, 'APPROVED', qrCode]
     );
     res.json({ success: true, ticket_id: ticketId });
   } catch (error) {
@@ -1152,8 +1543,8 @@ app.post('/api/approve', async (req, res) => {
     const { ticket_id } = req.body;
     const result = await pool.query('SELECT * FROM attendees WHERE ticket_id = $1', [ticket_id]);
     if (result.rows.length === 0) return res.json({ success: false, error: 'Ticket not found' });
-    const qrCode = await QRCode.toDataURL(JSON.stringify({ ticket_id, name: result.rows[0].name }));
-    await pool.query('UPDATE attendees SET payment_status = $1, qr_code = $2 WHERE ticket_id = $3', ['APPROVED', qrCode, ticket_id]);
+    const qrCode = await ensureQR(result.rows[0]);
+    await pool.query('UPDATE attendees SET payment_status=$1, qr_code=$2 WHERE ticket_id=$3', ['APPROVED', qrCode, ticket_id]);
     res.json({ success: true });
   } catch (error) {
     res.json({ success: false, error: error.message });
@@ -1209,6 +1600,183 @@ app.delete('/api/attendees/:ticket_id', async (req, res) => {
     res.json({ success: false, error: error.message });
   }
 });
+
+// ── F-1: Payment proof ────────────────────────────────────────────────────────
+
+app.post('/api/attendees/:ticket_id/payment', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const { data, name, mimeType } = req.body;
+    if (!data || !name) return res.json({ success: false, error: 'File data and name required' });
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(mimeType)) return res.json({ success: false, error: 'Only PDF, JPG, PNG allowed' });
+    await pool.query(
+      'UPDATE attendees SET payment_proof=$1, payment_proof_name=$2 WHERE ticket_id=$3',
+      [data, name, req.params.ticket_id]
+    );
+    res.json({ success: true });
+  } catch (e) { res.json({ success: false, error: e.message }); }
+});
+
+app.get('/api/attendees/:ticket_id/payment', async (req, res) => {
+  try {
+    if (!pool) return res.status(503).send('DB not ready');
+    const r = await pool.query('SELECT payment_proof, payment_proof_name FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    if (!r.rows[0]?.payment_proof) return res.status(404).json({ error: 'No payment proof' });
+    const { payment_proof, payment_proof_name } = r.rows[0];
+    const mimeMatch = payment_proof.match(/^data:([^;]+);base64,/);
+    const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+    const buf = Buffer.from(payment_proof.replace(/^data:[^;]+;base64,/, ''), 'base64');
+    res.setHeader('Content-Type', mime);
+    res.setHeader('Content-Disposition', 'inline; filename="' + (payment_proof_name || 'payment') + '"');
+    res.send(buf);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/attendees/:ticket_id/payment', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    await pool.query('UPDATE attendees SET payment_proof=NULL, payment_proof_name=NULL WHERE ticket_id=$1', [req.params.ticket_id]);
+    res.json({ success: true });
+  } catch (e) { res.json({ success: false, error: e.message }); }
+});
+
+// ── F-2: Document folder ──────────────────────────────────────────────────────
+
+app.get('/api/attendees/:ticket_id/documents', async (req, res) => {
+  try {
+    if (!pool) return res.json([]);
+    const r = await pool.query('SELECT documents FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    const docs = (r.rows[0]?.documents || []).map((d, i) => ({ index: i, name: d.name, uploadedAt: d.uploadedAt, size: d.size }));
+    res.json(docs);
+  } catch (e) { res.json([]); }
+});
+
+app.post('/api/attendees/:ticket_id/documents', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const { data, name, mimeType } = req.body;
+    if (!data || !name) return res.json({ success: false, error: 'File data and name required' });
+    const r = await pool.query('SELECT documents FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    if (!r.rows[0]) return res.json({ success: false, error: 'Attendee not found' });
+    const docs = r.rows[0].documents || [];
+    const sizeKB = Math.round(Buffer.byteLength(data, 'utf8') / 1024);
+    docs.push({ name, mimeType, data, uploadedAt: new Date().toISOString(), size: sizeKB + ' KB' });
+    await pool.query('UPDATE attendees SET documents=$1 WHERE ticket_id=$2', [JSON.stringify(docs), req.params.ticket_id]);
+    res.json({ success: true, count: docs.length });
+  } catch (e) { res.json({ success: false, error: e.message }); }
+});
+
+app.get('/api/attendees/:ticket_id/documents/:idx', async (req, res) => {
+  try {
+    if (!pool) return res.status(503).send('DB not ready');
+    const r = await pool.query('SELECT documents FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    const docs = r.rows[0]?.documents || [];
+    const doc = docs[parseInt(req.params.idx)];
+    if (!doc) return res.status(404).json({ error: 'Document not found' });
+    const buf = Buffer.from(doc.data.replace(/^data:[^;]+;base64,/, ''), 'base64');
+    const mime = doc.mimeType || 'application/octet-stream';
+    res.setHeader('Content-Type', mime);
+    res.setHeader('Content-Disposition', 'inline; filename="' + doc.name + '"');
+    res.send(buf);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/attendees/:ticket_id/documents/:idx', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const r = await pool.query('SELECT documents FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    const docs = r.rows[0]?.documents || [];
+    docs.splice(parseInt(req.params.idx), 1);
+    await pool.query('UPDATE attendees SET documents=$1 WHERE ticket_id=$2', [JSON.stringify(docs), req.params.ticket_id]);
+    res.json({ success: true });
+  } catch (e) { res.json({ success: false, error: e.message }); }
+});
+
+// ── P2-A: Badge PDF ───────────────────────────────────────────────────────────
+
+app.get('/api/badge/:ticket_id', async (req, res) => {
+  try {
+    if (!pool) return res.status(503).json({ error: 'Database not ready' });
+    const r = await pool.query('SELECT * FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    if (!r.rows[0]) return res.status(404).json({ error: 'Attendee not found' });
+    const a = r.rows[0];
+    const pdfBuf = await generateBadgePDF(a);
+    await pool.query('UPDATE attendees SET badge_generated=true WHERE ticket_id=$1', [a.ticket_id]);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="badge-' + a.ticket_id + '.pdf"');
+    res.send(pdfBuf);
+  } catch (e) {
+    if (!res.headersSent) res.status(500).json({ error: e.message });
+  }
+});
+
+// Inline preview (opens in browser)
+app.get('/api/badge/:ticket_id/preview', async (req, res) => {
+  try {
+    if (!pool) return res.status(503).json({ error: 'Database not ready' });
+    const r = await pool.query('SELECT * FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    if (!r.rows[0]) return res.status(404).json({ error: 'Attendee not found' });
+    const pdfBuf = await generateBadgePDF(r.rows[0]);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="badge-' + req.params.ticket_id + '.pdf"');
+    res.send(pdfBuf);
+  } catch (e) {
+    if (!res.headersSent) res.status(500).json({ error: e.message });
+  }
+});
+
+// ── P2-C: SMTP email with badge attachment ────────────────────────────────────
+
+app.post('/api/send-badge/:ticket_id', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return res.json({ success: false, error: 'SMTP not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS in Vercel env)' });
+    }
+    const r = await pool.query('SELECT * FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    if (!r.rows[0]) return res.json({ success: false, error: 'Attendee not found' });
+    const a = r.rows[0];
+
+    const pdfBuf = await generateBadgePDF(a);
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+    });
+
+    const typeLabel = { general:'General Admin', foreigners:'Foreigner (VIP)', youth:'Youth', speaker:'Speaker', business:'Business' }[a.ticket_type] || a.ticket_type;
+
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || '"Africa Convention 2026" <' + process.env.SMTP_USER + '>',
+      to: a.email,
+      subject: 'Your Africa Convention 2026 Badge — ' + a.name,
+      html: `
+      <div style="font-family:sans-serif;background:#12002a;padding:40px 20px;min-height:100vh">
+        <div style="max-width:560px;margin:0 auto;background:rgba(255,255,255,0.05);border:1px solid rgba(196,77,255,0.25);border-radius:20px;padding:40px;color:white">
+          <h1 style="font-size:22px;font-weight:800;background:linear-gradient(135deg,#ff80f0,#c44dff,#ff4da6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:0 0 4px">🎪 Africa Convention 2026</h1>
+          <p style="color:rgba(200,160,255,0.65);font-size:13px;margin:0 0 28px">Arusha, Tanzania · June 18–22, 2026</p>
+          <p style="color:rgba(240,220,255,0.9);font-size:16px;margin:0 0 14px">Dear <strong>${a.name}</strong>,</p>
+          <p style="color:rgba(210,180,255,0.8);line-height:1.7;margin:0 0 24px">Your convention badge is attached to this email as a PDF. Please present it at the entrance — printed or on your device — for check-in.</p>
+          <div style="background:rgba(196,77,255,0.1);border:1px solid rgba(196,77,255,0.25);border-radius:12px;padding:20px;margin-bottom:28px">
+            <p style="margin:0 0 8px;color:rgba(255,220,255,0.9)"><strong>Ticket ID:</strong> ${a.ticket_id}</p>
+            <p style="margin:0 0 8px;color:rgba(255,220,255,0.9)"><strong>Pass Type:</strong> ${typeLabel}</p>
+            ${a.organization ? '<p style="margin:0;color:rgba(255,220,255,0.9)"><strong>Organisation:</strong> ' + a.organization + '</p>' : ''}
+          </div>
+          <p style="color:rgba(180,130,220,0.5);font-size:12px;text-align:center;margin:0">Africa Convention 2026 · WCCM Tanzania · wccm.tz@gmail.com</p>
+        </div>
+      </div>`,
+      attachments: [{ filename: 'badge-' + a.ticket_id + '.pdf', content: pdfBuf, contentType: 'application/pdf' }]
+    });
+
+    await pool.query('UPDATE attendees SET badge_sent=true, badge_generated=true WHERE ticket_id=$1', [a.ticket_id]);
+    res.json({ success: true, sent_to: a.email });
+  } catch (e) { res.json({ success: false, error: e.message }); }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 app.get('/api/health', async (req, res) => {
   let count = null, dbErr = null, dbUser = null;
