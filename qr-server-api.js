@@ -813,9 +813,9 @@ app.get('/admin', (req, res) => {
     header a { color:#e91e63; padding:9px 22px; background:rgba(255,255,255,0.75); border-radius:25px; cursor:pointer; text-decoration:none; transition:all 0.3s; backdrop-filter:blur(10px); font-size:13px; font-weight:600; border:1px solid rgba(244,143,177,0.35); }
     header a:hover { background:rgba(255,255,255,0.98); }
     .tabs-wrapper { display:flex; background:rgba(255,255,255,0.92); border-bottom:2px solid rgba(244,143,177,0.22); overflow-x:auto; flex-shrink:0; backdrop-filter:blur(16px); }
-    .tab-btn { padding:14px 20px; background:transparent; border:none; cursor:pointer; font-size:13px; color:#64748b; border-bottom:3px solid transparent; white-space:nowrap; transition:all 0.25s; font-weight:500; font-family:inherit; }
-    .tab-btn:hover { color:#e91e63; background:rgba(244,143,177,0.07); }
-    .tab-btn.active { color:#e91e63; border-bottom-color:#f06292; font-weight:700; background:rgba(244,143,177,0.07); }
+    .tab-btn { padding:14px 20px; background:transparent; border:none; cursor:pointer; font-size:13px; color:#64748b; border-bottom:3px solid transparent; white-space:nowrap; transition:color 0.2s, background 0.2s, border-color 0.2s; font-weight:500; font-family:inherit; transform:none !important; box-shadow:none !important; }
+    .tab-btn:hover { color:#e91e63; background:rgba(244,143,177,0.07); transform:none !important; box-shadow:none !important; }
+    .tab-btn.active { color:#e91e63; border-bottom-color:#f06292; font-weight:700; background:rgba(244,143,177,0.07); transform:none !important; box-shadow:none !important; }
     .content-wrapper { flex:1; overflow-y:auto; padding:32px 40px; }
     .tab-content { display:none; animation:fadeInUp 0.3s ease-out; }
     .tab-content.active { display:block; }
@@ -945,7 +945,7 @@ app.get('/admin', (req, res) => {
           <div id="qr-reader" style="width:300px;border-radius:16px;overflow:hidden;border:2px solid rgba(196,77,255,0.3)"></div>
           <div style="margin-top:12px;display:flex;gap:10px">
             <button id="scanStartBtn" onclick="startScanner()" style="flex:1">▶ Start Camera</button>
-            <button id="scanStopBtn" onclick="stopScanner()" style="flex:1;background:rgba(255,100,150,0.2);color:#fa709a;border:1px solid rgba(255,100,150,0.3)" disabled>⏹ Stop</button>
+            <button id="scanStopBtn" onclick="stopScanner()" style="flex:1;background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4)" disabled>⏹ Stop</button>
           </div>
         </div>
         <div style="flex:1;min-width:240px">
@@ -988,15 +988,15 @@ app.get('/admin', (req, res) => {
         <label style="padding:8px 14px;background:linear-gradient(135deg,#c44dff,#ff4da6);color:white;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0">
           📎 Attach Payment<input type="file" id="paymentFile" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none" onchange="uploadPayment()">
         </label>
-        <button id="viewPaymentBtn" onclick="viewPayment()" style="background:rgba(196,77,255,0.15);color:#e879f9;border:1px solid rgba(196,77,255,0.3);padding:8px 14px;font-size:12px" disabled>👁 View</button>
-        <button id="delPaymentBtn" onclick="deletePayment()" style="background:rgba(255,100,150,0.1);color:#fa709a;border:1px solid rgba(255,100,150,0.25);padding:8px 14px;font-size:12px" disabled>🗑 Remove</button>
+        <button id="viewPaymentBtn" onclick="viewPayment()" style="background:rgba(186,104,200,0.12);color:#8e24aa;border:1px solid rgba(186,104,200,0.3);padding:8px 14px;font-size:12px" disabled>👁 View</button>
+        <button id="delPaymentBtn" onclick="deletePayment()" style="background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4);padding:8px 14px;font-size:12px" disabled>🗑 Remove</button>
       </div>
     </div>
     <hr style="border:none;border-top:1px solid rgba(196,77,255,0.15);margin:20px 0">
     <div>
       <p style="font-size:13px;font-weight:700;color:rgba(200,160,255,0.7);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📂 Documents</p>
       <div id="docList" style="margin-bottom:12px;min-height:40px;font-size:13px;color:rgba(180,140,220,0.6)">No documents uploaded.</div>
-      <label style="padding:8px 14px;background:rgba(196,77,255,0.12);color:#e879f9;border:1px solid rgba(196,77,255,0.3);border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0">
+      <label style="padding:8px 14px;background:rgba(186,104,200,0.12);color:#8e24aa;border:1px solid rgba(186,104,200,0.3);border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0">
         ➕ Upload Document<input type="file" id="docFile" accept=".pdf,.jpg,.jpeg,.png,.docx" style="display:none" onchange="uploadDocument()">
       </label>
     </div>
@@ -1085,11 +1085,11 @@ app.get('/admin', (req, res) => {
       document.getElementById('stat-checked').textContent  = data.filter(a => a.checked_in).length;
       document.getElementById('stat-pending').textContent  = data.filter(a => a.payment_status === 'PENDING').length;
       document.getElementById('overviewList').innerHTML = data.map(a =>
-        '<tr><td><code style="font-size:11px;color:#e879f9">' + a.ticket_id + '</code></td>' +
+        '<tr><td><code style="font-size:11px;color:#e91e63">' + a.ticket_id + '</code></td>' +
         '<td>' + a.name + '</td><td style="font-size:12px">' + a.email + '</td><td>' + a.ticket_type + '</td>' +
         '<td style="font-size:12px">' + new Date(a.created_at).toLocaleDateString() + '</td>' +
         '<td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
-        '<td style="font-size:12px">' + (a.badge_generated?'<span style="color:#84fab0">✅</span>':'—') + (a.badge_sent?' <span style="color:#84fab0;font-size:10px">📧</span>':'') + '</td>' +
+        '<td style="font-size:12px">' + (a.badge_generated?'<span style="color:#059669">✅</span>':'—') + (a.badge_sent?' <span style="color:#059669;font-size:10px">📧</span>':'') + '</td>' +
         '<td style="white-space:nowrap">' +
           '<button class="btn-edit" onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
           '<button class="btn-badge" onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
@@ -1364,8 +1364,8 @@ app.get('/admin', (req, res) => {
             '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(196,77,255,0.1)">' +
             '<span style="flex:1;color:rgba(220,190,255,0.85);font-size:13px">📄 ' + d.name + '</span>' +
             '<span style="font-size:11px;color:rgba(180,140,220,0.5)">' + (d.size||'') + '</span>' +
-            '<button onclick="viewDoc(\'' + tid + '\',' + d.index + ')" style="padding:4px 10px;font-size:11px;background:rgba(196,77,255,0.15);color:#e879f9;border:1px solid rgba(196,77,255,0.3)">View</button>' +
-            '<button onclick="deleteDoc(\'' + tid + '\',' + d.index + ')" style="padding:4px 10px;font-size:11px;background:rgba(255,100,150,0.1);color:#fa709a;border:1px solid rgba(255,100,150,0.25)">✕</button>' +
+            '<button onclick="viewDoc(\'' + tid + '\',' + d.index + ')" style="padding:4px 10px;font-size:11px;background:rgba(186,104,200,0.12);color:#8e24aa;border:1px solid rgba(186,104,200,0.3)">View</button>' +
+            '<button onclick="deleteDoc(\'' + tid + '\',' + d.index + ')" style="padding:4px 10px;font-size:11px;background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4)">✕</button>' +
             '</div>'
           ).join('')
         : '<span style="color:rgba(180,140,220,0.45);font-size:13px">No documents uploaded.</span>';
@@ -1460,14 +1460,14 @@ app.get('/admin', (req, res) => {
         ? '✅ <strong>' + r.name + '</strong> checked in successfully'
         : '❌ ' + (r.error || 'Unknown error') + ' — ' + ticketId;
       document.getElementById('scanResult').innerHTML =
-        '<div style="padding:16px;border-radius:10px;background:' + (ok?'rgba(132,250,176,0.1)':'rgba(250,112,154,0.1)') + ';border:1px solid ' + (ok?'rgba(132,250,176,0.3)':'rgba(250,112,154,0.3)') + ';color:' + (ok?'#84fab0':'#fa709a') + ';font-size:14px">' + msg + '</div>';
+        '<div style="padding:16px;border-radius:10px;background:' + (ok?'rgba(167,243,208,0.2)':'rgba(254,202,202,0.25)') + ';border:1px solid ' + (ok?'rgba(167,243,208,0.5)':'rgba(252,165,165,0.4)') + ';color:' + (ok?'#059669':'#e11d48') + ';font-size:14px">' + msg + '</div>';
       recentScans.unshift({ ticketId, ok, name: r.name || ticketId, time: new Date().toLocaleTimeString() });
       if (recentScans.length > 8) recentScans.pop();
       document.getElementById('recentScans').innerHTML = recentScans
-        .map(s => '<div style="padding:5px 0;border-bottom:1px solid rgba(196,77,255,0.08);color:' + (s.ok?'#84fab0':'#fa709a') + ';font-size:12px">' + s.time + ' · ' + s.name + (s.ok?' ✅':' ❌') + '</div>')
+        .map(s => '<div style="padding:5px 0;border-bottom:1px solid rgba(244,143,177,0.12);color:' + (s.ok?'#059669':'#e11d48') + ';font-size:12px">' + s.time + ' · ' + s.name + (s.ok?' ✅':' ❌') + '</div>')
         .join('');
     } catch(e) {
-      document.getElementById('scanResult').innerHTML = '<div style="color:#fa709a">Network error</div>';
+      document.getElementById('scanResult').innerHTML = '<div style="color:#e11d48">Network error</div>';
     }
   }
 
