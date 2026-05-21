@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "qr.server-api.js",
+      "src": "qr-server-api.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "qr.server-api.js"
+      "dest": "qr-server-api.js"
     }
   ]
 }

@@ -1,22 +1,35 @@
 const fs = require('fs');
+const path = require('path');
+
+// --- INTERLINKING ENVIRONMENT SELECTION LAYER ---
+const localEnvPath = path.join(__dirname, '.env.local');
+
+if (fs.existsSync(localEnvPath) && (process.env.NODE_ENV === 'development' || !process.env.VERCEL)) {
+  console.log('🔌 [SYSTEM ENGINE] Hooked successfully to Local Configuration: .env.local');
+  require('dotenv').config({ path: localEnvPath });
+} else {
+  console.log('☁️ [SYSTEM ENGINE] Hooked to Production Cloud Configuration: Default Environment/.env');
+  require('dotenv').config();
+}
+
 const express = require('express');
 const { Pool } = require('pg');
-const path = require('path');
 const cors = require('cors');
 const QRCode = require('qrcode');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Dynamic DB Handshake with SSL mapping check
+// max: 5 keeps Vercel serverless within Supabase free-tier connection limits
 let pool = null;
 const dbConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      ssl: process.env.DATABASE_URL.includes('supabase') ? { rejectUnauthorized: false } : false,
+      max: 5,
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 8000,
     }
   : {
       host: process.env.DB_HOST || 'shared-db',
@@ -27,7 +40,7 @@ const dbConfig = process.env.DATABASE_URL
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
-      ssl: { rejectUnauthorized: false },
+      ssl: false,
     };
 
 app.use(cors());
@@ -54,8 +67,8 @@ const TICKET_TYPES = {
   'business': { name: 'Business', price: 250, currency: 'USD', icon: '💼' }
 };
 
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'Africa2026!';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Africa2026!';
 const adminSessions = new Map();
 
 function generateAdminToken() {
@@ -63,14 +76,16 @@ function generateAdminToken() {
 }
 
 async function initializeDatabase() {
-  console.log('🔧 Initializing database...');
+  console.log('🔧 Initializing database connection layer...');
+  // Reduced retries for Vercel serverless (10s timeout budget)
+  const maxRetries = process.env.VERCEL ? 5 : 30;
   let retries = 0;
   
-  while (retries < 30) {
+  while (retries < maxRetries) {
     try {
       pool = new Pool(dbConfig);
       const client = await pool.connect();
-      console.log('✅ Database connected!');
+      console.log('✅ Database handshake executed successfully!');
       client.release();
       
       await pool.query(`
@@ -100,18 +115,17 @@ async function initializeDatabase() {
         );
       `);
       
-      console.log('✅ Database ready');
+      console.log('✅ Database dynamic storage schemas verified and ready');
       return true;
     } catch (error) {
       retries++;
-      console.log(`⏳ Retry ${retries}/30...`);
+      console.log(`⏳ Database unavailable. Retry ${retries}/${maxRetries} in 1s...`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
   return false;
 }
 
-// BEAUTIFUL LANDING PAGE WITH REGISTRATION & GALLERY
 app.get('/', (req, res) => {
   res.send(`
 <!DOCTYPE html>
@@ -120,68 +134,76 @@ app.get('/', (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Africa Convention 2026</title>
-  // ...existing code...
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); min-height: 100vh; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); min-height: 100vh; color: #333; }
 
-    nav { background: rgba(255,255,255,0.95); padding: 20px 40px; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 32px rgba(0,0,0,0.1); backdrop-filter: blur(10px); animation: slideDown 0.6s ease-out; }
+    nav { background: rgba(255,255,255,0.95); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 32px rgba(0,0,0,0.1); backdrop-filter: blur(10px); animation: slideDown 0.6s ease-out; }
     @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    nav h1, .hero h2, .section h2, .ticket-card h3, .contact-section h2, .contact-card h3 {
-      text-align: center;
-      background: linear-gradient(135deg, #ffffff 0%, #ffb7ff 40%, #72d6ff 60%, #ffe37f 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 12px rgba(255,255,255,0.85), 0 10px 20px rgba(102,126,234,0.18);
-    }
-
-    nav h1 { font-size: 28px; font-weight: 800; letter-spacing: 0.03em; }
-    nav a { padding: 12px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
+    nav h1 { font-size: 28px; font-weight: 800; letter-spacing: 0.03em; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    nav a { padding: 12px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; transition: all 0.3s; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
     nav a:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.5); }
 
-    .hero { background: linear-gradient(135deg, #667eea, #f093fb); color: white; padding: 100px 40px; text-align: center; animation: fadeInUp 0.8s ease-out; }
-    .hero p { font-size: 18px; margin-bottom: 30px; opacity: 0.95; }
+    .hero { color: white; padding: 100px 40px; text-align: center; animation: fadeInUp 0.8s ease-out; }
+    .hero h2 { font-size: 48px; font-weight: 800; margin-bottom: 20px; text-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .hero p { font-size: 20px; margin-bottom: 30px; opacity: 0.95; font-weight: 500; }
 
-    .section { padding: 60px 40px; }
-    .gallery-section { background: white; }
+    .section { padding: 60px 40px; max-width: 1200px; margin: 0 auto; text-align: center; }
+    .section h2 { font-size: 36px; margin-bottom: 10px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .section p { font-size: 16px; margin-bottom: 40px; color: rgba(255,255,255,0.85); }
+    
+    .gallery-section { background: rgba(255, 255, 255, 0.95); border-radius: 24px; padding: 60px 40px; margin: 40px auto; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+    .gallery-section h2 { color: #333; text-shadow: none; }
+    .gallery-section p { color: #666; }
 
-    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-    .gallery-item { cursor: pointer; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.1); transition: all 0.35s; animation: slideUp 0.6s ease-out; background: #fff; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+    .gallery-item { cursor: pointer; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.1); transition: all 0.35s; background: #fff; }
     .gallery-item:hover { transform: translateY(-10px); box-shadow: 0 18px 45px rgba(102,126,234,0.25); }
     .gallery-item img { width: 100%; height: 250px; object-fit: cover; display: block; }
-    .gallery-caption { padding: 14px 16px 20px; font-size: 15px; font-weight: 700; color: #333; text-align: center; background: #fff; }
+    .gallery-caption { padding: 14px 16px 20px; font-size: 15px; font-weight: 700; color: #333; text-align: center; background: #fff; border-top: 1px solid #eee; }
 
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.75); align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
     .modal.active { display: flex; }
-    .modal-content { background-color: white; padding: 30px; border-radius: 20px; position: relative; max-width: 90%; max-height: 90%; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: scaleIn 0.3s; }
-    .close-btn { position: absolute; top: 15px; right: 20px; font-size: 32px; font-weight: bold; cursor: pointer; color: #667eea; }
-    .modal-image { width: 100%; max-width: 800px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .modal-content { background-color: white; padding: 20px; border-radius: 20px; position: relative; max-width: 90%; max-height: 90%; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .close-btn { position: absolute; top: 15px; right: 20px; font-size: 32px; font-weight: bold; cursor: pointer; color: #667eea; z-index: 1001; }
+    .modal-image { width: 100%; max-width: 800px; border-radius: 15px; display: block; }
 
-    .tickets { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
-    .ticket-card { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s; animation: fadeInUp 0.8s ease-out; }
-    .ticket-card button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
+    .tickets { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+    .ticket-card { background: white; padding: 35px 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: all 0.3s; }
+    .ticket-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+    .ticket-card h3 { font-size: 22px; color: #333; margin-bottom: 15px; }
+    .ticket-card .price { font-size: 28px; font-weight: 800; color: #764ba2; margin-bottom: 15px; }
+    .ticket-card button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 16px; transition: all 0.3s; }
     .ticket-card button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102,126,234,0.4); }
 
-    .registration-form { background: white; padding: 40px; border-radius: 16px; max-width: 600px; margin: 0 auto; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-    .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; }
-    .form-group button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .registration-form { background: white; padding: 40px; border-radius: 24px; max-width: 650px; margin: 0 auto; box-shadow: 0 15px 40px rgba(0,0,0,0.15); text-align: left; }
+    .form-group { margin-bottom: 22px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; font-size: 15px; }
+    .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; transition: all 0.3s; color: #333; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 10px rgba(102,126,234,0.15); }
+    .form-group button { width: 100%; padding: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+    .form-group button:hover { box-shadow: 0 10px 25px rgba(102,126,234,0.4); transform: translateY(-1px); }
 
-    footer { background: linear-gradient(135deg, #333, #555); color: white; text-align: center; padding: 40px; margin-top: 60px; }
-    .contact-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px 40px; text-align: center; }
+    .contact-section { background: rgba(255,255,255,0.95); border-radius: 24px; padding: 50px 40px; margin-top: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+    .contact-section h2 { color: #333; text-shadow: none; margin-bottom: 30px; }
+    .contact-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
+    .contact-card { background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; }
+    .contact-card h3 { font-size: 18px; color: #4a5568; margin-bottom: 12px; }
+    .contact-card p { color: #64748b; font-size: 15px; margin-bottom: 6px; font-weight: 500; }
+
+    footer { text-align: center; padding: 40px; margin-top: 40px; color: rgba(255,255,255,0.8); font-weight: 500; }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     @media (max-width: 900px) {
       nav { padding: 18px 20px; }
-      .hero { padding: 80px 24px; }
+      .hero h2 { font-size: 36px; }
       .section { padding: 40px 20px; }
-      .gallery { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-      .tickets { grid-template-columns: 1fr; }
     }
     @media (max-width: 600px) {
-      nav { flex-direction: column; gap: 12px; }
-      .hero h2 { font-size: 34px; }
-      .gallery-item img { height: 220px; }
-      .modal-content { padding: 22px; }
+      nav { flex-direction: column; gap: 15px; text-align: center; }
+      .registration-form { padding: 25px 20px; }
     }
   </style>
 </head>
@@ -195,16 +217,14 @@ app.get('/', (req, res) => {
     <h2>Doing Business and Bearing Fruitful</h2>
     <p>June 18-22, 2026 | Arusha, Tanzania</p>
   </div>
-
     
-    <div class="gallery-section">
+  <div class="gallery-section">
     <h2>Event Gallery</h2>
     <p>Experience the Africa Convention 2026</p>
     <div class="gallery" id="gallery"></div>
   </div>
 
-
-  <div class="section" style="background: #f9f9f9;">
+  <div class="section">
     <h2>Register for the Convention</h2>
     <p>Choose your ticket type and register</p>
     <div class="registration-form">
@@ -248,24 +268,27 @@ app.get('/', (req, res) => {
 
   <div class="section">
     <h2>Ticket Options</h2>
+    <p>Select your tier to continue</p>
     <div class="tickets" id="ticketsContainer"></div>
   </div>
 
-  <div class="contact-section">
-    <h2>Contact Information</h2>
-    <div class="contact-info">
-      <div class="contact-card">
-        <h3>📞 Phone</h3>
-        <p>+255 787 576 900</p>
-        <p>+255 713 276 655</p>
-      </div>
-      <div class="contact-card">
-        <h3>📧 Email</h3>
-        <p>wccm.tz@gmail.com</p>
-      </div>
-      <div class="contact-card">
-        <h3>🌐 Website</h3>
-        <p>www.livinghope.or.tz</p>
+  <div class="section">
+    <div class="contact-section">
+      <h2>Contact Information</h2>
+      <div class="contact-info">
+        <div class="contact-card">
+          <h3>📞 Phone</h3>
+          <p>+255 787 576 900</p>
+          <p>+255 713 276 655</p>
+        </div>
+        <div class="contact-card">
+          <h3>📧 Email</h3>
+          <p>wccm.tz@gmail.com</p>
+        </div>
+        <div class="contact-card">
+          <h3>🌐 Website</h3>
+          <p>www.livinghope.or.tz</p>
+        </div>
       </div>
     </div>
   </div>
@@ -281,8 +304,6 @@ app.get('/', (req, res) => {
     </div>
   </div>
 
-  
- // ...existing code...
   <script>
     const galleryImages = ${JSON.stringify(getGalleryImages())};
     const gallery = document.getElementById('gallery');
@@ -290,19 +311,20 @@ app.get('/', (req, res) => {
 
     function formatImageTitle(filename) {
       return decodeURIComponent(filename)
-        .replace(/\.[^/.]+$/, '')
+        .replace(/\\.[^/.]+$/, '')
         .replace(/[-_]/g, ' ')
-        .replace(/\b\w/g, (c) => c.toUpperCase());
+        .replace(/\\b\\w/g, (c) => c.toUpperCase());
     }
 
     function renderGallery() {
+      if (!gallery) return;
       gallery.innerHTML = '';
       galleryImages.forEach((img, i) => {
         const title = formatImageTitle(img.split('/').pop());
         const div = document.createElement('div');
         div.className = 'gallery-item';
         div.innerHTML =
-          '<img src="' + img + '" alt="' + title + '" title="' + title + '" style="width:100%; height:250px; object-fit:cover;">' +
+          '<img src="' + img + '" alt="' + title + '" title="' + title + '">' +
           '<div class="gallery-caption">' + title + '</div>';
         div.onclick = function() { openGallery(i); };
         gallery.appendChild(div);
@@ -335,7 +357,7 @@ app.get('/', (req, res) => {
         card.innerHTML =
           '<h3>' + data.icon + ' ' + data.name + '</h3>' +
           '<p class="price">' + data.price.toLocaleString() + ' ' + data.currency + '</p>' +
-          '<p style="margin: 0 0 18px; color: #555; font-size: 14px;">' +
+          '<p style="margin: 0 0 18px; color: #666; font-size: 14px; line-height: 1.5;">' +
             'Includes access to convention sessions, networking, and event materials.' +
           '</p>' +
           '<button type="button" onclick="selectTicketType(\\'' + type + '\\')">Select</button>';
@@ -345,7 +367,47 @@ app.get('/', (req, res) => {
 
     function selectTicketType(type) {
       const select = document.getElementById('ticketType');
-      if (select) select.value = type;
+      if (select) {
+        select.value = type;
+        select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    async function registerAttendee() {
+      const ticket_type = document.getElementById('ticketType').value;
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const organization = document.getElementById('organization').value.trim();
+      const title = document.getElementById('title').value.trim();
+      const msgDiv = document.getElementById('regMsg');
+
+      if (!ticket_type || !name || !email || !phone) {
+        msgDiv.innerHTML = '<div style="color: #c92a2a; background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-weight: 600;">⚠️ Please fill in all required fields.</div>';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticket_type, name, email, phone, organization, title })
+        });
+        const data = await res.json();
+        if (data.success) {
+          msgDiv.innerHTML = '<div style="color: #2b8a3e; background: #f4fce3; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-weight: 600;">🎉 Registration Complete! Ticket ID: ' + data.ticket_id + '</div>';
+          document.getElementById('name').value = '';
+          document.getElementById('email').value = '';
+          document.getElementById('phone').value = '';
+          document.getElementById('organization').value = '';
+          document.getElementById('title').value = '';
+          document.getElementById('ticketType').value = '';
+        } else {
+          msgDiv.innerHTML = '<div style="color: #c92a2a; background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px;">❌ Error: ' + data.error + '</div>';
+        }
+      } catch (err) {
+        msgDiv.innerHTML = '<div style="color: #c92a2a; background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px;">❌ Network error occurred.</div>';
+      }
     }
 
     renderGallery();
@@ -354,522 +416,407 @@ app.get('/', (req, res) => {
 </body>
 </html>
   `);
-
 });
 
-// ADMIN DASHBOARD (same as before - keeping all functionality)
-app.get('/admin', (req, res) => {
-  const token = req.query.token;
-  if (!token || !adminSessions.has(token)) {
-    return res.redirect('/admin-login?error=1');
-  }
-
-  const html = `<!DOCTYPE html>
+// ADMIN LOGIN TEMPLATE
+app.get('/admin-login', (req, res) => {
+  res.send(`
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Africa Convention 2026</title>
-  // ...existing code...
+  <title>Admin Login</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(180deg, #eef2f7 0%, #f8fbff 55%, #ffffff 100%);
-      color: #2f3a45;
-      min-height: 100vh;
-    }
-
-    nav {
-      background: rgba(255,255,255,0.96);
-      padding: 18px 32px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 10px 30px rgba(45,55,72,0.08);
-      border-bottom: 1px solid rgba(100,116,139,0.12);
-      animation: slideDown 0.6s ease-out;
-    }
-    @keyframes slideDown {
-      from { transform: translateY(-20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    nav h1,
-    .hero h2,
-    .section h2,
-    .ticket-card h3,
-    .contact-section h2,
-    .contact-card h3 {
-      text-align: center;
-      background: linear-gradient(135deg, #5b8bfd, #7d93ff, #c5b5ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 1px 14px rgba(255,255,255,0.65);
-    }
-
-    nav h1 {
-      font-size: 30px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-    }
-    nav a {
-      padding: 12px 26px;
-      background: linear-gradient(135deg, #5b8bfd, #7d93ff);
-      color: white;
-      text-decoration: none;
-      border-radius: 30px;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      box-shadow: 0 8px 20px rgba(91,139,253,0.25);
-    }
-    nav a:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(91,139,253,0.35);
-    }
-
-    .hero {
-      background: rgba(255,255,255,0.85);
-      color: #2f3a45;
-      padding: 90px 32px;
-      text-align: center;
-      border-radius: 32px;
-      margin: 24px auto;
-      max-width: 1080px;
-      box-shadow: 0 18px 50px rgba(45,55,72,0.08);
-    }
-    .hero p {
-      font-size: 18px;
-      margin-top: 18px;
-      color: #475160;
-    }
-
-    .section {
-      padding: 48px 28px;
-      max-width: 1180px;
-      margin: 0 auto;
-    }
-
-    .gallery-section {
-      background: rgba(255,255,255,0.96);
-      border-radius: 28px;
-      padding: 36px 28px 28px;
-      box-shadow: 0 18px 50px rgba(45,55,72,0.08);
-      margin-bottom: 36px;
-      text-align: center;
-    }
-    .gallery-section h2 {
-      margin-bottom: 12px;
-      font-size: 34px;
-      letter-spacing: 0.01em;
-    }
-    .gallery-section p {
-      margin-bottom: 26px;
-      color: #5b6b86;
-      font-size: 16px;
-      max-width: 760px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 22px;
-      margin-top: 18px;
-    }
-    .gallery-item {
-      cursor: pointer;
-      border-radius: 22px;
-      overflow: hidden;
-      box-shadow: 0 12px 35px rgba(45,55,72,0.08);
-      transition: transform 0.35s ease, box-shadow 0.35s ease;
-      background: #ffffff;
-    }
-    .gallery-item:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 18px 45px rgba(45,55,72,0.12);
-    }
-    .gallery-item img {
-      width: 100%;
-      height: 240px;
-      object-fit: cover;
-      display: block;
-    }
-    .gallery-caption {
-      padding: 16px 14px 20px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #2f3a45;
-      text-align: center;
-      background: #fbfbff;
-    }
-
-    .tickets {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-      margin-top: 24px;
-    }
-    .ticket-card {
-      background: #ffffff;
-      padding: 28px;
-      border-radius: 24px;
-      text-align: center;
-      box-shadow: 0 12px 30px rgba(45,55,72,0.08);
-    }
-    .ticket-card button {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #5b8bfd, #7d93ff);
-      color: white;
-      border: none;
-      border-radius: 18px;
-      cursor: pointer;
-      font-weight: 700;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-    .ticket-card button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(91,139,253,0.25);
-    }
-
-    .registration-form {
-      background: #ffffff;
-      padding: 36px;
-      border-radius: 26px;
-      margin: 0 auto;
-      max-width: 720px;
-      box-shadow: 0 18px 45px rgba(45,55,72,0.08);
-    }
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #d7dbe6;
-      border-radius: 14px;
-      font-size: 15px;
-      color: #2f3a45;
-      margin-top: 10px;
-    }
-    .form-group button {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #5b8bfd, #7d93ff);
-      color: white;
-      border: none;
-      border-radius: 14px;
-      font-weight: 700;
-      margin-top: 12px;
-    }
-
-    .contact-section {
-      background: rgba(255,255,255,0.96);
-      border-radius: 28px;
-      padding: 42px 28px;
-      text-align: center;
-      box-shadow: 0 18px 50px rgba(45,55,72,0.08);
-    }
-    .contact-info {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      margin-top: 30px;
-    }
-    .contact-card {
-      background: #f7f9ff;
-      padding: 24px;
-      border-radius: 20px;
-      box-shadow: 0 12px 28px rgba(45,55,72,0.06);
-    }
-
-    footer {
-      background: transparent;
-      color: #475160;
-      text-align: center;
-      padding: 28px 20px;
-      margin-top: 40px;
-      font-size: 14px;
-    }
-
-    .modal-content { max-width: 90%; }
-    .modal-image { max-height: 75vh; }
-
-    @media (max-width: 900px) {
-      .hero { padding: 60px 24px; }
-      .section { padding: 36px 18px; }
-      .gallery-item img { height: 220px; }
-      .gallery-caption { padding: 14px; }
-    }
-    @media (max-width: 650px) {
-      nav { padding: 16px 18px; }
-      .hero { padding: 50px 18px; }
-      .gallery-item img { height: 200px; }
-      .registration-form { padding: 28px 18px; }
-      .tickets { grid-template-columns: 1fr; }
-      .contact-info { grid-template-columns: 1fr; }
-    }
+    body { font-family: sans-serif; background: #f1f5f9; padding: 50px; text-align: center; }
+    .login { background: white; max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; }
+    button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .error { color: red; margin-bottom: 15px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Admin Dashboard</h1>
-      <a onclick="logout()">Logout</a>
-    </header>
-
-    <div class="tabs-wrapper">
-      <button class="tab-btn active" data-tab="academy">Academy</button>
-      <button class="tab-btn" data-tab="overview">Overview</button>
-      <button class="tab-btn" data-tab="pending">Pending</button>
-      <button class="tab-btn" data-tab="approval">Approval</button>
-      <button class="tab-btn" data-tab="checkin">Check-in</button>
-      <button class="tab-btn" data-tab="checkout">Check-out</button>
-      <button class="tab-btn" data-tab="statistics">Statistics</button>
-    </div>
-
-    <div class="content-wrapper">
-      
-      <div id="academy" class="tab-content active">
-        <h2>Academy</h2>
-        <iframe src="/documentation/training.html"></iframe>
-      </div>
-
-      <div id="overview" class="tab-content">
-        <h2>Overview</h2>
-        <div class="stat-box"><div class="stat-number" id="stat-total">0</div><div class="stat-label">Total</div></div>
-        <div class="stat-box"><div class="stat-number" id="stat-approved">0</div><div class="stat-label">Approved</div></div>
-        <div class="stat-box"><div class="stat-number" id="stat-checked">0</div><div class="stat-label">Checked In</div></div>
-        <div class="stat-box"><div class="stat-number" id="stat-pending">0</div><div class="stat-label">Pending</div></div>
-        <h3>Activity</h3>
-        <table><thead><tr><th>Time</th><th>Event</th><th>Name</th><th>Status</th></tr></thead><tbody id="activity"></tbody></table>
-      </div>
-
-      <div id="pending" class="tab-content">
-        <h2>Pending</h2>
-        <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Status</th></tr></thead><tbody id="pendingList"></tbody></table>
-      </div>
-
-      <div id="approval" class="tab-content">
-        <h2>Approval</h2>
-        <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="approvalList"></tbody></table>
-      </div>
-
-      <div id="checkin" class="tab-content">
-        <h2>Check-in</h2>
-        <div style="margin-bottom: 20px;">
-          <input type="text" id="checkinInput" placeholder="Scan or Enter Ticket ID" style="max-width: 350px; padding: 12px;">
-          <div id="checkinMsg" style="margin-top: 12px;"></div>
-        </div>
-        <h3>Recent Check-ins</h3>
-        <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Type</th><th>Status</th></tr></thead><tbody id="checkinList"></tbody></table>
-      </div>
-
-      <div id="checkout" class="tab-content">
-        <h2>Check-out</h2>
-        <div style="margin-bottom: 20px;">
-          <input type="text" id="checkoutInput" placeholder="Scan or Enter Ticket ID" style="max-width: 350px; padding: 12px;">
-          <div id="checkoutMsg" style="margin-top: 12px;"></div>
-        </div>
-        <h3>Recent Check-outs</h3>
-        <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Duration</th><th>Status</th></tr></thead><tbody id="checkoutList"></tbody></table>
-      </div>
-
-      <div id="statistics" class="tab-content">
-        <h2>Statistics</h2>
-        <h3>By Type</h3>
-        <div id="stats"></div>
-        <h3>All Attendees</h3>
-        <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Checked In</th><th>Status</th></tr></thead><tbody id="attendeesList"></tbody></table>
-      </div>
-
-    </div>
+  <div class="login">
+    <h1>Admin Login</h1>
+    <p>Africa Convention 2026</p>
+    \${req.query.error ? '<div class="error">Invalid credentials</div>' : ''}
+    <form method=\"POST\" action=\"/api/admin-login\">
+      <input type="text" name="username" placeholder="Username" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
   </div>
-
-  <script>
-    let token = new URLSearchParams(window.location.search).get('token');
-
-    document.addEventListener('DOMContentLoaded', function() {
-      setupTabSystem();
-      loadOverview();
-    });
-
-    function setupTabSystem() {
-      const tabButtons = document.querySelectorAll('.tab-btn');
-      tabButtons.forEach((btn) => {
-        const tabName = btn.getAttribute('data-tab');
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          switchToTab(tabName);
-        });
-      });
-    }
-
-    function switchToTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      const tabContent = document.getElementById(tabName);
-      const tabButton = document.querySelector('[data-tab="' + tabName + '"]');
-      
-      if (tabContent && tabButton) {
-        tabContent.classList.add('active');
-        tabButton.classList.add('active');
-        
-        if (tabName === 'overview') loadOverview();
-        if (tabName === 'pending') loadPending();
-        if (tabName === 'approval') loadApproval();
-        if (tabName === 'checkin') { const inp = document.getElementById('checkinInput'); if (inp) inp.focus(); }
-        if (tabName === 'checkout') { const inp = document.getElementById('checkoutInput'); if (inp) inp.focus(); }
-        if (tabName === 'statistics') loadStatistics();
-      }
-    }
-
-    async function loadOverview() {
-      try {
-        const res = await fetch('/api/registrations');
-        const data = await res.json();
-        document.getElementById('stat-total').textContent = data.length;
-        document.getElementById('stat-approved').textContent = data.filter(a => a.payment_status === 'APPROVED').length;
-        document.getElementById('stat-checked').textContent = data.filter(a => a.checked_in).length;
-        document.getElementById('stat-pending').textContent = data.filter(a => a.payment_status === 'PENDING').length;
-      } catch (err) { console.error(err); }
-    }
-
-    async function loadPending() {
-      try {
-        const res = await fetch('/api/registrations');
-        const data = await res.json();
-        const pending = data.filter(a => a.payment_status === 'PENDING');
-        const list = document.getElementById('pendingList');
-        list.innerHTML = '';
-        if (pending.length === 0) {
-          list.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">No pending</td></tr>';
-        } else {
-          pending.forEach(a => {
-            list.innerHTML += '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + (a.organization || '-') + '</td><td><span class="badge badge-pending">Pending</span></td></tr>';
-          });
-        }
-      } catch (err) { console.error(err); }
-    }
-
-    async function loadApproval() {
-      try {
-        const res = await fetch('/api/registrations');
-        const data = await res.json();
-        const list = document.getElementById('approvalList');
-        list.innerHTML = '';
-        data.forEach(a => {
-          const status = a.payment_status === 'APPROVED' ? '<span class="badge badge-approved">Approved</span>' : '<span class="badge badge-pending">Pending</span>';
-          list.innerHTML += '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + status + '</td><td><button onclick="approve(' + "'" + a.ticket_id + "'" + ')">Approve</button></td></tr>';
-        });
-      } catch (err) { console.error(err); }
-    }
-
-    async function loadStatistics() {
-      try {
-        const res = await fetch('/api/registrations');
-        const data = await res.json();
-        const counts = { general: 0, foreigners: 0, youth: 0, speaker: 0, business: 0 };
-        data.forEach(a => { if (counts.hasOwnProperty(a.ticket_type)) counts[a.ticket_type]++; });
-        let html = '';
-        for (let [k, v] of Object.entries(counts)) {
-          html += '<div class="stat-box"><div class="stat-number">' + v + '</div><div class="stat-label">' + k + '</div></div>';
-        }
-        document.getElementById('stats').innerHTML = html;
-        
-        const list = document.getElementById('attendeesList');
-        list.innerHTML = '';
-        data.forEach(a => {
-          const checked = a.checked_in ? 'Yes' : 'No';
-          const status = a.payment_status === 'APPROVED' ? '<span class="badge badge-approved">Approved</span>' : '<span class="badge badge-pending">Pending</span>';
-          list.innerHTML += '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + (a.organization || '-') + '</td><td>' + checked + '</td><td>' + status + '</td></tr>';
-        });
-      } catch (err) { console.error(err); }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const checkinInput = document.getElementById('checkinInput');
-      if (checkinInput) {
-        checkinInput.addEventListener('keypress', async (e) => {
-          if (e.key === 'Enter') {
-            const tid = e.target.value.trim();
-            if (!tid) return;
-            try {
-              const res = await fetch('/api/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticket_id: tid }) });
-              const result = await res.json();
-              const msg = document.getElementById('checkinMsg');
-              if (result.success) {
-                msg.innerHTML = '<div class="info-msg success">✅ ' + result.name + ' checked in</div>';
-              } else {
-                msg.innerHTML = '<div class="info-msg error">❌ ' + result.error + '</div>';
-              }
-              e.target.value = '';
-              setTimeout(() => loadOverview(), 500);
-            } catch (err) {
-              document.getElementById('checkinMsg').innerHTML = '<div class="info-msg error">❌ Error</div>';
-            }
-          }
-        });
-      }
-
-      const checkoutInput = document.getElementById('checkoutInput');
-      if (checkoutInput) {
-        checkoutInput.addEventListener('keypress', async (e) => {
-          if (e.key === 'Enter') {
-            const tid = e.target.value.trim();
-            if (!tid) return;
-            try {
-              const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticket_id: tid }) });
-              const result = await res.json();
-              const msg = document.getElementById('checkoutMsg');
-              if (result.success) {
-                msg.innerHTML = '<div class="info-msg success">✅ ' + result.name + ' checked out</div>';
-              } else {
-                msg.innerHTML = '<div class="info-msg error">❌ ' + result.error + '</div>';
-              }
-              e.target.value = '';
-            } catch (err) {
-              document.getElementById('checkoutMsg').innerHTML = '<div class="info-msg error">❌ Error</div>';
-            }
-          }
-        });
-      }
-    });
-
-    async function approve(tid) {
-      if (!confirm('Approve?')) return;
-      try {
-        await fetch('/api/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticket_id: tid }) });
-        loadApproval();
-        loadOverview();
-      } catch (err) {
-        alert('Error');
-      }
-    }
-
-    function logout() {
-      window.location.href = '/api/admin-logout?token=' + token;
-    }
-  </script>
 </body>
-</html>`;
-
-  res.send(html);
+</html>
+  `);
 });
 
-// API ENDPOINTS (same as before)
+// Fallback listeners initialization
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CLIENT PREVIEW — public read-only live attendee board
+// ═══════════════════════════════════════════════════════════════════════════
+app.get('/preview', async (req, res) => {
+  try {
+    if (!pool) return res.status(503).send('<h2 style="padding:40px;font-family:sans-serif">Database initialising, try again in a moment.</h2>');
+    const result = await pool.query('SELECT * FROM attendees ORDER BY created_at DESC');
+    const attendees = result.rows;
+    const total     = attendees.length;
+    const approved  = attendees.filter(a => a.payment_status === 'APPROVED').length;
+    const pending   = attendees.filter(a => a.payment_status === 'PENDING').length;
+    const checkedIn = attendees.filter(a => a.checked_in).length;
+
+    const rows = attendees.map(a => `
+      <tr>
+        <td><span class="tid">${a.ticket_id}</span></td>
+        <td><strong>${a.name}</strong></td>
+        <td>${a.organization || '—'}</td>
+        <td><span class="badge type-${a.ticket_type}">${a.ticket_type}</span></td>
+        <td>${a.ticket_price} ${a.currency}</td>
+        <td><span class="status ${a.payment_status === 'APPROVED' ? 'approved' : 'pending'}">${a.payment_status}</span></td>
+        <td>${a.checked_in ? '✅' : '—'}</td>
+      </tr>`).join('');
+
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Africa Convention 2026 — Live Preview</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:#0f0f13; color:#e8e8f0; min-height:100vh; }
+    header { background:linear-gradient(135deg,#667eea,#764ba2); padding:28px 48px; display:flex; justify-content:space-between; align-items:center; }
+    header h1 { font-size:20px; font-weight:700; color:white; }
+    header p  { font-size:13px; color:rgba(255,255,255,0.8); margin-top:4px; }
+    header a  { background:rgba(255,255,255,0.2); color:white; text-decoration:none; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; backdrop-filter:blur(10px); transition:all 0.2s; }
+    header a:hover { background:rgba(255,255,255,0.35); }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; padding:28px 48px 0; }
+    .stat { background:#1a1a24; border:1px solid #2a2a3a; border-radius:14px; padding:22px; text-align:center; }
+    .stat .n { font-size:38px; font-weight:700; background:linear-gradient(135deg,#667eea,#f093fb); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .stat .l { font-size:11px; color:#888; margin-top:6px; text-transform:uppercase; letter-spacing:1px; }
+    .table-wrap { margin:28px 48px 48px; background:#1a1a24; border:1px solid #2a2a3a; border-radius:16px; overflow:hidden; }
+    .table-header { padding:18px 24px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2a2a3a; }
+    .table-header h2 { font-size:15px; font-weight:600; }
+    .table-header span { font-size:12px; color:#667eea; background:rgba(102,126,234,0.12); padding:4px 12px; border-radius:20px; }
+    table { width:100%; border-collapse:collapse; }
+    th { padding:12px 18px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#666; border-bottom:1px solid #2a2a3a; }
+    td { padding:14px 18px; font-size:14px; border-bottom:1px solid #1e1e2a; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(102,126,234,0.04); }
+    .tid { font-family:monospace; font-size:12px; color:#667eea; background:rgba(102,126,234,0.1); padding:3px 8px; border-radius:6px; }
+    .badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; text-transform:uppercase; }
+    .type-general    { background:rgba(102,126,234,0.15); color:#667eea; }
+    .type-foreigners { background:rgba(240,147,251,0.15); color:#f093fb; }
+    .type-youth      { background:rgba(132,250,176,0.15); color:#84fab0; }
+    .type-speaker    { background:rgba(254,225,64,0.15);  color:#fee140; }
+    .type-business   { background:rgba(248,181,0,0.15);   color:#f8b500; }
+    .status { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .approved { background:rgba(132,250,176,0.15); color:#84fab0; }
+    .pending  { background:rgba(250,112,154,0.15); color:#fa709a; }
+    .empty    { text-align:center; padding:60px; color:#555; font-size:16px; }
+    .refresh  { position:fixed; bottom:28px; right:28px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; padding:13px 22px; border-radius:30px; font-weight:700; cursor:pointer; box-shadow:0 8px 30px rgba(102,126,234,0.4); font-size:14px; font-family:'DM Sans',sans-serif; }
+    .refresh:hover { transform:translateY(-2px); }
+    @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.table-wrap,.stats{margin-left:16px;margin-right:16px}header{padding:20px 16px;flex-direction:column;gap:12px;text-align:center}}
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1>🎪 Africa Convention 2026</h1><p>Live Attendee Database · Arusha, Tanzania · June 18-22</p></div>
+    <a href="/">← Back to Site</a>
+  </header>
+  <div class="stats">
+    <div class="stat"><div class="n">${total}</div><div class="l">Total Registered</div></div>
+    <div class="stat"><div class="n">${approved}</div><div class="l">Approved</div></div>
+    <div class="stat"><div class="n">${pending}</div><div class="l">Pending</div></div>
+    <div class="stat"><div class="n">${checkedIn}</div><div class="l">Checked In</div></div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-header"><h2>All Attendees</h2><span>${total} records</span></div>
+    <table>
+      <thead><tr><th>Ticket ID</th><th>Name</th><th>Organization</th><th>Type</th><th>Price</th><th>Status</th><th>In</th></tr></thead>
+      <tbody>${rows.length ? rows : '<tr><td colspan="7" class="empty">No attendees yet — register via the main page.</td></tr>'}</tbody>
+    </table>
+  </div>
+  <button class="refresh" onclick="location.reload()">🔄 Refresh</button>
+</body>
+</html>`);
+  } catch (err) {
+    res.status(500).send(`<h2 style="padding:40px;color:red;font-family:sans-serif">Error: ${err.message}</h2>`);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+app.get('/admin', (req, res) => {
+  const token = req.query.token;
+  if (!token || !adminSessions.has(token)) return res.redirect('/admin-login?error=1');
+
+  res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin — Africa Convention 2026</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html,body { height:100%; }
+    body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#f5f5f5,#e8e8f0); }
+    .container { display:flex; flex-direction:column; height:100vh; }
+    header { background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%); color:white; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; box-shadow:0 8px 32px rgba(102,126,234,0.3); }
+    header h1 { font-size:24px; font-weight:700; }
+    header a { color:white; padding:10px 22px; background:rgba(255,255,255,0.2); border-radius:25px; cursor:pointer; text-decoration:none; transition:all 0.3s; backdrop-filter:blur(10px); font-size:14px; }
+    header a:hover { background:rgba(255,255,255,0.3); }
+    .tabs-wrapper { display:flex; background:white; border-bottom:3px solid #667eea; overflow-x:auto; flex-shrink:0; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+    .tab-btn { padding:15px 22px; background:white; border:none; cursor:pointer; font-size:13px; color:#666; border-bottom:4px solid transparent; white-space:nowrap; transition:all 0.3s; font-weight:500; }
+    .tab-btn:hover { background:#f5f5f5; color:#667eea; }
+    .tab-btn.active { color:#667eea; border-bottom-color:#667eea; font-weight:600; }
+    .content-wrapper { flex:1; overflow-y:auto; padding:36px 40px; }
+    .tab-content { display:none; animation:fadeInUp 0.35s ease-out; }
+    .tab-content.active { display:block; }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .stat-box { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:22px 28px; border-radius:14px; display:inline-block; margin:0 16px 16px 0; min-width:180px; text-align:center; box-shadow:0 8px 25px rgba(102,126,234,0.3); transition:all 0.3s; }
+    .stat-box:hover { transform:translateY(-4px); }
+    .stat-number { font-size:34px; font-weight:bold; }
+    .stat-label  { font-size:12px; margin-top:8px; opacity:0.9; text-transform:uppercase; letter-spacing:0.5px; }
+    table { width:100%; border-collapse:collapse; margin-top:16px; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.08); }
+    th,td { padding:13px 15px; text-align:left; border-bottom:1px solid #f0f0f0; color:#333; font-size:14px; }
+    th { background:linear-gradient(135deg,#667eea,#764ba2); color:white; font-weight:600; font-size:13px; }
+    tr:hover td { background:#f9f9f9; }
+    .badge { display:inline-block; padding:5px 11px; border-radius:12px; font-size:11px; font-weight:bold; }
+    .badge-approved { background:linear-gradient(135deg,#84fab0,#8fd3f4); color:#155724; }
+    .badge-pending  { background:linear-gradient(135deg,#fa709a,#fee140); color:#856404; }
+    input[type=text] { padding:11px 14px; border:2px solid #ddd; border-radius:8px; font-size:14px; color:#333; transition:all 0.3s; }
+    input[type=text]:focus { outline:none; border-color:#667eea; box-shadow:0 0 10px rgba(102,126,234,0.2); }
+    button { padding:10px 18px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; transition:all 0.3s; }
+    button:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(102,126,234,0.35); }
+    h2 { color:#333; margin-bottom:18px; font-size:22px; }
+    h3 { color:#667eea; margin:26px 0 12px; font-weight:600; }
+    .info-msg { padding:13px 16px; margin-bottom:14px; border-radius:8px; font-weight:500; font-size:14px; }
+    .info-msg.success { background:#d4edda; color:#155724; border-left:4px solid #28a745; }
+    .info-msg.error   { background:#f8d7da; color:#c92a2a; border-left:4px solid #dc3545; }
+    iframe { width:100%; height:680px; border:2px solid #ddd; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08); }
+    .preview-btn { display:inline-block; margin-bottom:18px; padding:10px 20px; background:linear-gradient(135deg,#11998e,#38ef7d); color:white; text-decoration:none; border-radius:20px; font-weight:600; font-size:13px; }
+    .preview-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(17,153,142,0.35); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎪 Admin Dashboard</h1>
+    <a onclick="logout()">Logout</a>
+  </header>
+  <div class="tabs-wrapper">
+    <button class="tab-btn active" data-tab="academy">🎓 Academy</button>
+    <button class="tab-btn" data-tab="overview">📊 Overview</button>
+    <button class="tab-btn" data-tab="pending">⏳ Pending</button>
+    <button class="tab-btn" data-tab="approval">✅ Approval</button>
+    <button class="tab-btn" data-tab="checkin">📥 Check-in</button>
+    <button class="tab-btn" data-tab="checkout">📤 Check-out</button>
+    <button class="tab-btn" data-tab="statistics">📈 Statistics</button>
+  </div>
+  <div class="content-wrapper">
+
+    <div id="academy" class="tab-content active">
+      <h2>Academy</h2>
+      <iframe src="/documentation/training.html" title="Training Materials"></iframe>
+    </div>
+
+    <div id="overview" class="tab-content">
+      <h2>Overview</h2>
+      <a class="preview-btn" href="/preview" target="_blank">📋 Open Client Preview →</a>
+      <br>
+      <div class="stat-box"><div class="stat-number" id="stat-total">—</div><div class="stat-label">Total</div></div>
+      <div class="stat-box"><div class="stat-number" id="stat-approved">—</div><div class="stat-label">Approved</div></div>
+      <div class="stat-box"><div class="stat-number" id="stat-checked">—</div><div class="stat-label">Checked In</div></div>
+      <div class="stat-box"><div class="stat-number" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
+      <h3>All Registrations</h3>
+      <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Registered</th><th>Status</th></tr></thead>
+      <tbody id="overviewList"></tbody></table>
+    </div>
+
+    <div id="pending" class="tab-content">
+      <h2>Pending Registrations</h2>
+      <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Status</th></tr></thead>
+      <tbody id="pendingList"></tbody></table>
+    </div>
+
+    <div id="approval" class="tab-content">
+      <h2>Approval Queue</h2>
+      <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="approvalList"></tbody></table>
+    </div>
+
+    <div id="checkin" class="tab-content">
+      <h2>Check-in</h2>
+      <div style="margin-bottom:20px">
+        <input type="text" id="checkinInput" placeholder="Scan or enter Ticket ID" style="max-width:340px">
+        <div id="checkinMsg" style="margin-top:12px"></div>
+      </div>
+      <h3>Recent Check-ins</h3>
+      <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Type</th><th>Status</th></tr></thead>
+      <tbody id="checkinList"></tbody></table>
+    </div>
+
+    <div id="checkout" class="tab-content">
+      <h2>Check-out</h2>
+      <div style="margin-bottom:20px">
+        <input type="text" id="checkoutInput" placeholder="Scan or enter Ticket ID" style="max-width:340px">
+        <div id="checkoutMsg" style="margin-top:12px"></div>
+      </div>
+      <h3>Recent Check-outs</h3>
+      <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Duration</th><th>Status</th></tr></thead>
+      <tbody id="checkoutList"></tbody></table>
+    </div>
+
+    <div id="statistics" class="tab-content">
+      <h2>Statistics</h2>
+      <h3>By Ticket Type</h3>
+      <div id="statsByType"></div>
+      <h3>Full Attendee List</h3>
+      <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Checked In</th><th>Status</th></tr></thead>
+      <tbody id="attendeesList"></tbody></table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const token = new URLSearchParams(window.location.search).get('token');
+
+  // Tab system
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const tab = this.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      this.classList.add('active');
+      if (tab === 'overview')   loadOverview();
+      if (tab === 'pending')    loadPending();
+      if (tab === 'approval')   loadApproval();
+      if (tab === 'statistics') loadStatistics();
+      if (tab === 'checkin')    document.getElementById('checkinInput').focus();
+      if (tab === 'checkout')   document.getElementById('checkoutInput').focus();
+    });
+  });
+
+  async function fetchAttendees() {
+    const res = await fetch('/api/registrations');
+    return res.json();
+  }
+
+  async function loadOverview() {
+    try {
+      const data = await fetchAttendees();
+      document.getElementById('stat-total').textContent    = data.length;
+      document.getElementById('stat-approved').textContent = data.filter(a => a.payment_status === 'APPROVED').length;
+      document.getElementById('stat-checked').textContent  = data.filter(a => a.checked_in).length;
+      document.getElementById('stat-pending').textContent  = data.filter(a => a.payment_status === 'PENDING').length;
+      document.getElementById('overviewList').innerHTML = data.map(a =>
+        '<tr><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + new Date(a.created_at).toLocaleDateString() + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td></tr>'
+      ).join('');
+    } catch(e) { console.error(e); }
+  }
+
+  async function loadPending() {
+    try {
+      const data = await fetchAttendees();
+      const pending = data.filter(a => a.payment_status === 'PENDING');
+      document.getElementById('pendingList').innerHTML = pending.length
+        ? pending.map(a => '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + (a.organization||'—') + '</td><td><span class="badge badge-pending">Pending</span></td></tr>').join('')
+        : '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px">No pending registrations</td></tr>';
+    } catch(e) { console.error(e); }
+  }
+
+  async function loadApproval() {
+    try {
+      const data = await fetchAttendees();
+      document.getElementById('approvalList').innerHTML = data.map(a =>
+        '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td><td><button onclick="approve(\'' + a.ticket_id + '\')">' + (a.payment_status==='APPROVED'?'Re-approve':'Approve') + '</button></td></tr>'
+      ).join('');
+    } catch(e) { console.error(e); }
+  }
+
+  async function loadStatistics() {
+    try {
+      const data = await fetchAttendees();
+      const counts = { general:0, foreigners:0, youth:0, speaker:0, business:0 };
+      data.forEach(a => { if (a.ticket_type in counts) counts[a.ticket_type]++; });
+      document.getElementById('statsByType').innerHTML = Object.entries(counts)
+        .map(([k,v]) => '<div class="stat-box"><div class="stat-number">' + v + '</div><div class="stat-label">' + k + '</div></div>').join('');
+      document.getElementById('attendeesList').innerHTML = data.map(a =>
+        '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + (a.organization||'—') + '</td><td>' + (a.checked_in?'✅ Yes':'—') + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td></tr>'
+      ).join('');
+    } catch(e) { console.error(e); }
+  }
+
+  async function approve(tid) {
+    if (!confirm('Approve ticket ' + tid + '?')) return;
+    try {
+      const res = await fetch('/api/approve', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
+      const result = await res.json();
+      if (result.success) { loadApproval(); loadOverview(); }
+      else alert('Error: ' + result.error);
+    } catch(e) { alert('Network error'); }
+  }
+
+  // Check-in handler
+  document.getElementById('checkinInput').addEventListener('keypress', async e => {
+    if (e.key !== 'Enter') return;
+    const tid = e.target.value.trim(); if (!tid) return;
+    try {
+      const res = await fetch('/api/checkin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
+      const result = await res.json();
+      const msg = document.getElementById('checkinMsg');
+      msg.innerHTML = result.success
+        ? '<div class="info-msg success">✅ ' + result.name + ' checked in successfully</div>'
+        : '<div class="info-msg error">❌ ' + result.error + '</div>';
+      e.target.value = '';
+      setTimeout(loadOverview, 500);
+    } catch(e) { document.getElementById('checkinMsg').innerHTML = '<div class="info-msg error">❌ Network error</div>'; }
+  });
+
+  // Check-out handler
+  document.getElementById('checkoutInput').addEventListener('keypress', async e => {
+    if (e.key !== 'Enter') return;
+    const tid = e.target.value.trim(); if (!tid) return;
+    try {
+      const res = await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
+      const result = await res.json();
+      const msg = document.getElementById('checkoutMsg');
+      msg.innerHTML = result.success
+        ? '<div class="info-msg success">✅ ' + result.name + ' checked out successfully</div>'
+        : '<div class="info-msg error">❌ ' + result.error + '</div>';
+      e.target.value = '';
+    } catch(e) { document.getElementById('checkoutMsg').innerHTML = '<div class="info-msg error">❌ Network error</div>'; }
+  });
+
+  function logout() { window.location.href = '/api/admin-logout?token=' + token; }
+
+  // Load overview on mount
+  loadOverview();
+</script>
+</body>
+</html>`);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  API ROUTES
+// ═══════════════════════════════════════════════════════════════════════════
+
 app.post('/api/register', async (req, res) => {
   try {
-    if (!pool) return res.json({ success: false, error: 'DB not ready' });
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
     const { ticket_type, name, email, phone, organization, title } = req.body;
-    if (!ticket_type || !name || !email || !phone) return res.json({ success: false, error: 'Missing fields' });
+    if (!ticket_type || !name || !email || !phone) return res.json({ success: false, error: 'Missing required fields' });
     const ticket = TICKET_TYPES[ticket_type];
-    const ticketId = 'TKT-' + Date.now();
-    await pool.query('INSERT INTO attendees (ticket_id, name, email, phone, organization, title, ticket_type, ticket_price, currency, payment_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [ticketId, name, email, phone, organization || '', title || '', ticket_type, ticket.price, ticket.currency, 'APPROVED']);
+    if (!ticket) return res.json({ success: false, error: 'Invalid ticket type' });
+    const ticketId = 'TKT-' + ticket_type.toUpperCase().slice(0, 3) + '-' + Date.now();
+    await pool.query(
+      'INSERT INTO attendees (ticket_id, name, email, phone, organization, title, ticket_type, ticket_price, currency, payment_status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
+      [ticketId, name, email, phone, organization || '', title || '', ticket_type, ticket.price, ticket.currency, 'APPROVED']
+    );
     res.json({ success: true, ticket_id: ticketId });
   } catch (error) {
     res.json({ success: false, error: error.message });
@@ -878,7 +825,7 @@ app.post('/api/register', async (req, res) => {
 
 app.post('/api/checkin', async (req, res) => {
   try {
-    if (!pool) return res.json({ success: false, error: 'DB not ready' });
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
     const { ticket_id } = req.body;
     const result = await pool.query('SELECT * FROM attendees WHERE ticket_id = $1', [ticket_id]);
     if (result.rows.length === 0) return res.json({ success: false, error: 'Ticket not found' });
@@ -893,13 +840,13 @@ app.post('/api/checkin', async (req, res) => {
 
 app.post('/api/checkout', async (req, res) => {
   try {
-    if (!pool) return res.json({ success: false, error: 'DB not ready' });
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
     const { ticket_id } = req.body;
     const result = await pool.query('SELECT * FROM attendees WHERE ticket_id = $1', [ticket_id]);
     if (result.rows.length === 0) return res.json({ success: false, error: 'Ticket not found' });
     const attendee = result.rows[0];
-    if (!attendee.checked_in) return res.json({ success: false, error: 'Not checked in' });
-    if (attendee.checked_out) return res.json({ success: false, error: 'Already checked out' });
+    if (!attendee.checked_in)  return res.json({ success: false, error: 'Not checked in yet' });
+    if (attendee.checked_out)  return res.json({ success: false, error: 'Already checked out' });
     await pool.query('UPDATE attendees SET checked_out = true, checked_out_at = NOW() WHERE ticket_id = $1', [ticket_id]);
     res.json({ success: true, name: attendee.name });
   } catch (error) {
@@ -909,12 +856,11 @@ app.post('/api/checkout', async (req, res) => {
 
 app.post('/api/approve', async (req, res) => {
   try {
-    if (!pool) return res.json({ success: false, error: 'DB not ready' });
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
     const { ticket_id } = req.body;
     const result = await pool.query('SELECT * FROM attendees WHERE ticket_id = $1', [ticket_id]);
-    if (result.rows.length === 0) return res.json({ success: false, error: 'Not found' });
-    const qrData = JSON.stringify({ ticket_id, name: result.rows[0].name });
-    const qrCode = await QRCode.toDataURL(qrData);
+    if (result.rows.length === 0) return res.json({ success: false, error: 'Ticket not found' });
+    const qrCode = await QRCode.toDataURL(JSON.stringify({ ticket_id, name: result.rows[0].name }));
     await pool.query('UPDATE attendees SET payment_status = $1, qr_code = $2 WHERE ticket_id = $3', ['APPROVED', qrCode, ticket_id]);
     res.json({ success: true });
   } catch (error) {
@@ -948,27 +894,28 @@ app.get('/api/admin-logout', (req, res) => {
   res.redirect('/');
 });
 
-app.get('/admin-login', (req, res) => {
-  res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Admin Login</title><style>* { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: 'Segoe UI'; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); display: flex; align-items: center; justify-content: center; height: 100vh; } .login { background: white; padding: 60px; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 420px; } h1 { color: #667eea; margin-bottom: 15px; } p { color: #666; margin-bottom: 40px; } input { width: 100%; padding: 14px; margin-bottom: 16px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; } input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 15px rgba(102,126,234,0.2); } button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; } button:hover { box-shadow: 0 12px 30px rgba(102,126,234,0.4); } .error { color: #c92a2a; background: rgba(201,42,42,0.1); padding: 12px; border-radius: 8px; margin-bottom: 20px; }</style></head><body><div class="login"><h1>Admin Login</h1><p>Africa Convention 2026</p>${req.query.error ? '<div class="error">Invalid credentials</div>' : ''}<form method="POST" action="/api/admin-login"><input type="text" name="username" placeholder="admin" required autofocus><input type="password" name="password" placeholder="Africa2026!" required><button>Login</button></form></div></body></html>`);
-});
-
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-async function start() {
-  await initializeDatabase();
-  app.listen(PORT, () => {
-    console.log('\n✨ DASHBOARD WITH GENERAL ADMIN ON-DOOR REGISTRATION READY');
-    console.log(`📍 http://localhost:${PORT}\n`);
+  res.json({
+    status: 'ok',
+    db: pool ? 'connected' : 'disconnected',
+    env: process.env.NODE_ENV || 'unknown',
+    timestamp: new Date().toISOString()
   });
-}
-
-process.on('SIGINT', async () => {
-  if (pool) await pool.end();
-  process.exit(0);
 });
 
-start();
-// At the very bottom of qr.server-api.js
-module.exports = app;
+// ═══════════════════════════════════════════════════════════════════════════
+//  STARTUP
+// ═══════════════════════════════════════════════════════════════════════════
+initializeDatabase().then((ready) => {
+  if (ready) {
+    app.listen(PORT, () => {
+      console.log(`🚀 [SERVER RUNNING] Cluster alive on port: ${PORT}`);
+      console.log(`📋 Preview:  http://localhost:${PORT}/preview`);
+      console.log(`🔒 Admin:    http://localhost:${PORT}/admin-login`);
+      console.log(`💊 Health:   http://localhost:${PORT}/api/health`);
+    });
+  } else {
+    console.error('🛑 Core failure: Database could not initialize.');
+    process.exit(1);
+  }
+});
