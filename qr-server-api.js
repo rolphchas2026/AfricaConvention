@@ -47,6 +47,12 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Shared init promise — set in the Vercel startup block below.
+// This middleware (registered before all routes) makes every request wait
+// until the DB pool is ready on the first cold-start invocation.
+let _initPromise = null;
+app.use(async (req, res, next) => { if (!pool && _initPromise) await _initPromise; next(); });
+
 const imagesPath = path.join(__dirname, 'sysimages');
 const docsPath = path.join(__dirname, 'documentation');
 
@@ -1065,10 +1071,8 @@ app.get('/api/health', (req, res) => {
 //  STARTUP
 // ═══════════════════════════════════════════════════════════════════════════
 if (process.env.VERCEL) {
-  // Serverless: begin init immediately; middleware awaits the same promise so
-  // the first real request blocks until the pool is ready (no race condition).
-  const _initPromise = initializeDatabase();
-  app.use(async (req, res, next) => { if (!pool) await _initPromise; next(); });
+  // Serverless: store the init promise so the early middleware can await it.
+  _initPromise = initializeDatabase();
   module.exports = app;
 } else {
   initializeDatabase().then((ready) => {
