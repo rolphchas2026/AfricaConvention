@@ -1065,8 +1065,10 @@ app.get('/api/health', (req, res) => {
 //  STARTUP
 // ═══════════════════════════════════════════════════════════════════════════
 if (process.env.VERCEL) {
-  // Serverless: fire-and-forget init, export app for Vercel to invoke
-  initializeDatabase();
+  // Serverless: begin init immediately; middleware awaits the same promise so
+  // the first real request blocks until the pool is ready (no race condition).
+  const _initPromise = initializeDatabase();
+  app.use(async (req, res, next) => { if (!pool) await _initPromise; next(); });
   module.exports = app;
 } else {
   initializeDatabase().then((ready) => {
