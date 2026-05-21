@@ -10,7 +10,7 @@
     "dev:cloud": "cross-env NODE_ENV=production nodemon qr-server-api.js"
   },
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "dependencies": {
     "cors": "^2.8.5",
