@@ -598,6 +598,22 @@ app.get('/admin', (req, res) => {
     iframe { width:100%; height:680px; border:2px solid #ddd; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08); }
     .preview-btn { display:inline-block; margin-bottom:18px; padding:10px 20px; background:linear-gradient(135deg,#11998e,#38ef7d); color:white; text-decoration:none; border-radius:20px; font-weight:600; font-size:13px; }
     .preview-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(17,153,142,0.35); }
+    .btn-edit { padding:4px 10px; background:linear-gradient(135deg,#4facfe,#00f2fe); color:#003d5c; border:none; border-radius:6px; cursor:pointer; font-size:11px; font-weight:700; margin-right:4px; transition:all 0.2s; }
+    .btn-del  { padding:4px 10px; background:linear-gradient(135deg,#fa709a,#fee140); color:#7b1226; border:none; border-radius:6px; cursor:pointer; font-size:11px; font-weight:700; transition:all 0.2s; }
+    .btn-edit:hover,.btn-del:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(0,0,0,0.2); }
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:white; border-radius:16px; padding:32px; width:540px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:fadeInUp 0.25s ease-out; }
+    .modal-box h3 { color:#667eea; margin-bottom:20px; font-size:18px; }
+    .form-row { margin-bottom:14px; }
+    .form-row label { display:block; font-size:12px; font-weight:700; color:#555; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.4px; }
+    .form-row input,.form-row select { width:100%; padding:9px 12px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; color:#333; transition:border 0.2s; }
+    .form-row input:focus,.form-row select:focus { outline:none; border-color:#667eea; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .modal-actions { display:flex; gap:10px; margin-top:22px; justify-content:flex-end; }
+    .btn-cancel { padding:10px 18px; background:#f0f0f0; color:#555; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; }
+    .btn-cancel:hover { background:#e0e0e0; transform:none; box-shadow:none; }
+    .btn-save { padding:10px 22px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; }
   </style>
 </head>
 <body>
@@ -631,7 +647,7 @@ app.get('/admin', (req, res) => {
       <div class="stat-box"><div class="stat-number" id="stat-checked">—</div><div class="stat-label">Checked In</div></div>
       <div class="stat-box"><div class="stat-number" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
       <h3>All Registrations</h3>
-      <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Registered</th><th>Status</th></tr></thead>
+      <table><thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody id="overviewList"></tbody></table>
     </div>
 
@@ -674,10 +690,53 @@ app.get('/admin', (req, res) => {
       <h3>By Ticket Type</h3>
       <div id="statsByType"></div>
       <h3>Full Attendee List</h3>
-      <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Checked In</th><th>Status</th></tr></thead>
+      <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Checked In</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody id="attendeesList"></tbody></table>
     </div>
 
+  </div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <h3>✏️ Edit Attendee</h3>
+    <input type="hidden" id="editTicketId">
+    <div class="form-grid">
+      <div class="form-row" style="margin-bottom:0"><label>Name</label><input type="text" id="editName"></div>
+      <div class="form-row" style="margin-bottom:0"><label>Email</label><input type="text" id="editEmail"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row" style="margin-bottom:0"><label>Phone</label><input type="text" id="editPhone"></div>
+      <div class="form-row" style="margin-bottom:0"><label>Title</label><input type="text" id="editTitle"></div>
+    </div>
+    <div class="form-row"><label>Organization</label><input type="text" id="editOrganization"></div>
+    <div class="form-grid">
+      <div class="form-row" style="margin-bottom:0"><label>Ticket Type</label>
+        <select id="editTicketType">
+          <option value="general">General Admin (Local)</option>
+          <option value="foreigners">Foreigners (VIP)</option>
+          <option value="youth">Youth</option>
+          <option value="speaker">Speaker</option>
+          <option value="business">Business</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-bottom:0"><label>Payment Status</label>
+        <select id="editPaymentStatus">
+          <option value="APPROVED">APPROVED</option>
+          <option value="PENDING">PENDING</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;cursor:pointer">
+        <input type="checkbox" id="editVerified" style="width:auto;margin:0"> Verified
+      </label>
+    </div>
+    <div id="editError" style="color:#c92a2a;font-size:13px;min-height:18px"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit()">Save Changes</button>
+    </div>
   </div>
 </div>
 
@@ -701,9 +760,11 @@ app.get('/admin', (req, res) => {
     });
   });
 
+  let _allAttendees = [];
   async function fetchAttendees() {
     const res = await fetch('/api/registrations');
-    return res.json();
+    _allAttendees = await res.json();
+    return _allAttendees;
   }
 
   async function loadOverview() {
@@ -714,7 +775,8 @@ app.get('/admin', (req, res) => {
       document.getElementById('stat-checked').textContent  = data.filter(a => a.checked_in).length;
       document.getElementById('stat-pending').textContent  = data.filter(a => a.payment_status === 'PENDING').length;
       document.getElementById('overviewList').innerHTML = data.map(a =>
-        '<tr><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + new Date(a.created_at).toLocaleDateString() + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td></tr>'
+        '<tr><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + new Date(a.created_at).toLocaleDateString() + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
+        '<td><button class="btn-edit" onclick="editAttendee(\'' + a.ticket_id + '\')">✏️ Edit</button><button class="btn-del" onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button></td></tr>'
       ).join('');
     } catch(e) { console.error(e); }
   }
@@ -746,7 +808,8 @@ app.get('/admin', (req, res) => {
       document.getElementById('statsByType').innerHTML = Object.entries(counts)
         .map(([k,v]) => '<div class="stat-box"><div class="stat-number">' + v + '</div><div class="stat-label">' + k + '</div></div>').join('');
       document.getElementById('attendeesList').innerHTML = data.map(a =>
-        '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + (a.organization||'—') + '</td><td>' + (a.checked_in?'✅ Yes':'—') + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td></tr>'
+        '<tr><td>' + a.name + '</td><td>' + a.email + '</td><td>' + a.ticket_type + '</td><td>' + (a.organization||'—') + '</td><td>' + (a.checked_in?'✅ Yes':'—') + '</td><td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
+        '<td><button class="btn-edit" onclick="editAttendee(\'' + a.ticket_id + '\')">✏️ Edit</button><button class="btn-del" onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button></td></tr>'
       ).join('');
     } catch(e) { console.error(e); }
   }
@@ -793,6 +856,73 @@ app.get('/admin', (req, res) => {
   });
 
   function logout() { window.location.href = '/api/admin-logout?token=' + token; }
+
+  function editAttendee(ticketId) {
+    const a = _allAttendees.find(x => x.ticket_id === ticketId);
+    if (!a) return;
+    document.getElementById('editTicketId').value        = a.ticket_id;
+    document.getElementById('editName').value            = a.name || '';
+    document.getElementById('editEmail').value           = a.email || '';
+    document.getElementById('editPhone').value           = a.phone || '';
+    document.getElementById('editTitle').value           = a.title || '';
+    document.getElementById('editOrganization').value    = a.organization || '';
+    document.getElementById('editTicketType').value      = a.ticket_type || 'general';
+    document.getElementById('editPaymentStatus').value   = a.payment_status || 'PENDING';
+    document.getElementById('editVerified').checked      = !!a.verified;
+    document.getElementById('editError').textContent     = '';
+    document.getElementById('editModal').classList.add('open');
+  }
+
+  function closeEdit() {
+    document.getElementById('editModal').classList.remove('open');
+  }
+
+  async function saveEdit() {
+    const ticketId = document.getElementById('editTicketId').value;
+    const body = {
+      name:           document.getElementById('editName').value.trim(),
+      email:          document.getElementById('editEmail').value.trim(),
+      phone:          document.getElementById('editPhone').value.trim(),
+      title:          document.getElementById('editTitle').value.trim(),
+      organization:   document.getElementById('editOrganization').value.trim(),
+      ticket_type:    document.getElementById('editTicketType').value,
+      payment_status: document.getElementById('editPaymentStatus').value,
+      verified:       document.getElementById('editVerified').checked
+    };
+    if (!body.name || !body.email) {
+      document.getElementById('editError').textContent = 'Name and email are required.';
+      return;
+    }
+    try {
+      const res = await fetch('/api/attendees/' + encodeURIComponent(ticketId), {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+      });
+      const result = await res.json();
+      if (result.success) {
+        closeEdit();
+        loadOverview();
+        if (document.getElementById('statistics').classList.contains('active')) loadStatistics();
+      } else {
+        document.getElementById('editError').textContent = result.error || 'Save failed.';
+      }
+    } catch(e) { document.getElementById('editError').textContent = 'Network error.'; }
+  }
+
+  async function deleteAttendee(ticketId) {
+    const a = _allAttendees.find(x => x.ticket_id === ticketId);
+    if (!confirm('Delete ' + (a ? a.name : ticketId) + '? This cannot be undone.')) return;
+    try {
+      const res = await fetch('/api/attendees/' + encodeURIComponent(ticketId), { method: 'DELETE' });
+      const result = await res.json();
+      if (result.success) { loadOverview(); }
+      else alert('Error: ' + (result.error || 'Delete failed'));
+    } catch(e) { alert('Network error'); }
+  }
+
+  // Close modal when clicking the overlay background
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEdit();
+  });
 
   // Load overview on mount
   loadOverview();
@@ -892,6 +1022,34 @@ app.get('/api/admin-logout', (req, res) => {
   const token = req.query.token;
   if (token) adminSessions.delete(token);
   res.redirect('/');
+});
+
+app.put('/api/attendees/:ticket_id', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const { ticket_id } = req.params;
+    const { name, email, phone, organization, title, ticket_type, payment_status, verified } = req.body;
+    if (!name || !email) return res.json({ success: false, error: 'Name and email required' });
+    const result = await pool.query(
+      'UPDATE attendees SET name=$1, email=$2, phone=$3, organization=$4, title=$5, ticket_type=$6, payment_status=$7, verified=$8 WHERE ticket_id=$9',
+      [name, email, phone || '', organization || '', title || '', ticket_type, payment_status, !!verified, ticket_id]
+    );
+    if (result.rowCount === 0) return res.json({ success: false, error: 'Attendee not found' });
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
+app.delete('/api/attendees/:ticket_id', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const { ticket_id } = req.params;
+    const result = await pool.query('DELETE FROM attendees WHERE ticket_id = $1', [ticket_id]);
+    res.json({ success: true, deleted: result.rowCount });
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
 });
 
 app.get('/api/health', (req, res) => {
