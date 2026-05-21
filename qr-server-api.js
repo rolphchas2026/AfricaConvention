@@ -906,16 +906,22 @@ app.get('/api/health', (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════
 //  STARTUP
 // ═══════════════════════════════════════════════════════════════════════════
-initializeDatabase().then((ready) => {
-  if (ready) {
-    app.listen(PORT, () => {
-      console.log(`🚀 [SERVER RUNNING] Cluster alive on port: ${PORT}`);
-      console.log(`📋 Preview:  http://localhost:${PORT}/preview`);
-      console.log(`🔒 Admin:    http://localhost:${PORT}/admin-login`);
-      console.log(`💊 Health:   http://localhost:${PORT}/api/health`);
-    });
-  } else {
-    console.error('🛑 Core failure: Database could not initialize.');
-    process.exit(1);
-  }
-});
+if (process.env.VERCEL) {
+  // Serverless: fire-and-forget init, export app for Vercel to invoke
+  initializeDatabase();
+  module.exports = app;
+} else {
+  initializeDatabase().then((ready) => {
+    if (ready) {
+      app.listen(PORT, () => {
+        console.log(`🚀 [SERVER RUNNING] Cluster alive on port: ${PORT}`);
+        console.log(`📋 Preview:  http://localhost:${PORT}/preview`);
+        console.log(`🔒 Admin:    http://localhost:${PORT}/admin-login`);
+        console.log(`💊 Health:   http://localhost:${PORT}/api/health`);
+      });
+    } else {
+      console.error('🛑 Core failure: Database could not initialize.');
+      process.exit(1);
+    }
+  });
+}
