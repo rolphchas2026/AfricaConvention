@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Africa Convention 2026</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html,body { height:100%; }
+    body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(160deg,#e8f4fd 0%,#fdf0f7 40%,#eef4ff 100%); min-height:100vh; }
+    .container { display:flex; flex-direction:column; height:100vh; }
+    header { background:linear-gradient(135deg,#fce4ec 0%,#e8eaf6 40%,#e3f2fd 80%,#e0f7fa 100%); color:#1e293b; padding:18px 40px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; box-shadow:0 8px 40px rgba(244,143,177,0.2); }
+    header h1 { font-size:22px; font-weight:800; letter-spacing:0.02em; }
+    .tabs-outer { position:relative; flex-shrink:0; }
+    .tabs-wrapper { display:flex; background:rgba(255,255,255,0.92); border-bottom:2px solid rgba(244,143,177,0.22); overflow-x:auto; scrollbar-width:none; backdrop-filter:blur(16px); }
+    .tabs-wrapper::-webkit-scrollbar { display:none; }
+    .tabs-fade { position:absolute; right:0; top:0; bottom:0; width:52px; background:linear-gradient(to right,transparent,rgba(255,255,255,0.95)); pointer-events:none; z-index:2; }
+    .tab-btn { padding:14px 16px; background:transparent; border:none; cursor:pointer; font-size:13px; color:#64748b; border-bottom:3px solid transparent; white-space:nowrap; transition:color 0.2s,background 0.2s,border-color 0.2s; font-weight:500; font-family:inherit; transform:none !important; box-shadow:none !important; touch-action:manipulation; }
+    .tab-btn:hover { color:#e91e63; background:rgba(244,143,177,0.07); transform:none !important; box-shadow:none !important; }
+    .tab-btn.active { color:#e91e63; border-bottom-color:#f06292; font-weight:700; background:rgba(244,143,177,0.07); transform:none !important; box-shadow:none !important; }
+    .content-wrapper { flex:1; overflow-y:auto; padding:32px 40px; }
+    .tab-content { display:none; animation:fadeInUp 0.3s ease-out; }
+    .tab-content.active { display:block; }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    .stat-box { background:linear-gradient(135deg,#fce4ec,#e8eaf6); color:#1e293b; padding:20px 26px; border-radius:14px; display:inline-block; margin:0 14px 14px 0; min-width:175px; text-align:center; box-shadow:0 8px 28px rgba(244,143,177,0.2); transition:all 0.3s; border:1px solid rgba(244,143,177,0.2); }
+    .stat-box:hover { transform:translateY(-4px); box-shadow:0 14px 40px rgba(244,143,177,0.35); }
+    .stat-number { font-size:34px; font-weight:800; background:linear-gradient(135deg,#f06292,#ce93d8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .stat-label { font-size:11px; margin-top:8px; color:#64748b; text-transform:uppercase; letter-spacing:1px; }
+    table { width:100%; border-collapse:collapse; margin-top:16px; background:rgba(255,255,255,0.94); border-radius:14px; overflow:hidden; box-shadow:0 4px 24px rgba(244,143,177,0.14); border:1px solid rgba(244,143,177,0.16); }
+    th,td { padding:12px 15px; text-align:left; border-bottom:1px solid rgba(244,143,177,0.1); color:#374151; font-size:14px; }
+    th { background:linear-gradient(135deg,rgba(252,231,243,0.98),rgba(232,240,254,0.98)); color:#64748b; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; }
+    tr:hover td { background:rgba(244,143,177,0.05); }
+    .badge { display:inline-block; padding:4px 11px; border-radius:12px; font-size:11px; font-weight:700; }
+    .badge-approved { background:rgba(167,243,208,0.28); color:#059669; border:1px solid rgba(167,243,208,0.5); }
+    .badge-pending  { background:rgba(254,202,202,0.3);  color:#e11d48; border:1px solid rgba(252,165,165,0.4); }
+    input[type=text] { padding:11px 14px; border:1px solid rgba(244,143,177,0.35); border-radius:8px; font-size:14px; color:#374151; background:rgba(255,255,255,0.95); transition:all 0.3s; font-family:inherit; }
+    input[type=text]:focus { outline:none; border-color:rgba(240,98,146,0.6); box-shadow:0 0 0 3px rgba(244,143,177,0.18); background:#fff; }
+    input[type=text]::placeholder { color:#94a3b8; }
+    button { padding:10px 18px; background:linear-gradient(135deg,#f48fb1,#ce93d8); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:13px; transition:all 0.3s; font-family:inherit; touch-action:manipulation; }
+    button:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(244,143,177,0.45); }
+    @media(hover:none){ button:hover { transform:none; box-shadow:none; } }
+    h2 { color:#1e293b; margin-bottom:18px; font-size:22px; font-weight:700; }
+    h3 { color:#e91e63; margin:26px 0 12px; font-weight:600; font-size:15px; }
+    .info-msg { padding:13px 16px; margin-bottom:14px; border-radius:8px; font-weight:600; font-size:14px; }
+    .info-msg.success { background:rgba(167,243,208,0.22); color:#059669; border-left:4px solid #34d399; }
+    .info-msg.error   { background:rgba(254,202,202,0.22); color:#e11d48; border-left:4px solid #f87171; }
+    .preview-btn { display:inline-block; margin-bottom:18px; padding:10px 22px; background:linear-gradient(135deg,#81d4fa,#b2ebf2); color:#01579b; text-decoration:none; border-radius:20px; font-weight:700; font-size:13px; }
+    .preview-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(129,212,250,0.4); }
+    .btn-logout { color:#e91e63; padding:9px 22px; background:rgba(255,255,255,0.75); border-radius:25px; cursor:pointer; text-decoration:none; transition:all 0.3s; backdrop-filter:blur(10px); font-size:13px; font-weight:600; border:1px solid rgba(244,143,177,0.35); transform:none !important; box-shadow:none !important; touch-action:manipulation; }
+    .btn-logout:hover { background:rgba(255,255,255,0.98); transform:none !important; box-shadow:none !important; }
+    .btn-edit   { padding:4px 9px; background:linear-gradient(135deg,#81d4fa,#b2ebf2); color:#01579b; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
+    .btn-del    { padding:4px 9px; background:linear-gradient(135deg,#fca5a5,#fde68a); color:#b91c1c; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
+    .btn-badge  { padding:4px 9px; background:linear-gradient(135deg,#f48fb1,#ce93d8); color:white; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
+    .btn-email  { padding:4px 9px; background:linear-gradient(135deg,#a7f3d0,#6ee7b7); color:#064e3b; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
+    .btn-files  { padding:4px 9px; background:rgba(186,104,200,0.12); color:#8e24aa; border:1px solid rgba(186,104,200,0.3); border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; transition:all 0.2s; touch-action:manipulation; }
+    .btn-edit:hover,.btn-del:hover,.btn-badge:hover,.btn-email:hover,.btn-files:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(244,143,177,0.22); }
+    @media(hover:none){ .btn-edit:hover,.btn-del:hover,.btn-badge:hover,.btn-email:hover,.btn-files:hover { transform:none; box-shadow:none; } }
+    #qr-reader video { border-radius:12px; }
+    #qr-reader { background:#f8f9fa; }
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(30,41,59,0.45); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:white; border-radius:20px; padding:32px; width:540px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(244,143,177,0.25); animation:fadeInUp 0.25s ease-out; }
+    .modal-box h3 { color:#e91e63; margin-bottom:20px; font-size:18px; }
+    .form-row { margin-bottom:14px; }
+    .form-row label { display:block; font-size:12px; font-weight:700; color:#555; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.4px; }
+    .form-row input,.form-row select { width:100%; padding:9px 12px; border:2px solid #f1e8f0; border-radius:8px; font-size:14px; color:#333; transition:border 0.2s; }
+    .form-row input:focus,.form-row select:focus { outline:none; border-color:#f06292; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .modal-actions { display:flex; gap:10px; margin-top:22px; justify-content:flex-end; }
+    .btn-cancel { padding:10px 18px; background:#f0f0f0; color:#555; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; touch-action:manipulation; }
+    .btn-cancel:hover { background:#e8e8e8; transform:none; box-shadow:none; }
+    .btn-save { padding:10px 22px; background:linear-gradient(135deg,#f48fb1,#ce93d8); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; touch-action:manipulation; }
+    .modal-section-label { font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px; }
+    @media(max-width:640px){
+      .content-wrapper { padding:20px 16px; }
+      .tab-btn { padding:12px 11px; font-size:11px; }
+      header { padding:14px 16px; }
+      header h1 { font-size:17px; }
+      .stat-box { min-width:130px; padding:16px 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎪 Admin Dashboard</h1>
+    <button onclick="logout()" class="btn-logout">Logout</button>
+  </header>
+
+  <div class="tabs-outer">
+    <div class="tabs-wrapper" id="tabsWrapper">
+      <button class="tab-btn" data-tab="academy">🎓 Academy</button>
+      <button class="tab-btn active" data-tab="overview">📊 Overview</button>
+      <button class="tab-btn" data-tab="pending">⏳ Pending</button>
+      <button class="tab-btn" data-tab="approval">✅ Approval</button>
+      <button class="tab-btn" data-tab="checkin">📥 Check-in</button>
+      <button class="tab-btn" data-tab="checkout">📤 Check-out</button>
+      <button class="tab-btn" data-tab="scanner">📷 QR Scanner</button>
+      <button class="tab-btn" data-tab="statistics">📈 Statistics</button>
+    </div>
+    <div class="tabs-fade" id="tabsFade"></div>
+  </div>
+
+  <div class="content-wrapper">
+
+    <!-- ── Academy ── -->
+    <div id="academy" class="tab-content">
+      <h2>Convention Hub</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:900px;margin-top:8px">
+        <div style="background:rgba(255,255,255,0.92);border-radius:14px;padding:28px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 4px 20px rgba(244,143,177,0.12)">
+          <h3>📍 Event Details</h3>
+          <p style="color:#64748b;font-size:15px;line-height:1.8;margin-top:10px"><strong>Dates:</strong> June 18–22, 2026<br><strong>Venue:</strong> Arusha, Tanzania<br><strong>Organiser:</strong> WCCM Tanzania<br><strong>Theme:</strong> Doing Business and Bearing Fruitful</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.92);border-radius:14px;padding:28px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 4px 20px rgba(244,143,177,0.12)">
+          <h3>📋 Programme</h3>
+          <p style="color:#94a3b8;font-size:14px;line-height:1.75;margin-top:10px;font-style:italic">Programme schedule not yet uploaded.<br><br>Drop <code style="background:rgba(244,143,177,0.1);padding:2px 6px;border-radius:4px;font-style:normal">programme.html</code> or <code style="background:rgba(244,143,177,0.1);padding:2px 6px;border-radius:4px;font-style:normal">programme.pdf</code> into the <code style="background:rgba(244,143,177,0.1);padding:2px 6px;border-radius:4px;font-style:normal">/documentation/</code> folder to display it here.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.92);border-radius:14px;padding:28px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 4px 20px rgba(244,143,177,0.12)">
+          <h3>📞 Contact</h3>
+          <p style="color:#64748b;font-size:15px;line-height:1.8;margin-top:10px">+255 787 576 900<br>+255 713 276 655<br>wccm.tz@gmail.com<br><a href="http://www.livinghope.or.tz" target="_blank" style="color:#e91e63;text-decoration:none">www.livinghope.or.tz</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Overview ── -->
+    <div id="overview" class="tab-content active">
+      <h2>Overview</h2>
+      <a class="preview-btn" href="/preview" target="_blank">📋 Open Client Preview →</a>
+      <br>
+      <div class="stat-box"><div class="stat-number" id="stat-total">—</div><div class="stat-label">Total</div></div>
+      <div class="stat-box"><div class="stat-number" id="stat-approved">—</div><div class="stat-label">Approved</div></div>
+      <div class="stat-box"><div class="stat-number" id="stat-checked">—</div><div class="stat-label">Checked In</div></div>
+      <div class="stat-box"><div class="stat-number" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
+      <h3>All Registrations</h3>
+      <table>
+        <thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Registered</th><th>Status</th><th>Badge</th><th>Actions</th></tr></thead>
+        <tbody id="overviewList"></tbody>
+      </table>
+    </div>
+
+    <!-- ── Pending ── -->
+    <div id="pending" class="tab-content">
+      <h2>Pending Registrations</h2>
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Status</th></tr></thead>
+        <tbody id="pendingList"></tbody>
+      </table>
+    </div>
+
+    <!-- ── Approval ── -->
+    <div id="approval" class="tab-content">
+      <h2>Approval Queue</h2>
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="approvalList"></tbody>
+      </table>
+    </div>
+
+    <!-- ── Check-in ── -->
+    <div id="checkin" class="tab-content">
+      <h2>Check-in</h2>
+      <div style="margin-bottom:20px">
+        <input type="text" id="checkinInput" placeholder="Scan or enter Ticket ID" style="max-width:340px">
+        <div id="checkinMsg" style="margin-top:12px"></div>
+      </div>
+      <h3>Recent Check-ins</h3>
+      <table>
+        <thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Type</th><th>Status</th></tr></thead>
+        <tbody id="checkinList"></tbody>
+      </table>
+    </div>
+
+    <!-- ── Check-out ── -->
+    <div id="checkout" class="tab-content">
+      <h2>Check-out</h2>
+      <div style="margin-bottom:20px">
+        <input type="text" id="checkoutInput" placeholder="Scan or enter Ticket ID" style="max-width:340px">
+        <div id="checkoutMsg" style="margin-top:12px"></div>
+      </div>
+      <h3>Recent Check-outs</h3>
+      <table>
+        <thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Duration</th><th>Status</th></tr></thead>
+        <tbody id="checkoutList"></tbody>
+      </table>
+    </div>
+
+    <!-- ── QR Scanner ── -->
+    <div id="scanner" class="tab-content">
+      <h2>📷 QR Check-in Scanner</h2>
+      <p style="color:#64748b;font-size:14px;margin-bottom:24px">Point camera at a delegate's QR badge to check them in instantly.</p>
+      <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
+        <div>
+          <div id="qr-reader" style="width:300px;border-radius:16px;overflow:hidden;border:2px solid rgba(244,143,177,0.4)"></div>
+          <div style="margin-top:12px;display:flex;gap:10px">
+            <button id="scanStartBtn" onclick="startScanner()" style="flex:1">▶ Start Camera</button>
+            <button id="scanStopBtn" onclick="stopScanner()" style="flex:1;background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4)" disabled>⏹ Stop</button>
+          </div>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <div id="scanResult" style="min-height:120px;padding:20px;background:rgba(248,250,252,0.9);border:1px solid rgba(244,143,177,0.22);border-radius:14px;color:#94a3b8;font-size:14px">Scan result will appear here…</div>
+          <div style="margin-top:16px">
+            <p style="font-size:12px;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:700">Manual Entry</p>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="manualTid" placeholder="Enter Ticket ID" style="flex:1">
+              <button onclick="manualCheckin()">Check In</button>
+            </div>
+          </div>
+          <div style="margin-top:20px">
+            <h3>Recent Scans</h3>
+            <div id="recentScans" style="font-size:13px;color:#374151">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Statistics ── -->
+    <div id="statistics" class="tab-content">
+      <h2>Statistics</h2>
+      <h3>By Ticket Type</h3>
+      <div id="statsByType"></div>
+      <h3>Full Attendee List</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Checked In</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="attendeesList"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /.content-wrapper -->
+</div><!-- /.container -->
+
+<!-- ── File Modal ── -->
+<div class="modal-overlay" id="fileModal">
+  <div class="modal-box" style="width:580px">
+    <h3>📁 Files — <span id="fileModalName"></span></h3>
+    <input type="hidden" id="fileModalTid">
+    <div style="margin-bottom:20px">
+      <p class="modal-section-label">💳 Payment Proof</p>
+      <div id="paymentProofStatus" style="font-size:13px;color:#64748b;margin-bottom:10px">—</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label style="padding:8px 14px;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+          📎 Attach Payment<input type="file" id="paymentFile" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none" onchange="uploadPayment()">
+        </label>
+        <button id="viewPaymentBtn" onclick="viewPayment()" style="background:rgba(186,104,200,0.12);color:#8e24aa;border:1px solid rgba(186,104,200,0.3);padding:8px 14px;font-size:12px" disabled>👁 View</button>
+        <button id="delPaymentBtn" onclick="deletePayment()" style="background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4);padding:8px 14px;font-size:12px" disabled>🗑 Remove</button>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px solid rgba(244,143,177,0.2);margin:20px 0">
+    <div>
+      <p class="modal-section-label">📂 Documents</p>
+      <div id="docList" style="margin-bottom:12px;min-height:40px;font-size:13px;color:#94a3b8">No documents uploaded.</div>
+      <label style="padding:8px 14px;background:rgba(186,104,200,0.12);color:#8e24aa;border:1px solid rgba(186,104,200,0.3);border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+        ➕ Upload Document<input type="file" id="docFile" accept=".pdf,.jpg,.jpeg,.png,.docx" style="display:none" onchange="uploadDocument()">
+      </label>
+    </div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeFileModal()">Close</button></div>
+  </div>
+</div>
+
+<!-- ── Edit Modal ── -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <h3>✏️ Edit Attendee</h3>
+    <input type="hidden" id="editTicketId">
+    <div class="form-grid">
+      <div class="form-row" style="margin-bottom:0"><label>Name</label><input type="text" id="editName"></div>
+      <div class="form-row" style="margin-bottom:0"><label>Email</label><input type="text" id="editEmail"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row" style="margin-bottom:0"><label>Phone</label><input type="text" id="editPhone"></div>
+      <div class="form-row" style="margin-bottom:0"><label>Title</label><input type="text" id="editTitle"></div>
+    </div>
+    <div class="form-row"><label>Organization</label><input type="text" id="editOrganization"></div>
+    <div class="form-grid">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Ticket Type</label>
+        <select id="editTicketType">
+          <option value="general">General Admin (Local)</option>
+          <option value="foreigners">Foreigners (VIP)</option>
+          <option value="youth">Youth</option>
+          <option value="speaker">Speaker</option>
+          <option value="business">Business</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Payment Status</label>
+        <select id="editPaymentStatus">
+          <option value="APPROVED">APPROVED</option>
+          <option value="PENDING">PENDING</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;cursor:pointer">
+        <input type="checkbox" id="editVerified" style="width:auto;margin:0"> Verified
+      </label>
+    </div>
+    <div id="editError" style="color:#c92a2a;font-size:13px;min-height:18px"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── State ────────────────────────────────────────────────────────────────────
+  let _allAttendees = [];
+  let qrScanner = null;
+  const recentScans = [];
+
+  // ── Tabs ─────────────────────────────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var tab = this.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.getElementById(tab).classList.add('active');
+      this.classList.add('active');
+      if (tab === 'overview')   loadOverview();
+      if (tab === 'pending')    loadPending();
+      if (tab === 'approval')   loadApproval();
+      if (tab === 'statistics') loadStatistics();
+      if (tab === 'checkin')    { loadCheckins();  document.getElementById('checkinInput').focus(); }
+      if (tab === 'checkout')   { loadCheckouts(); document.getElementById('checkoutInput').focus(); }
+      if (tab !== 'scanner' && qrScanner) stopScanner();
+    });
+  });
+
+  // Tabs overflow fade
+  (function() {
+    var wrap = document.getElementById('tabsWrapper');
+    var fade = document.getElementById('tabsFade');
+    function updateFade() {
+      if (!wrap || !fade) return;
+      fade.style.display = (wrap.scrollWidth > wrap.clientWidth + wrap.scrollLeft + 4) ? 'block' : 'none';
+    }
+    wrap.addEventListener('scroll', updateFade);
+    window.addEventListener('resize', updateFade);
+    updateFade();
+  })();
+
+  // ── Data fetching ─────────────────────────────────────────────────────────────
+  async function fetchAttendees() {
+    var res = await fetch('/api/registrations');
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    var body = await res.json();
+    if (!Array.isArray(body)) throw new Error(body.error || 'Unexpected server response');
+    _allAttendees = body;
+    return body;
+  }
+
+  // ── Overview ──────────────────────────────────────────────────────────────────
+  async function loadOverview() {
+    var tbody = document.getElementById('overviewList');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:#94a3b8">⏳ Loading registrations…</td></tr>';
+    try {
+      var data = await fetchAttendees();
+      document.getElementById('stat-total').textContent    = data.length;
+      document.getElementById('stat-approved').textContent = data.filter(function(a){ return a.payment_status === 'APPROVED'; }).length;
+      document.getElementById('stat-checked').textContent  = data.filter(function(a){ return a.checked_in; }).length;
+      document.getElementById('stat-pending').textContent  = data.filter(function(a){ return a.payment_status === 'PENDING'; }).length;
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#94a3b8">📭 No registrations found. <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(function(a) {
+        return '<tr>' +
+          '<td><code style="font-size:11px;color:#e91e63">' + a.ticket_id + '</code></td>' +
+          '<td>' + esc(a.name) + '</td>' +
+          '<td style="font-size:12px">' + esc(a.email) + '</td>' +
+          '<td>' + a.ticket_type + '</td>' +
+          '<td style="font-size:12px">' + new Date(a.created_at).toLocaleDateString() + '</td>' +
+          '<td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
+          '<td style="font-size:12px">' + (a.badge_generated ? '<span style="color:#059669">✅</span>' : '—') + (a.badge_sent ? ' <span style="color:#059669;font-size:10px">📧</span>' : '') + '</td>' +
+          '<td style="white-space:nowrap">' +
+            '<button class="btn-edit"  onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
+            '<button class="btn-badge" onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
+            '<button class="btn-email" onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g,"\\'") + '\')">📧</button>' +
+            '<button class="btn-files" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g,"\\'") + '\')">📁</button>' +
+            '<button class="btn-del"   onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
+          '</td></tr>';
+      }).join('');
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:#e11d48">⚠️ ' + (e.message || 'Failed to load') + ' — <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
+    }
+  }
+
+  // ── Pending ───────────────────────────────────────────────────────────────────
+  async function loadPending() {
+    try {
+      var data = await fetchAttendees();
+      var pending = data.filter(function(a){ return a.payment_status === 'PENDING'; });
+      document.getElementById('pendingList').innerHTML = pending.length
+        ? pending.map(function(a){ return '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.organization||'—') + '</td><td><span class="badge badge-pending">Pending</span></td></tr>'; }).join('')
+        : '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px">No pending registrations</td></tr>';
+    } catch(e) { document.getElementById('pendingList').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
+  }
+
+  // ── Approval ──────────────────────────────────────────────────────────────────
+  async function loadApproval() {
+    try {
+      var data = await fetchAttendees();
+      document.getElementById('approvalList').innerHTML = data.map(function(a){
+        return '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.email) + '</td><td>' + a.ticket_type + '</td>' +
+          '<td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
+          '<td><button onclick="approve(\'' + a.ticket_id + '\')">' + (a.payment_status==='APPROVED'?'Re-approve':'Approve') + '</button></td></tr>';
+      }).join('');
+    } catch(e) { document.getElementById('approvalList').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
+  }
+
+  async function approve(tid) {
+    if (!confirm('Approve ticket ' + tid + '?')) return;
+    try {
+      var res = await fetch('/api/approve', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
+      var result = await res.json();
+      if (result.success) { loadApproval(); loadOverview(); }
+      else alert('Error: ' + result.error);
+    } catch(e) { alert('Network error'); }
+  }
+
+  // ── Statistics ────────────────────────────────────────────────────────────────
+  async function loadStatistics() {
+    try {
+      var data = await fetchAttendees();
+      var counts = { general:0, foreigners:0, youth:0, speaker:0, business:0 };
+      data.forEach(function(a){ if (a.ticket_type in counts) counts[a.ticket_type]++; });
+      document.getElementById('statsByType').innerHTML = Object.entries(counts)
+        .map(function(e){ return '<div class="stat-box"><div class="stat-number">' + e[1] + '</div><div class="stat-label">' + e[0] + '</div></div>'; }).join('');
+      document.getElementById('attendeesList').innerHTML = data.map(function(a){
+        return '<tr><td>' + esc(a.name) + '</td><td style="font-size:12px">' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.organization||'—') + '</td><td>' + (a.checked_in?'✅':'—') + '</td>' +
+          '<td><span class="badge ' + (a.payment_status==='APPROVED'?'badge-approved':'badge-pending') + '">' + a.payment_status + '</span></td>' +
+          '<td style="white-space:nowrap">' +
+            '<button class="btn-edit"  onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
+            '<button class="btn-badge" onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
+            '<button class="btn-email" onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g,"\\'") + '\')">📧</button>' +
+            '<button class="btn-files" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g,"\\'") + '\')">📁</button>' +
+            '<button class="btn-del"   onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
+          '</td></tr>';
+      }).join('');
+    } catch(e) { console.error(e); }
+  }
+
+  // ── Check-in ──────────────────────────────────────────────────────────────────
+  async function loadCheckins() {
+    try {
+      var data = await fetchAttendees();
+      var rows = data.filter(function(a){ return a.checked_in; });
+      document.getElementById('checkinList').innerHTML = rows.length
+        ? rows.map(function(a){ return '<tr><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + esc(a.name) + '</td><td>' + (a.checked_in_at ? new Date(a.checked_in_at).toLocaleString() : '—') + '</td><td>' + a.ticket_type + '</td><td><span class="badge badge-approved">Checked In</span></td></tr>'; }).join('')
+        : '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px">No check-ins yet</td></tr>';
+    } catch(e) { console.error(e); }
+  }
+
+  document.getElementById('checkinInput').addEventListener('keypress', async function(e) {
+    if (e.key !== 'Enter') return;
+    var tid = e.target.value.trim(); if (!tid) return;
+    try {
+      var res = await fetch('/api/checkin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
+      var result = await res.json();
+      var msg = document.getElementById('checkinMsg');
+      msg.innerHTML = result.success
+        ? '<div class="info-msg success">✅ ' + esc(result.name) + ' checked in successfully</div>'
+        : '<div class="info-msg error">❌ ' + (result.error||'Error') + '</div>';
+      e.target.value = '';
+      setTimeout(function(){ loadCheckins(); loadOverview(); }, 500);
+    } catch(err) { document.getElementById('checkinMsg').innerHTML = '<div class="info-msg error">❌ Network error</div>'; }
+  });
+
+  // ── Check-out ─────────────────────────────────────────────────────────────────
+  async function loadCheckouts() {
+    try {
+      var data = await fetchAttendees();
+      var rows = data.filter(function(a){ return a.checked_out; });
+      document.getElementById('checkoutList').innerHTML = rows.length
+        ? rows.map(function(a){
+            var dur = (a.checked_in_at && a.checked_out_at)
+              ? Math.round((new Date(a.checked_out_at) - new Date(a.checked_in_at)) / 60000) + ' min' : '—';
+            return '<tr><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + esc(a.name) + '</td><td>' + (a.checked_out_at ? new Date(a.checked_out_at).toLocaleString() : '—') + '</td><td>' + dur + '</td><td><span class="badge badge-approved">Checked Out</span></td></tr>';
+          }).join('')
+        : '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px">No check-outs yet</td></tr>';
+    } catch(e) { console.error(e); }
+  }
+
+  document.getElementById('checkoutInput').addEventListener('keypress', async function(e) {
+    if (e.key !== 'Enter') return;
+    var tid = e.target.value.trim(); if (!tid) return;
+    try {
+      var res = await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
+      var result = await res.json();
+      var msg = document.getElementById('checkoutMsg');
+      msg.innerHTML = result.success
+        ? '<div class="info-msg success">✅ ' + esc(result.name) + ' checked out successfully</div>'
+        : '<div class="info-msg error">❌ ' + (result.error||'Error') + '</div>';
+      e.target.value = '';
+      setTimeout(function(){ loadCheckouts(); loadOverview(); }, 500);
+    } catch(err) { document.getElementById('checkoutMsg').innerHTML = '<div class="info-msg error">❌ Network error</div>'; }
+  });
+
+  // ── Edit attendee ─────────────────────────────────────────────────────────────
+  function editAttendee(ticketId) {
+    var a = _allAttendees.find(function(x){ return x.ticket_id === ticketId; });
+    if (!a) return;
+    document.getElementById('editTicketId').value      = a.ticket_id;
+    document.getElementById('editName').value          = a.name || '';
+    document.getElementById('editEmail').value         = a.email || '';
+    document.getElementById('editPhone').value         = a.phone || '';
+    document.getElementById('editTitle').value         = a.title || '';
+    document.getElementById('editOrganization').value  = a.organization || '';
+    document.getElementById('editTicketType').value    = a.ticket_type || 'general';
+    document.getElementById('editPaymentStatus').value = a.payment_status || 'PENDING';
+    document.getElementById('editVerified').checked    = !!a.verified;
+    document.getElementById('editError').textContent   = '';
+    document.getElementById('editModal').classList.add('open');
+  }
+
+  function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
+
+  async function saveEdit() {
+    var ticketId = document.getElementById('editTicketId').value;
+    var body = {
+      name:           document.getElementById('editName').value.trim(),
+      email:          document.getElementById('editEmail').value.trim(),
+      phone:          document.getElementById('editPhone').value.trim(),
+      title:          document.getElementById('editTitle').value.trim(),
+      organization:   document.getElementById('editOrganization').value.trim(),
+      ticket_type:    document.getElementById('editTicketType').value,
+      payment_status: document.getElementById('editPaymentStatus').value,
+      verified:       document.getElementById('editVerified').checked
+    };
+    if (!body.name || !body.email) { document.getElementById('editError').textContent = 'Name and email are required.'; return; }
+    try {
+      var res = await fetch('/api/attendees/' + encodeURIComponent(ticketId), { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      var result = await res.json();
+      if (result.success) { closeEdit(); loadOverview(); if (document.getElementById('statistics').classList.contains('active')) loadStatistics(); }
+      else document.getElementById('editError').textContent = result.error || 'Save failed.';
+    } catch(e) { document.getElementById('editError').textContent = 'Network error.'; }
+  }
+
+  async function deleteAttendee(ticketId) {
+    var a = _allAttendees.find(function(x){ return x.ticket_id === ticketId; });
+    if (!confirm('Delete ' + (a ? a.name : ticketId) + '? This cannot be undone.')) return;
+    try {
+      var res = await fetch('/api/attendees/' + encodeURIComponent(ticketId), { method:'DELETE' });
+      var result = await res.json();
+      if (result.success) loadOverview();
+      else alert('Error: ' + (result.error || 'Delete failed'));
+    } catch(e) { alert('Network error'); }
+  }
+
+  document.getElementById('editModal').addEventListener('click', function(e){ if (e.target === this) closeEdit(); });
+  document.getElementById('fileModal').addEventListener('click', function(e){ if (e.target === this) closeFileModal(); });
+
+  // ── Badge actions ─────────────────────────────────────────────────────────────
+  function downloadBadge(ticketId) { window.open('/api/badge/' + encodeURIComponent(ticketId), '_blank'); }
+
+  async function sendBadgeEmail(ticketId, name) {
+    if (!confirm('Send badge email to ' + name + '?')) return;
+    try {
+      var res = await fetch('/api/send-badge/' + encodeURIComponent(ticketId), { method:'POST' });
+      var r = await res.json();
+      if (r.success) { alert('✅ Badge sent to ' + r.sent_to); loadOverview(); }
+      else alert('❌ ' + r.error);
+    } catch(e) { alert('Network error'); }
+  }
+
+  // ── File modal ────────────────────────────────────────────────────────────────
+  async function openFileModal(ticketId, name) {
+    document.getElementById('fileModalTid').value = ticketId;
+    document.getElementById('fileModalName').textContent = name;
+    document.getElementById('fileModal').classList.add('open');
+    await refreshPaymentStatus(ticketId);
+    await refreshDocList(ticketId);
+  }
+
+  function closeFileModal() { document.getElementById('fileModal').classList.remove('open'); }
+
+  async function refreshPaymentStatus(ticketId) {
+    var tid = ticketId || document.getElementById('fileModalTid').value;
+    var a = _allAttendees.find(function(x){ return x.ticket_id === tid; });
+    var hasProof = a && a.payment_proof;
+    document.getElementById('paymentProofStatus').textContent = hasProof ? '✅ Payment proof on file: ' + (a.payment_proof_name || 'file') : '⚠️ No payment proof attached yet';
+    document.getElementById('viewPaymentBtn').disabled = !hasProof;
+    document.getElementById('delPaymentBtn').disabled  = !hasProof;
+  }
+
+  async function uploadPayment() {
+    var file = document.getElementById('paymentFile').files[0];
+    var tid  = document.getElementById('fileModalTid').value;
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        var res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/payment', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ data: e.target.result, name: file.name, mimeType: file.type }) });
+        var r = await res.json();
+        if (r.success) { await fetchAttendees(); await refreshPaymentStatus(tid); alert('✅ Payment proof uploaded'); }
+        else alert('❌ ' + r.error);
+      } catch(err) { alert('Network error'); }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function viewPayment() { window.open('/api/attendees/' + encodeURIComponent(document.getElementById('fileModalTid').value) + '/payment', '_blank'); }
+
+  async function deletePayment() {
+    var tid = document.getElementById('fileModalTid').value;
+    if (!confirm('Remove payment proof?')) return;
+    var res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/payment', { method:'DELETE' });
+    var r = await res.json();
+    if (r.success) { await fetchAttendees(); await refreshPaymentStatus(tid); }
+    else alert('❌ ' + r.error);
+  }
+
+  async function refreshDocList(ticketId) {
+    var tid = ticketId || document.getElementById('fileModalTid').value;
+    try {
+      var res  = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/documents');
+      var docs = await res.json();
+      document.getElementById('docList').innerHTML = docs.length
+        ? docs.map(function(d){
+            return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(244,143,177,0.12)">' +
+              '<span style="flex:1;color:#374151;font-size:13px">📄 ' + esc(d.name) + '</span>' +
+              '<span style="font-size:11px;color:#94a3b8">' + (d.size||'') + '</span>' +
+              '<button onclick="viewDoc(\'' + tid + '\',' + d.index + ')" style="padding:4px 10px;font-size:11px;background:rgba(186,104,200,0.12);color:#8e24aa;border:1px solid rgba(186,104,200,0.3)">View</button>' +
+              '<button onclick="deleteDoc(\'' + tid + '\',' + d.index + ')" style="padding:4px 10px;font-size:11px;background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4)">✕</button>' +
+            '</div>';
+          }).join('')
+        : '<span style="color:#94a3b8;font-size:13px">No documents uploaded.</span>';
+    } catch(e) { /* ignore */ }
+  }
+
+  async function uploadDocument() {
+    var file = document.getElementById('docFile').files[0];
+    var tid  = document.getElementById('fileModalTid').value;
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        var res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/documents', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ data: e.target.result, name: file.name, mimeType: file.type }) });
+        var r = await res.json();
+        if (r.success) await refreshDocList(tid);
+        else alert('❌ ' + r.error);
+      } catch(err) { alert('Network error'); }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function viewDoc(tid, idx)    { window.open('/api/attendees/' + encodeURIComponent(tid) + '/documents/' + idx, '_blank'); }
+
+  async function deleteDoc(tid, idx) {
+    if (!confirm('Delete this document?')) return;
+    var res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/documents/' + idx, { method:'DELETE' });
+    var r = await res.json();
+    if (r.success) await refreshDocList(tid);
+    else alert('❌ ' + r.error);
+  }
+
+  // ── QR Scanner ────────────────────────────────────────────────────────────────
+  function startScanner() {
+    if (typeof Html5Qrcode === 'undefined') { alert('QR library not loaded. Refresh the page.'); return; }
+    qrScanner = new Html5Qrcode('qr-reader');
+    qrScanner.start({ facingMode:'environment' }, { fps:12, qrbox:{ width:220, height:220 } }, onQRScan)
+      .then(function(){ document.getElementById('scanStartBtn').disabled = true; document.getElementById('scanStopBtn').disabled = false; })
+      .catch(function(err){ alert('Camera error: ' + err); });
+  }
+
+  function stopScanner() {
+    if (qrScanner) {
+      qrScanner.stop().then(function(){ qrScanner = null; document.getElementById('scanStartBtn').disabled = false; document.getElementById('scanStopBtn').disabled = true; });
+    }
+  }
+
+  async function onQRScan(decoded) {
+    var ticketId;
+    try { ticketId = JSON.parse(decoded).ticket_id; } catch(e) { ticketId = decoded.trim(); }
+    if (!ticketId) return;
+    await processCheckin(ticketId);
+  }
+
+  async function manualCheckin() {
+    var tid = document.getElementById('manualTid').value.trim();
+    if (!tid) return;
+    document.getElementById('manualTid').value = '';
+    await processCheckin(tid);
+  }
+
+  async function processCheckin(ticketId) {
+    try {
+      var res = await fetch('/api/checkin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: ticketId }) });
+      var r = await res.json();
+      var ok = r.success;
+      document.getElementById('scanResult').innerHTML =
+        '<div style="padding:16px;border-radius:10px;background:' + (ok?'rgba(167,243,208,0.2)':'rgba(254,202,202,0.25)') + ';border:1px solid ' + (ok?'rgba(167,243,208,0.5)':'rgba(252,165,165,0.4)') + ';color:' + (ok?'#059669':'#e11d48') + ';font-size:14px">' +
+        (ok ? '✅ <strong>' + esc(r.name) + '</strong> checked in successfully' : '❌ ' + (r.error||'Unknown error') + ' — ' + ticketId) + '</div>';
+      recentScans.unshift({ ticketId:ticketId, ok:ok, name:r.name||ticketId, time:new Date().toLocaleTimeString() });
+      if (recentScans.length > 8) recentScans.pop();
+      document.getElementById('recentScans').innerHTML = recentScans
+        .map(function(s){ return '<div style="padding:5px 0;border-bottom:1px solid rgba(244,143,177,0.12);color:' + (s.ok?'#059669':'#e11d48') + ';font-size:12px">' + s.time + ' · ' + esc(s.name) + (s.ok?' ✅':' ❌') + '</div>'; }).join('');
+    } catch(e) {
+      document.getElementById('scanResult').innerHTML = '<div style="color:#e11d48">Network error</div>';
+    }
+  }
+
+  // ── Auth / logout ─────────────────────────────────────────────────────────────
+  function logout() { window.location.href = '/api/admin-logout'; }
+
+  // ── Utility ───────────────────────────────────────────────────────────────────
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────────
+  loadOverview();
+</script>
+</body>
+</html>

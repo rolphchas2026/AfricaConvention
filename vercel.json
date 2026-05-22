@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "qr-server-api.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["views/**", "sysimages/**", "documentation/**"]
+      }
     }
   ],
   "routes": [
