@@ -99,6 +99,15 @@ function verifyAdminToken(token) {
   } catch { return false; }
 }
 
+function parseCookies(req) {
+  const h = req.headers.cookie;
+  if (!h) return {};
+  return Object.fromEntries(h.split(';').map(c => {
+    const i = c.indexOf('=');
+    return [c.slice(0, i).trim(), decodeURIComponent(c.slice(i + 1))];
+  }));
+}
+
 async function initializeDatabase() {
   console.log('🔧 Initializing database connection layer...');
   // Reduced retries for Vercel serverless (10s timeout budget)
@@ -867,8 +876,9 @@ app.get('/preview', async (req, res) => {
 //  ADMIN DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════════
 app.get('/admin', (req, res) => {
-  const token = req.query.token;
+  const token = req.query.token || parseCookies(req).admin_token;
   if (!verifyAdminToken(token)) return res.redirect('/admin-login?error=1');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   res.send(`<!DOCTYPE html>
 <html>
@@ -886,11 +896,15 @@ app.get('/admin', (req, res) => {
     header h1 { font-size:22px; font-weight:800; letter-spacing:0.02em; }
     header a { color:#e91e63; padding:9px 22px; background:rgba(255,255,255,0.75); border-radius:25px; cursor:pointer; text-decoration:none; transition:all 0.3s; backdrop-filter:blur(10px); font-size:13px; font-weight:600; border:1px solid rgba(244,143,177,0.35); }
     header a:hover { background:rgba(255,255,255,0.98); }
-    .tabs-wrapper { display:flex; background:rgba(255,255,255,0.92); border-bottom:2px solid rgba(244,143,177,0.22); overflow-x:auto; flex-shrink:0; backdrop-filter:blur(16px); }
-    .tab-btn { padding:14px 20px; background:transparent; border:none; cursor:pointer; font-size:13px; color:#64748b; border-bottom:3px solid transparent; white-space:nowrap; transition:color 0.2s, background 0.2s, border-color 0.2s; font-weight:500; font-family:inherit; transform:none !important; box-shadow:none !important; }
+    .tabs-outer { position:relative; flex-shrink:0; }
+    .tabs-wrapper { display:flex; background:rgba(255,255,255,0.92); border-bottom:2px solid rgba(244,143,177,0.22); overflow-x:auto; scrollbar-width:none; backdrop-filter:blur(16px); }
+    .tabs-wrapper::-webkit-scrollbar { display:none; }
+    .tabs-fade { position:absolute; right:0; top:0; bottom:0; width:52px; background:linear-gradient(to right,transparent,rgba(255,255,255,0.95)); pointer-events:none; z-index:2; }
+    .tab-btn { padding:14px 16px; background:transparent; border:none; cursor:pointer; font-size:13px; color:#64748b; border-bottom:3px solid transparent; white-space:nowrap; transition:color 0.2s, background 0.2s, border-color 0.2s; font-weight:500; font-family:inherit; transform:none !important; box-shadow:none !important; touch-action:manipulation; }
     .tab-btn:hover { color:#e91e63; background:rgba(244,143,177,0.07); transform:none !important; box-shadow:none !important; }
     .tab-btn.active { color:#e91e63; border-bottom-color:#f06292; font-weight:700; background:rgba(244,143,177,0.07); transform:none !important; box-shadow:none !important; }
     .content-wrapper { flex:1; overflow-y:auto; padding:32px 40px; }
+    @media(max-width:640px){ .content-wrapper{padding:20px 16px} .tab-btn{padding:12px 11px;font-size:11px} header{padding:14px 16px} header h1{font-size:17px} }
     .tab-content { display:none; animation:fadeInUp 0.3s ease-out; }
     .tab-content.active { display:block; }
     @keyframes fadeInUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
@@ -949,15 +963,18 @@ app.get('/admin', (req, res) => {
     <h1>🎪 Admin Dashboard</h1>
     <button onclick="logout()" class="btn-logout">Logout</button>
   </header>
-  <div class="tabs-wrapper">
-    <button class="tab-btn" data-tab="academy">🎓 Academy</button>
-    <button class="tab-btn active" data-tab="overview">📊 Overview</button>
-    <button class="tab-btn" data-tab="pending">⏳ Pending</button>
-    <button class="tab-btn" data-tab="approval">✅ Approval</button>
-    <button class="tab-btn" data-tab="checkin">📥 Check-in</button>
-    <button class="tab-btn" data-tab="checkout">📤 Check-out</button>
-    <button class="tab-btn" data-tab="scanner">📷 QR Scanner</button>
-    <button class="tab-btn" data-tab="statistics">📈 Statistics</button>
+  <div class="tabs-outer">
+    <div class="tabs-wrapper" id="tabsWrapper">
+      <button class="tab-btn" data-tab="academy">🎓 Academy</button>
+      <button class="tab-btn active" data-tab="overview">📊 Overview</button>
+      <button class="tab-btn" data-tab="pending">⏳ Pending</button>
+      <button class="tab-btn" data-tab="approval">✅ Approval</button>
+      <button class="tab-btn" data-tab="checkin">📥 Check-in</button>
+      <button class="tab-btn" data-tab="checkout">📤 Check-out</button>
+      <button class="tab-btn" data-tab="scanner">📷 QR Scanner</button>
+      <button class="tab-btn" data-tab="statistics">📈 Statistics</button>
+    </div>
+    <div class="tabs-fade" id="tabsFade"></div>
   </div>
   <div class="content-wrapper">
 
@@ -1028,19 +1045,19 @@ app.get('/admin', (req, res) => {
 
     <div id="scanner" class="tab-content">
       <h2>📷 QR Check-in Scanner</h2>
-      <p style="color:rgba(200,160,255,0.65);font-size:14px;margin-bottom:24px">Point camera at a delegate's QR badge to check them in instantly.</p>
+      <p style="color:#64748b;font-size:14px;margin-bottom:24px">Point camera at a delegate's QR badge to check them in instantly.</p>
       <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
         <div>
-          <div id="qr-reader" style="width:300px;border-radius:16px;overflow:hidden;border:2px solid rgba(196,77,255,0.3)"></div>
+          <div id="qr-reader" style="width:300px;border-radius:16px;overflow:hidden;border:2px solid rgba(244,143,177,0.4)"></div>
           <div style="margin-top:12px;display:flex;gap:10px">
             <button id="scanStartBtn" onclick="startScanner()" style="flex:1">▶ Start Camera</button>
             <button id="scanStopBtn" onclick="stopScanner()" style="flex:1;background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4)" disabled>⏹ Stop</button>
           </div>
         </div>
         <div style="flex:1;min-width:240px">
-          <div id="scanResult" style="min-height:120px;padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(196,77,255,0.15);border-radius:14px;color:rgba(200,160,255,0.55);font-size:14px">Scan result will appear here…</div>
+          <div id="scanResult" style="min-height:120px;padding:20px;background:rgba(248,250,252,0.9);border:1px solid rgba(244,143,177,0.22);border-radius:14px;color:#94a3b8;font-size:14px">Scan result will appear here…</div>
           <div style="margin-top:16px">
-            <p style="font-size:12px;color:rgba(200,160,255,0.5);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Manual Entry</p>
+            <p style="font-size:12px;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:700">Manual Entry</p>
             <div style="display:flex;gap:8px">
               <input type="text" id="manualTid" placeholder="Enter Ticket ID" style="flex:1">
               <button onclick="manualCheckin()">Check In</button>
@@ -1048,7 +1065,7 @@ app.get('/admin', (req, res) => {
           </div>
           <div style="margin-top:20px">
             <h3>Recent Scans</h3>
-            <div id="recentScans" style="font-size:13px;color:rgba(200,160,255,0.65)">—</div>
+            <div id="recentScans" style="font-size:13px;color:#374151">—</div>
           </div>
         </div>
       </div>
@@ -1162,18 +1179,27 @@ app.get('/admin', (req, res) => {
   let _allAttendees = [];
   async function fetchAttendees() {
     const res = await fetch('/api/registrations');
-    _allAttendees = await res.json();
-    return _allAttendees;
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    const body = await res.json();
+    if (!Array.isArray(body)) throw new Error(body.error || 'Unexpected response from server');
+    _allAttendees = body;
+    return body;
   }
 
   async function loadOverview() {
+    const tbody = document.getElementById('overviewList');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:#94a3b8">⏳ Loading registrations…</td></tr>';
     try {
       const data = await fetchAttendees();
       document.getElementById('stat-total').textContent    = data.length;
       document.getElementById('stat-approved').textContent = data.filter(a => a.payment_status === 'APPROVED').length;
       document.getElementById('stat-checked').textContent  = data.filter(a => a.checked_in).length;
       document.getElementById('stat-pending').textContent  = data.filter(a => a.payment_status === 'PENDING').length;
-      document.getElementById('overviewList').innerHTML = data.map(a =>
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#94a3b8">📭 No registrations found — DB may be empty or disconnected. <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(a =>
         '<tr><td><code style="font-size:11px;color:#e91e63">' + a.ticket_id + '</code></td>' +
         '<td>' + a.name + '</td><td style="font-size:12px">' + a.email + '</td><td>' + a.ticket_type + '</td>' +
         '<td style="font-size:12px">' + new Date(a.created_at).toLocaleDateString() + '</td>' +
@@ -1187,7 +1213,9 @@ app.get('/admin', (req, res) => {
           '<button class="btn-del" onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
         '</td></tr>'
       ).join('');
-    } catch(e) { console.error(e); }
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:#e11d48">⚠️ ' + (e.message || 'Failed to load') + ' — <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
+    }
   }
 
   async function loadPending() {
@@ -1296,7 +1324,7 @@ app.get('/admin', (req, res) => {
     } catch(e) { document.getElementById('checkoutMsg').innerHTML = '<div class="info-msg error">❌ Network error</div>'; }
   });
 
-  function logout() { window.location.href = '/api/admin-logout?token=' + token; }
+  function logout() { window.location.href = '/api/admin-logout'; }
 
   function editAttendee(ticketId) {
     const a = _allAttendees.find(x => x.ticket_id === ticketId);
@@ -1563,6 +1591,19 @@ app.get('/admin', (req, res) => {
   // Wire scanner tab
   document.querySelector('[data-tab="scanner"]').addEventListener('click', function() {});
 
+  // Tabs overflow fade indicator
+  (function() {
+    const wrap = document.getElementById('tabsWrapper');
+    const fade = document.getElementById('tabsFade');
+    function updateFade() {
+      if (!wrap || !fade) return;
+      const hasMore = wrap.scrollWidth > wrap.clientWidth + wrap.scrollLeft + 4;
+      fade.style.display = hasMore ? 'block' : 'none';
+    }
+    if (wrap) { wrap.addEventListener('scroll', updateFade); updateFade(); }
+    window.addEventListener('resize', updateFade);
+  })();
+
   // Boot
   loadOverview();
 </script>
@@ -1642,23 +1683,31 @@ app.post('/api/approve', async (req, res) => {
 
 app.get('/api/registrations', async (req, res) => {
   try {
-    if (!pool) return res.json([]);
+    if (!pool) return res.status(503).json({ error: 'Database not connected — check DATABASE_URL in Vercel env vars' });
     const result = await pool.query('SELECT * FROM attendees ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (error) {
-    res.json([]);
+    res.status(500).json({ error: error.message });
   }
 });
 
 app.post('/api/admin-login', (req, res) => {
   const { username, password } = req.body;
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    return res.redirect('/admin?token=' + generateAdminToken());
+    const tok = generateAdminToken();
+    res.cookie('admin_token', tok, {
+      httpOnly: true,
+      secure: !!process.env.VERCEL,
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+    return res.redirect('/admin');
   }
   res.redirect('/admin-login?error=1');
 });
 
 app.get('/api/admin-logout', (req, res) => {
+  res.clearCookie('admin_token');
   res.redirect('/admin-login');
 });
 
