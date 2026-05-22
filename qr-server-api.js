@@ -416,7 +416,7 @@ app.get('/', (req, res) => {
     .sponsor-slot { display: flex; flex-direction: column; align-items: center; gap: 9px; text-decoration: none; transition: all 0.3s; position: relative; }
     .sponsor-logo-ph { width: 110px; height: 62px; background: rgba(255,255,255,0.85); border: 1px solid rgba(244,143,177,0.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: rgba(240,98,146,0.45); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; transition: all 0.35s; overflow: hidden; position: relative; }
     .sponsor-logo-ph img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; transition: opacity 0.35s, transform 0.35s; }
-    .sponsor-logo-ph::after { content: 'Follow \2192'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(233,30,99,0.82); color: white; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; border-radius: 10px; opacity: 0; transition: opacity 0.35s; font-family: inherit; }
+    .sponsor-logo-ph::after { content: 'Follow →'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(233,30,99,0.82); color: white; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; border-radius: 10px; opacity: 0; transition: opacity 0.35s; font-family: inherit; }
     .sponsor-slot:hover .sponsor-logo-ph { border-color: #f06292; box-shadow: 0 8px 28px rgba(244,143,177,0.45); transform: translateY(-4px) scale(1.04); }
     .sponsor-slot:hover .sponsor-logo-ph img { opacity: 0.25; transform: scale(1.08); }
     .sponsor-slot:hover .sponsor-logo-ph::after { opacity: 1; }
