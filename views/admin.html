@@ -87,6 +87,28 @@
       header h1 { font-size:17px; }
       .stat-box { min-width:130px; padding:16px 18px; }
     }
+    /* ── FAB ──────────────────────────────────────────────────────────────────── */
+    .fab-btn { position:fixed; bottom:25vh; right:22px; width:62px; height:62px; border-radius:50%; background:linear-gradient(135deg,#f48fb1,#ce93d8); color:white; border:none; cursor:pointer; box-shadow:0 6px 28px rgba(244,143,177,0.6); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:500; transition:all 0.3s; touch-action:manipulation; padding:0; gap:2px; }
+    .fab-btn:hover { transform:scale(1.12) translateY(-2px); box-shadow:0 12px 36px rgba(244,143,177,0.75); }
+    .fab-btn svg { width:26px; height:26px; flex-shrink:0; }
+    .fab-btn span { font-size:9px; font-weight:800; letter-spacing:0.8px; line-height:1; }
+    .fab-pulse { position:absolute; width:62px; height:62px; border-radius:50%; background:rgba(244,143,177,0.35); animation:fabPulse 2.2s ease-out infinite; pointer-events:none; }
+    @keyframes fabPulse { 0%{transform:scale(1);opacity:0.7} 100%{transform:scale(1.9);opacity:0} }
+    .fab-modal { display:flex; position:fixed; inset:0; background:rgba(30,41,59,0.45); z-index:600; align-items:flex-end; justify-content:center; }
+    .fab-panel { background:white; border-radius:24px 24px 0 0; padding:24px 24px 28px; width:100%; max-width:500px; max-height:86vh; overflow-y:auto; box-shadow:0 -8px 48px rgba(244,143,177,0.28); animation:slideUpFab 0.28s ease-out; }
+    @keyframes slideUpFab { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+    .fab-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+    .fab-header h3 { font-size:17px; font-weight:800; color:#1e293b; margin:0; }
+    .fab-close { width:32px; height:32px; border-radius:50%; background:rgba(244,143,177,0.12); border:none; cursor:pointer; font-size:16px; color:#64748b; display:flex; align-items:center; justify-content:center; transition:all 0.2s; padding:0; }
+    .fab-close:hover { background:rgba(244,143,177,0.25); color:#e91e63; transform:none; box-shadow:none; }
+    .fab-toggle { display:flex; background:rgba(244,143,177,0.09); border-radius:14px; padding:4px; margin-bottom:18px; gap:4px; }
+    .fab-toggle button { flex:1; padding:11px 8px; background:transparent; border:none; border-radius:11px; cursor:pointer; font-size:13px; font-weight:600; color:#64748b; transition:all 0.2s; font-family:inherit; touch-action:manipulation; }
+    .fab-toggle button.active { background:white; color:#e91e63; box-shadow:0 2px 10px rgba(244,143,177,0.25); }
+    .fab-scanner-wrap { border-radius:14px; overflow:hidden; border:2px solid rgba(244,143,177,0.3); margin-bottom:12px; background:#f8fafc; }
+    .fab-controls { display:flex; gap:8px; margin-bottom:14px; }
+    .fab-result { min-height:52px; padding:14px 16px; background:rgba(248,250,252,0.9); border:1px solid rgba(244,143,177,0.2); border-radius:12px; color:#94a3b8; font-size:13px; margin-bottom:12px; }
+    .fab-recent { font-size:12px; color:#374151; }
+    .fab-recent-title { font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
   </style>
 </head>
 <body x-data="adminApp()">
@@ -313,6 +335,57 @@
   </footer>
 </div><!-- /.container -->
 
+<!-- ── FAB Quick-Scan Button ── -->
+<div style="position:fixed;bottom:25vh;right:22px;z-index:500">
+  <div class="fab-pulse"></div>
+  <button class="fab-btn" @click="openFab()" title="Quick QR Check-in / Check-out">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="8" height="8" rx="1.5"/><rect x="4" y="4" width="4" height="4" fill="currentColor" stroke="none"/>
+      <rect x="14" y="2" width="8" height="8" rx="1.5"/><rect x="16" y="4" width="4" height="4" fill="currentColor" stroke="none"/>
+      <rect x="2" y="14" width="8" height="8" rx="1.5"/><rect x="4" y="16" width="4" height="4" fill="currentColor" stroke="none"/>
+      <rect x="14" y="14" width="3" height="3" fill="currentColor" stroke="none"/>
+      <rect x="19" y="14" width="3" height="3" fill="currentColor" stroke="none"/>
+      <rect x="14" y="19" width="3" height="3" fill="currentColor" stroke="none"/>
+      <rect x="19" y="19" width="3" height="3" fill="currentColor" stroke="none"/>
+    </svg>
+    <span>SCAN</span>
+  </button>
+</div>
+
+<!-- ── FAB QR Modal ── -->
+<div class="fab-modal" x-show="fabOpen" x-cloak @click.self="closeFab()">
+  <div class="fab-panel">
+    <div class="fab-header">
+      <h3>📷 Quick QR Scan</h3>
+      <button class="fab-close" @click="closeFab()">✕</button>
+    </div>
+
+    <!-- Mode toggle -->
+    <div class="fab-toggle">
+      <button :class="{'active': fabMode==='checkin'}"  @click="fabMode='checkin'">📥 Check In</button>
+      <button :class="{'active': fabMode==='checkout'}" @click="fabMode='checkout'">📤 Check Out</button>
+    </div>
+
+    <!-- Scanner viewport -->
+    <div class="fab-scanner-wrap">
+      <div id="qr-reader-fab" style="width:100%"></div>
+    </div>
+
+    <!-- Start / Stop controls -->
+    <div class="fab-controls">
+      <button id="fabStartBtn" onclick="startFabScanner()" style="flex:1;padding:10px;font-size:13px">▶ Start Camera</button>
+      <button id="fabStopBtn"  onclick="stopFabScanner()"  style="flex:1;padding:10px;font-size:13px;background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4)" disabled>⏹ Stop</button>
+    </div>
+
+    <!-- Scan result -->
+    <div class="fab-result" id="fabScanResult">Point camera at a delegate's QR badge…</div>
+
+    <!-- Recent scans -->
+    <div class="fab-recent-title">Recent Scans</div>
+    <div class="fab-recent" id="fabRecentScans" style="color:#94a3b8">—</div>
+  </div>
+</div>
+
 <!-- ── File Modal ── -->
 <div class="modal-overlay" id="fileModal" x-show="fileOpen" x-cloak @click.self="fileOpen=false">
   <div class="modal-box" style="width:580px">
@@ -399,6 +472,8 @@
       activeTab: 'overview',
       editOpen:  false,
       fileOpen:  false,
+      fabOpen:   false,
+      fabMode:   'checkin',
       editForm: {
         ticketId: '', name: '', email: '', phone: '', title: '',
         organization: '', ticketType: 'general', paymentStatus: 'PENDING', verified: false
@@ -469,6 +544,16 @@
         if (!tid) return;
         this.manualTid = '';
         await processCheckin(tid);
+      },
+
+      openFab() {
+        this.fabOpen = true;
+        this.$nextTick(function(){ startFabScanner(); });
+      },
+
+      closeFab() {
+        stopFabScanner();
+        this.fabOpen = false;
       },
 
       async saveEdit() {
@@ -814,6 +899,70 @@
         .map(function(s){ return '<div style="padding:5px 0;border-bottom:1px solid rgba(244,143,177,0.12);color:' + (s.ok ? '#059669' : '#e11d48') + ';font-size:12px">' + s.time + ' · ' + esc(s.name) + (s.ok ? ' ✅' : ' ❌') + '</div>'; }).join('');
     } catch(e) {
       document.getElementById('scanResult').innerHTML = '<div style="color:#e11d48">Network error</div>';
+    }
+  }
+
+  // ── FAB Quick-Scan ───────────────────────────────────────────────────────────
+  var qrScannerFab  = null;
+  var fabRecentScans = [];
+
+  function startFabScanner() {
+    if (typeof Html5Qrcode === 'undefined') { alert('QR library not loaded.'); return; }
+    if (qrScannerFab) return;
+    qrScannerFab = new Html5Qrcode('qr-reader-fab');
+    qrScannerFab.start({ facingMode:'environment' }, { fps:12, qrbox:{ width:220, height:220 } }, onQRScanFab)
+      .then(function(){
+        document.getElementById('fabStartBtn').disabled = true;
+        document.getElementById('fabStopBtn').disabled  = false;
+      })
+      .catch(function(err){ alert('Camera error: ' + err); qrScannerFab = null; });
+  }
+
+  function stopFabScanner() {
+    if (qrScannerFab) {
+      qrScannerFab.stop().catch(function(){}).finally(function(){
+        qrScannerFab = null;
+        var s = document.getElementById('fabStartBtn'); if (s) s.disabled = false;
+        var t = document.getElementById('fabStopBtn');  if (t) t.disabled = true;
+      });
+    }
+  }
+
+  async function onQRScanFab(decoded) {
+    var ticketId;
+    try { ticketId = JSON.parse(decoded).ticket_id; } catch(e) { ticketId = decoded.trim(); }
+    if (!ticketId) return;
+    var mode = window._app ? window._app.fabMode : 'checkin';
+    await processFabScan(ticketId, mode);
+  }
+
+  async function processFabScan(ticketId, mode) {
+    var endpoint = mode === 'checkout' ? '/api/checkout' : '/api/checkin';
+    var modeLabel = mode === 'checkout' ? '📤 Checked Out' : '📥 Checked In';
+    var okColor   = mode === 'checkout' ? 'rgba(254,249,195,0.45)' : 'rgba(167,243,208,0.2)';
+    var okBorder  = mode === 'checkout' ? 'rgba(251,191,36,0.4)'   : 'rgba(167,243,208,0.5)';
+    var okText    = mode === 'checkout' ? '#92400e'                 : '#059669';
+    try {
+      var res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: ticketId }) });
+      var r = await res.json();
+      var ok = r.success;
+      var resultEl = document.getElementById('fabScanResult');
+      if (resultEl) resultEl.innerHTML =
+        '<div style="padding:12px 14px;border-radius:10px;background:' + (ok ? okColor : 'rgba(254,202,202,0.25)') + ';border:1px solid ' + (ok ? okBorder : 'rgba(252,165,165,0.4)') + ';color:' + (ok ? okText : '#e11d48') + ';font-size:14px;font-weight:600">' +
+        (ok ? modeLabel + ' — <strong>' + esc(r.name) + '</strong>' : '❌ ' + (r.error || 'Unknown error') + ' · ' + ticketId) + '</div>';
+      fabRecentScans.unshift({ name: ok ? r.name : ticketId, ok: ok, mode: mode, time: new Date().toLocaleTimeString() });
+      if (fabRecentScans.length > 6) fabRecentScans.pop();
+      var recentEl = document.getElementById('fabRecentScans');
+      if (recentEl) recentEl.innerHTML = fabRecentScans.map(function(s){
+        return '<div style="padding:5px 0;border-bottom:1px solid rgba(244,143,177,0.1);display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="color:' + (s.ok ? '#374151' : '#e11d48') + '">' + esc(s.name) + (s.ok ? (s.mode==='checkout' ? ' 📤' : ' ✅') : ' ❌') + '</span>' +
+          '<span style="font-size:10px;color:#94a3b8">' + s.time + '</span>' +
+        '</div>';
+      }).join('');
+      if (ok) { setTimeout(function(){ loadOverview(); if(window._app && window._app.activeTab==='checkin') loadCheckins(); if(window._app && window._app.activeTab==='checkout') loadCheckouts(); }, 400); }
+    } catch(e) {
+      var el = document.getElementById('fabScanResult');
+      if (el) el.innerHTML = '<div style="color:#e11d48;font-size:13px">Network error</div>';
     }
   }
 
