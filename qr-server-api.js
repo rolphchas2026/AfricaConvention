@@ -197,8 +197,22 @@ async function generateBadgePDF(a) {
 
       // Background
       doc.rect(0, 0, W, H).fill('#12002a');
-      // Header band
-      doc.rect(0, 0, W, 115).fill('#3d0075');
+
+      // Header band — brochure image with dark overlay
+      const bronchourPath = path.join(__dirname, 'sysimages', 'bronchour.jpeg');
+      try {
+        if (fs.existsSync(bronchourPath)) {
+          doc.save().rect(0, 0, W, 115).clip();
+          doc.image(bronchourPath, 0, 0, { width: W });
+          doc.restore();
+          doc.save().fillOpacity(0.56).rect(0, 0, W, 115).fill('#1a0035').restore();
+        } else {
+          doc.rect(0, 0, W, 115).fill('#3d0075');
+        }
+      } catch (_) {
+        doc.rect(0, 0, W, 115).fill('#3d0075');
+      }
+
       // Accent stripe
       doc.rect(0, 115, W, 6).fill(accent);
 
@@ -713,6 +727,7 @@ app.get('/', (req, res) => {
     initCoverflow();
     renderTicketOptions();
   </script>
+  <footer style="text-align:center;padding:12px 20px;font-style:italic;font-size:7px;color:#94a3b8;border-top:1px solid rgba(244,143,177,0.15);background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);margin-top:0">© Faith&amp;Will Logi-Tec Solutions &nbsp;·&nbsp; Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;·&nbsp; raphayelchas@gmail.com &nbsp;·&nbsp; +255 743 868 755 &nbsp;·&nbsp; All Rights Reserved</footer>
 </body>
 </html>
   `);
@@ -770,6 +785,7 @@ app.get('/admin-login', (req, res) => {
       <button type="submit" class="btn">Sign In →</button>
     </form>
     <a class="back" href="/">← Back to main site</a>
+    <p style="text-align:center;margin-top:22px;font-style:italic;font-size:7px;color:#94a3b8">© Faith&amp;Will Logi-Tec Solutions &nbsp;·&nbsp; LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;·&nbsp; raphayelchas@gmail.com &nbsp;·&nbsp; +255 743 868 755 &nbsp;·&nbsp; All Rights Reserved</p>
   </div>
 </body>
 </html>
@@ -865,6 +881,7 @@ app.get('/preview', async (req, res) => {
     </table>
   </div>
   <button class="refresh" onclick="location.reload()">🔄 Refresh</button>
+  <footer style="text-align:center;padding:10px 20px;font-style:italic;font-size:7px;color:#94a3b8;border-top:1px solid rgba(244,143,177,0.12);margin-top:12px">© Faith&amp;Will Logi-Tec Solutions &nbsp;·&nbsp; Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;·&nbsp; raphayelchas@gmail.com &nbsp;·&nbsp; +255 743 868 755 &nbsp;·&nbsp; All Rights Reserved</footer>
 </body>
 </html>`);
   } catch (err) {
@@ -932,6 +949,21 @@ app.post('/api/checkout', async (req, res) => {
     if (!attendee.checked_in)  return res.json({ success: false, error: 'Not checked in yet' });
     if (attendee.checked_out)  return res.json({ success: false, error: 'Already checked out' });
     await pool.query('UPDATE attendees SET checked_out = true, checked_out_at = NOW() WHERE ticket_id = $1', [ticket_id]);
+    res.json({ success: true, name: attendee.name });
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/revoke-checkout', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const { ticket_id } = req.body;
+    const result = await pool.query('SELECT * FROM attendees WHERE ticket_id = $1', [ticket_id]);
+    if (result.rows.length === 0) return res.json({ success: false, error: 'Ticket not found' });
+    const attendee = result.rows[0];
+    if (!attendee.checked_out) return res.json({ success: false, error: 'Not checked out' });
+    await pool.query('UPDATE attendees SET checked_out = false, checked_out_at = NULL WHERE ticket_id = $1', [ticket_id]);
     res.json({ success: true, name: attendee.name });
   } catch (error) {
     res.json({ success: false, error: error.message });

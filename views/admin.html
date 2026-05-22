@@ -59,8 +59,12 @@
     .btn-badge  { padding:4px 9px; background:linear-gradient(135deg,#f48fb1,#ce93d8); color:white; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
     .btn-email  { padding:4px 9px; background:linear-gradient(135deg,#a7f3d0,#6ee7b7); color:#064e3b; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
     .btn-files  { padding:4px 9px; background:rgba(186,104,200,0.12); color:#8e24aa; border:1px solid rgba(186,104,200,0.3); border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; transition:all 0.2s; touch-action:manipulation; }
-    .btn-edit:hover,.btn-del:hover,.btn-badge:hover,.btn-email:hover,.btn-files:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(244,143,177,0.22); }
-    @media(hover:none){ .btn-edit:hover,.btn-del:hover,.btn-badge:hover,.btn-email:hover,.btn-files:hover { transform:none; box-shadow:none; } }
+    .btn-view   { padding:4px 9px; background:linear-gradient(135deg,#e0f2fe,#bae6fd); color:#0369a1; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
+    .btn-revoke { padding:4px 9px; background:rgba(254,249,195,0.6); color:#92400e; border:1px solid rgba(251,191,36,0.45); border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; transition:all 0.2s; touch-action:manipulation; }
+    .badge-checkedout { background:rgba(254,249,195,0.5); color:#92400e; border:1px solid rgba(251,191,36,0.45); }
+    .badge-active { background:rgba(167,243,208,0.28); color:#059669; border:1px solid rgba(167,243,208,0.5); }
+    .btn-edit:hover,.btn-del:hover,.btn-badge:hover,.btn-email:hover,.btn-files:hover,.btn-view:hover,.btn-revoke:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(244,143,177,0.22); }
+    @media(hover:none){ .btn-edit:hover,.btn-del:hover,.btn-badge:hover,.btn-email:hover,.btn-files:hover,.btn-view:hover,.btn-revoke:hover { transform:none; box-shadow:none; } }
     #qr-reader video { border-radius:12px; }
     #qr-reader { background:#f8f9fa; }
     .modal-overlay { display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(30,41,59,0.45); z-index:1000; align-items:center; justify-content:center; }
@@ -228,13 +232,30 @@
          x-transition:enter="tab-enter" x-transition:enter-start="tab-enter-start" x-transition:enter-end="tab-enter-end"
          x-cloak>
       <h2>Check-out</h2>
-      <div style="margin-bottom:20px">
-        <input type="text" id="checkoutInput" x-model="checkoutInput" placeholder="Scan or enter Ticket ID" @keypress.enter="handleCheckout()" style="max-width:340px">
-        <div x-html="checkoutMsg" style="margin-top:12px"></div>
+      <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px">
+        <!-- QR scanner column -->
+        <div>
+          <p style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📷 Scan to Check Out</p>
+          <div id="qr-reader-out" style="width:260px;border-radius:14px;overflow:hidden;border:2px solid rgba(244,143,177,0.35)"></div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button id="scanOutStartBtn" onclick="startScannerOut()" style="flex:1;font-size:12px;padding:8px 10px">▶ Start Camera</button>
+            <button id="scanOutStopBtn" onclick="stopScannerOut()" style="flex:1;font-size:12px;padding:8px 10px;background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.4)" disabled>⏹ Stop</button>
+          </div>
+          <div id="scanOutResult" style="margin-top:12px;min-height:52px;padding:12px 14px;background:rgba(248,250,252,0.9);border:1px solid rgba(244,143,177,0.2);border-radius:10px;color:#94a3b8;font-size:13px">Scan result will appear here…</div>
+        </div>
+        <!-- Manual entry column -->
+        <div style="flex:1;min-width:220px">
+          <p style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⌨️ Manual Entry</p>
+          <div style="display:flex;gap:8px;margin-bottom:4px">
+            <input type="text" id="checkoutInput" x-model="checkoutInput" placeholder="Scan or enter Ticket ID" @keypress.enter="handleCheckout()" style="flex:1">
+            <button @click="handleCheckout()" style="padding:11px 16px;font-size:13px">Check Out</button>
+          </div>
+          <div x-html="checkoutMsg" style="margin-top:8px"></div>
+        </div>
       </div>
       <h3>Recent Check-outs</h3>
       <table>
-        <thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Duration</th><th>Status</th></tr></thead>
+        <thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Duration</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="checkoutList"></tbody>
       </table>
     </div>
@@ -287,6 +308,9 @@
     </div>
 
   </div><!-- /.content-wrapper -->
+  <footer style="flex-shrink:0;text-align:center;padding:6px 16px;font-style:italic;font-size:7px;color:#94a3b8;background:rgba(255,255,255,0.7);border-top:1px solid rgba(244,143,177,0.14);backdrop-filter:blur(8px)">
+    © Faith&amp;Will Logi-Tec Solutions &nbsp;·&nbsp; Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;·&nbsp; raphayelchas@gmail.com &nbsp;·&nbsp; +255 743 868 755 &nbsp;·&nbsp; All Rights Reserved
+  </footer>
 </div><!-- /.container -->
 
 <!-- ── File Modal ── -->
@@ -365,8 +389,9 @@
 <script>
   // ── Global state ──────────────────────────────────────────────────────────────
   var _allAttendees = [];
-  var qrScanner = null;
-  var recentScans = [];
+  var qrScanner    = null;
+  var qrScannerOut = null;
+  var recentScans  = [];
 
   // ── Alpine component ──────────────────────────────────────────────────────────
   function adminApp() {
@@ -400,7 +425,8 @@
       },
 
       switchTab(tab) {
-        if (tab !== 'scanner' && qrScanner) stopScanner();
+        if (tab !== 'scanner'  && qrScanner)    stopScanner();
+        if (tab !== 'checkout' && qrScannerOut) stopScannerOut();
         this.activeTab = tab;
         if (tab === 'overview')   loadOverview();
         if (tab === 'pending')    loadPending();
@@ -434,7 +460,7 @@
             ? '<div class="info-msg success">✅ ' + esc(result.name) + ' checked out successfully</div>'
             : '<div class="info-msg error">❌ ' + (result.error || 'Error') + '</div>';
           this.checkoutInput = '';
-          setTimeout(function(){ loadCheckouts(); loadOverview(); }, 500);
+          setTimeout(function(){ loadCheckouts(); loadCheckins(); loadOverview(); }, 500);
         } catch(err) { this.checkoutMsg = '<div class="info-msg error">❌ Network error</div>'; }
       },
 
@@ -513,11 +539,12 @@
           '<td><span class="badge ' + (a.payment_status === 'APPROVED' ? 'badge-approved' : 'badge-pending') + '">' + a.payment_status + '</span></td>' +
           '<td style="font-size:12px">' + (a.badge_generated ? '<span style="color:#059669">✅</span>' : '—') + (a.badge_sent ? ' <span style="color:#059669;font-size:10px">📧</span>' : '') + '</td>' +
           '<td style="white-space:nowrap">' +
-            '<button class="btn-edit"  onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
-            '<button class="btn-badge" onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
-            '<button class="btn-email" onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📧</button>' +
-            '<button class="btn-files" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📁</button>' +
-            '<button class="btn-del"   onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
+            '<button class="btn-edit"  title="Edit attendee"    onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
+            '<button class="btn-badge" title="Download badge"   onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
+            '<button class="btn-view"  title="Quick view badge" onclick="window.open(\'/api/badge/' + a.ticket_id + '/preview\',\'_blank\')">👁️</button>' +
+            '<button class="btn-email" title="Email badge"      onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📧</button>' +
+            '<button class="btn-files" title="Files &amp; docs" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📁</button>' +
+            '<button class="btn-del"   title="Delete attendee"  onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
           '</td></tr>';
       }).join('');
     } catch(e) {
@@ -570,11 +597,12 @@
         return '<tr><td>' + esc(a.name) + '</td><td style="font-size:12px">' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.organization || '—') + '</td><td>' + (a.checked_in ? '✅' : '—') + '</td>' +
           '<td><span class="badge ' + (a.payment_status === 'APPROVED' ? 'badge-approved' : 'badge-pending') + '">' + a.payment_status + '</span></td>' +
           '<td style="white-space:nowrap">' +
-            '<button class="btn-edit"  onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
-            '<button class="btn-badge" onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
-            '<button class="btn-email" onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📧</button>' +
-            '<button class="btn-files" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📁</button>' +
-            '<button class="btn-del"   onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
+            '<button class="btn-edit"  title="Edit attendee"    onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
+            '<button class="btn-badge" title="Download badge"   onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
+            '<button class="btn-view"  title="Quick view badge" onclick="window.open(\'/api/badge/' + a.ticket_id + '/preview\',\'_blank\')">👁️</button>' +
+            '<button class="btn-email" title="Email badge"      onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📧</button>' +
+            '<button class="btn-files" title="Files &amp; docs" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📁</button>' +
+            '<button class="btn-del"   title="Delete attendee"  onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
           '</td></tr>';
       }).join('');
     } catch(e) { console.error(e); }
@@ -586,7 +614,13 @@
       var data = await fetchAttendees();
       var rows = data.filter(function(a){ return a.checked_in; });
       document.getElementById('checkinList').innerHTML = rows.length
-        ? rows.map(function(a){ return '<tr><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + esc(a.name) + '</td><td>' + (a.checked_in_at ? new Date(a.checked_in_at).toLocaleString() : '—') + '</td><td>' + a.ticket_type + '</td><td><span class="badge badge-approved">Checked In</span></td></tr>'; }).join('')
+        ? rows.map(function(a){
+            var isOut = a.checked_out;
+            var badgeCls = isOut ? 'badge-checkedout' : 'badge-active';
+            var badgeTxt = isOut ? '📤 Checked Out' : '✅ Active';
+            var rowStyle = isOut ? 'background:rgba(254,249,195,0.18)' : '';
+            return '<tr style="' + rowStyle + '"><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + esc(a.name) + '</td><td>' + (a.checked_in_at ? new Date(a.checked_in_at).toLocaleString() : '—') + '</td><td>' + a.ticket_type + '</td><td><span class="badge ' + badgeCls + '">' + badgeTxt + '</span></td></tr>';
+          }).join('')
         : '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px">No check-ins yet</td></tr>';
     } catch(e) { console.error(e); }
   }
@@ -600,9 +634,16 @@
         ? rows.map(function(a){
             var dur = (a.checked_in_at && a.checked_out_at)
               ? Math.round((new Date(a.checked_out_at) - new Date(a.checked_in_at)) / 60000) + ' min' : '—';
-            return '<tr><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + esc(a.name) + '</td><td>' + (a.checked_out_at ? new Date(a.checked_out_at).toLocaleString() : '—') + '</td><td>' + dur + '</td><td><span class="badge badge-approved">Checked Out</span></td></tr>';
+            return '<tr style="background:rgba(254,249,195,0.15)">' +
+              '<td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td>' +
+              '<td>' + esc(a.name) + '</td>' +
+              '<td>' + (a.checked_out_at ? new Date(a.checked_out_at).toLocaleString() : '—') + '</td>' +
+              '<td>' + dur + '</td>' +
+              '<td><span class="badge badge-checkedout">📤 Checked Out</span></td>' +
+              '<td><button class="btn-revoke" onclick="revokeCheckout(\'' + a.ticket_id + '\')">↩ Revoke</button></td>' +
+            '</tr>';
           }).join('')
-        : '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px">No check-outs yet</td></tr>';
+        : '<tr><td colspan="6" style="text-align:center;color:#999;padding:30px">No check-outs yet</td></tr>';
     } catch(e) { console.error(e); }
   }
 
@@ -774,6 +815,56 @@
     } catch(e) {
       document.getElementById('scanResult').innerHTML = '<div style="color:#e11d48">Network error</div>';
     }
+  }
+
+  // ── Check-out QR Scanner ─────────────────────────────────────────────────────
+  function startScannerOut() {
+    if (typeof Html5Qrcode === 'undefined') { alert('QR library not loaded. Refresh the page.'); return; }
+    qrScannerOut = new Html5Qrcode('qr-reader-out');
+    qrScannerOut.start({ facingMode:'environment' }, { fps:12, qrbox:{ width:200, height:200 } }, onQRScanOut)
+      .then(function(){ document.getElementById('scanOutStartBtn').disabled = true; document.getElementById('scanOutStopBtn').disabled = false; })
+      .catch(function(err){ alert('Camera error: ' + err); });
+  }
+
+  function stopScannerOut() {
+    if (qrScannerOut) {
+      qrScannerOut.stop().then(function(){ qrScannerOut = null; document.getElementById('scanOutStartBtn').disabled = false; document.getElementById('scanOutStopBtn').disabled = true; });
+    }
+  }
+
+  async function onQRScanOut(decoded) {
+    var ticketId;
+    try { ticketId = JSON.parse(decoded).ticket_id; } catch(e) { ticketId = decoded.trim(); }
+    if (!ticketId) return;
+    await processCheckout(ticketId);
+  }
+
+  async function processCheckout(ticketId) {
+    try {
+      var res = await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: ticketId }) });
+      var r = await res.json();
+      var ok = r.success;
+      var el = document.getElementById('scanOutResult');
+      if (el) el.innerHTML =
+        '<div style="padding:12px;border-radius:10px;background:' + (ok?'rgba(254,249,195,0.35)':'rgba(254,202,202,0.25)') + ';border:1px solid ' + (ok?'rgba(251,191,36,0.4)':'rgba(252,165,165,0.4)') + ';color:' + (ok?'#92400e':'#e11d48') + ';font-size:13px">' +
+        (ok ? '📤 <strong>' + esc(r.name) + '</strong> checked out' : '❌ ' + (r.error||'Unknown error') + ' — ' + ticketId) + '</div>';
+      if (ok) { setTimeout(function(){ loadCheckouts(); loadCheckins(); loadOverview(); }, 400); }
+    } catch(e) {
+      var el = document.getElementById('scanOutResult');
+      if (el) el.innerHTML = '<div style="color:#e11d48;font-size:13px">Network error</div>';
+    }
+  }
+
+  // ── Revoke checkout ───────────────────────────────────────────────────────────
+  async function revokeCheckout(ticketId) {
+    var a = _allAttendees.find(function(x){ return x.ticket_id === ticketId; });
+    if (!confirm('Revoke checkout for ' + (a ? a.name : ticketId) + '? They will return to checked-in status.')) return;
+    try {
+      var res = await fetch('/api/revoke-checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: ticketId }) });
+      var r = await res.json();
+      if (r.success) { loadCheckouts(); loadCheckins(); loadOverview(); }
+      else alert('Error: ' + (r.error || 'Failed'));
+    } catch(e) { alert('Network error'); }
   }
 
   // ── Utility ───────────────────────────────────────────────────────────────────
