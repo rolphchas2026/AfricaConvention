@@ -414,15 +414,17 @@ app.get('/', (req, res) => {
     .footer-sponsors h4 { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 22px; }
     .sponsor-grid { display: flex; flex-wrap: wrap; gap: 16px; }
     .sponsor-slot { display: flex; flex-direction: column; align-items: center; gap: 9px; text-decoration: none; transition: all 0.3s; position: relative; }
-    .sponsor-logo-ph { width: 110px; height: 62px; background: rgba(255,255,255,0.85); border: 1px dashed rgba(244,143,177,0.4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: rgba(240,98,146,0.45); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; transition: all 0.3s; overflow: hidden; }
-    .sponsor-logo-ph img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; transition: transform 0.3s; }
-    .sponsor-slot:hover .sponsor-logo-ph { background: rgba(244,143,177,0.06); border-color: rgba(240,98,146,0.5); box-shadow: 0 6px 20px rgba(244,143,177,0.25); transform: translateY(-3px); }
-    .sponsor-slot:hover .sponsor-logo-ph img { transform: scale(1.06); }
+    .sponsor-logo-ph { width: 110px; height: 62px; background: rgba(255,255,255,0.85); border: 1px solid rgba(244,143,177,0.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: rgba(240,98,146,0.45); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; transition: all 0.35s; overflow: hidden; position: relative; }
+    .sponsor-logo-ph img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; transition: opacity 0.35s, transform 0.35s; }
+    .sponsor-logo-ph::after { content: 'Follow \2192'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(233,30,99,0.82); color: white; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; border-radius: 10px; opacity: 0; transition: opacity 0.35s; font-family: inherit; }
+    .sponsor-slot:hover .sponsor-logo-ph { border-color: #f06292; box-shadow: 0 8px 28px rgba(244,143,177,0.45); transform: translateY(-4px) scale(1.04); }
+    .sponsor-slot:hover .sponsor-logo-ph img { opacity: 0.25; transform: scale(1.08); }
+    .sponsor-slot:hover .sponsor-logo-ph::after { opacity: 1; }
     .sponsor-slot span { font-size: 11px; color: #94a3b8; transition: color 0.3s; }
-    .sponsor-slot:hover span { color: #e91e63; }
-    .sponsor-tooltip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) scale(0.9); background: #1e293b; color: white; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 8px; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.2s; }
+    .sponsor-slot:hover span { color: #e91e63; font-weight: 700; }
+    .sponsor-tooltip { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%) translateY(4px); background: #1e293b; color: white; font-size: 11px; font-weight: 600; padding: 6px 13px; border-radius: 8px; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.25s; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
     .sponsor-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1e293b; }
-    .sponsor-slot:hover .sponsor-tooltip { opacity: 1; transform: translateX(-50%) scale(1); }
+    .sponsor-slot:hover .sponsor-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
     .footer-bottom { border-top: 1px solid rgba(244,143,177,0.15); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
     .footer-bottom p { font-size: 13px; color: #94a3b8; }
     .footer-bottom a { color: #ba68c8; text-decoration: none; transition: color 0.2s; }
@@ -962,9 +964,15 @@ app.get('/preview', async (req, res) => {
     </div>
   </div>
   <style>
-    .prev-sponsor:hover > div { border-color:rgba(240,98,146,0.5); box-shadow:0 6px 20px rgba(244,143,177,0.25); transform:translateY(-3px); }
-    .prev-sponsor:hover > span:first-of-type { color:#e91e63 !important; }
-    .prev-sponsor:hover .prev-sp-tip { opacity:1 !important; transform:translateX(-50%) scale(1) !important; }
+    .prev-sponsor > div { position:relative; overflow:hidden; }
+    .prev-sponsor > div::after { content:'Follow →'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(233,30,99,0.82); color:white; font-size:13px; font-weight:800; border-radius:10px; opacity:0; transition:opacity 0.35s; font-family:'Segoe UI',sans-serif; }
+    .prev-sponsor > div img { transition:opacity 0.35s, transform 0.35s; }
+    .prev-sponsor:hover > div { border-color:#f06292 !important; box-shadow:0 8px 28px rgba(244,143,177,0.45) !important; transform:translateY(-4px) scale(1.04); }
+    .prev-sponsor:hover > div img { opacity:0.25; transform:scale(1.08); }
+    .prev-sponsor:hover > div::after { opacity:1; }
+    .prev-sponsor:hover > span:first-of-type { color:#e91e63 !important; font-weight:700 !important; }
+    .prev-sponsor:hover .prev-sp-tip { opacity:1 !important; transform:translateX(-50%) translateY(0) !important; }
+    .prev-sp-tip { transform:translateX(-50%) translateY(4px) !important; transition:all 0.25s !important; }
     .prev-sp-tip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#1e293b; }
   </style>
 
