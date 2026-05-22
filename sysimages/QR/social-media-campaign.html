@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Africa Convention 2026 - Social Media Campaign</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8f0 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    h1 {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 42px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .social-post {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+      transition: all 0.4s ease;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .social-post:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+    }
+
+    .post-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      color: white;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .platform-icon {
+      font-size: 32px;
+    }
+
+    .platform-name {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .post-content {
+      padding: 25px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    .post-copy {
+      font-size: 14px;
+      margin-bottom: 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .hashtags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .hashtag {
+      color: #667eea;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .post-meta {
+      font-size: 12px;
+      color: #999;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .cta-section {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(240, 147, 251, 0.08) 100%);
+      padding: 15px;
+      border-top: 2px solid #667eea;
+      color: #667eea;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .copy-button {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 10px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .copy-button:hover {
+      background: #764ba2;
+      transform: scale(1.05);
+    }
+
+    .stats-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin: 50px 0;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(240, 147, 251, 0.08) 100%);
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .platform-tips {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      border-radius: 15px;
+      padding: 30px;
+      color: white;
+      margin: 50px 0;
+    }
+
+    .platform-tips h2 {
+      margin-bottom: 25px;
+      font-size: 24px;
+    }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .tip-card {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .tip-card h3 {
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .tip-card p {
+      font-size: 13px;
+      line-height: 1.6;
+      opacity: 0.95;
+    }
+
+    .calendar-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin: 50px 0;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+    }
+
+    .calendar-section h2 {
+      color: #667eea;
+      margin-bottom: 25px;
+      font-size: 24px;
+    }
+
+    .week {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+
+    .week h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .week-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .day-item {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid #f093fb;
+    }
+
+    .day-label {
+      font-weight: 600;
+      color: #667eea;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .day-content {
+      font-size: 13px;
+      color: #555;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      margin-top: 60px;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 28px;
+      }
+
+      .posts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📱 Social Media Campaign</h1>
+      <p class="subtitle">Africa Convention 2026 - Ready-to-Post Content</p>
+    </header>
+
+    <!-- Social Posts -->
+    <div class="posts-grid">
+      <!-- Instagram Post -->
+      <div class="social-post">
+        <div class="post-header">
+          <div class="platform-icon">📷</div>
+          <div class="platform-name">INSTAGRAM</div>
+        </div>
+        <div class="post-content">
+          <div class="post-copy">🎪 "Go and bear much fruit" - John 15:16 🎪
+
+AFRICA CONVENTION 2026
+📍 Arusha, Tanzania | June 18-22
+
+Theme: "Doing Business and Bearing Fruitful"
+
+Ready to transform your calling? Join 25+ leaders across Africa for 5 days of fellowship, breakthrough business strategies, and spiritual revival.
+
+👇 SCAN THE QR CODE BELOW TO REGISTER NOW 👇
+
+✅ 5 ticket options from 10,000 TZS to $350 USD
+✅ Instant registration
+✅ Network with purpose-driven entrepreneurs
+✅ Experience fruitful transformation
+
+Link in bio → www.livinghope.or.tz</div>
+          <div class="hashtags">
+            <span class="hashtag">#AfricaConvention2026</span>
+            <span class="hashtag">#DoingBusiness</span>
+            <span class="hashtag">#BearingFruitful</span>
+            <span class="hashtag">#ArushaFellowship</span>
+          </div>
+          <div class="post-meta">
+            ✨ Best time: Thursday 7-9 PM | 📊 Expected engagement: High
+          </div>
+          <button class="copy-button">Copy Caption</button>
+        </div>
+        <div class="cta-section">🎯 Include: QR code image + event poster</div>
+      </div>
+
+      <!-- Facebook Post -->
+      <div class="social-post">
+        <div class="post-header">
+          <div class="platform-icon">👍</div>
+          <div class="platform-name">FACEBOOK</div>
+        </div>
+        <div class="post-content">
+          <div class="post-copy">🎉 Africa Convention 2026 Registration is OPEN! Join the Movement 🎉
+
+"Whatever you do, work at it with all your heart, as working for the Lord..." - Colossians 3:23
+
+Dear Friends,
+
+We are thrilled to announce the AFRICA CONVENTION 2026 — a game-changing gathering of purpose-driven leaders, entrepreneurs, and innovators from across the African continent.
+
+📍 ARUSHA, TANZANIA | JUNE 18-22, 2026
+
+✨ WHY ATTEND?
+✅ Network with leaders reshaping Africa
+✅ Discover business strategies grounded in faith
+✅ Experience transformation and spiritual revival
+✅ Join a community of purpose-driven changemakers
+
+🎟️ 5 TICKET TYPES:
+👔 General Admin - 10,000 TZS
+✈️ Foreigners (VIP) - $350 USD
+🎓 Youth - $200 USD
+🎤 Speakers - $300 USD
+💼 Business - $250 USD
+
+👉 SCAN THE QR CODE TO REGISTER NOW
+
+Registration takes less than 2 minutes.
+Limited spots available — secure yours now!</div>
+          <div class="hashtags">
+            <span class="hashtag">#AfricaConvention2026</span>
+            <span class="hashtag">#DoingBusiness</span>
+            <span class="hashtag">#Arusha</span>
+            <span class="hashtag">#Tanzania</span>
+          </div>
+          <div class="post-meta">
+            ✨ Best time: Anytime | 📊 Boost: $10-20 USD | 📈 Reach: 500+
+          </div>
+          <button class="copy-button">Copy Post</button>
+        </div>
+        <div class="cta-section">🎯 Include: Large QR code (600x600px) + event details</div>
+      </div>
+
+      <!-- LinkedIn Post -->
+      <div class="social-post">
+        <div class="post-header">
+          <div class="platform-icon">💼</div>
+          <div class="platform-name">LINKEDIN</div>
+        </div>
+        <div class="post-content">
+          <div class="post-copy">Building transformative businesses rooted in purpose.
+
+AFRICA CONVENTION 2026: Where Faith Meets Enterprise
+
+We're excited to announce an exclusive gathering for entrepreneurs, business leaders, and innovators committed to creating meaningful impact across Africa.
+
+🎯 EVENT DETAILS:
+Theme: "Doing Business and Bearing Fruitful"
+Dates: June 18-22, 2026
+Location: Arusha, Tanzania
+Expected attendees: 25+ senior leaders, CEOs, entrepreneurs
+
+📊 PERFECT FOR:
+✅ Entrepreneurs building faith-centered businesses
+✅ Corporate leaders seeking purpose alignment
+✅ Business mentors and coaches
+✅ Impact investors
+✅ Young professionals scaling their vision
+
+💼 TICKET TIERS:
+General Admin - 10,000 TZS
+Foreigners (VIP) - $350 USD
+Business Partners - $250 USD
+Speakers - $300 USD
+Youth Leaders - $200 USD
+
+👉 SECURE YOUR SPOT - SCAN THE QR CODE BELOW
+
+Early bird spots filling fast. Register today.</div>
+          <div class="hashtags">
+            <span class="hashtag">#AfricaConvention2026</span>
+            <span class="hashtag">#Entrepreneurship</span>
+            <span class="hashtag">#Leadership</span>
+            <span class="hashtag">#ImpactInvesting</span>
+          </div>
+          <div class="post-meta">
+            ✨ Best time: Tuesday/Wednesday | 📊 Post frequency: 1x per week
+          </div>
+          <button class="copy-button">Copy Post</button>
+        </div>
+        <div class="cta-section">🎯 Include: Professional QR code + company logos</div>
+      </div>
+
+      <!-- WhatsApp Broadcast -->
+      <div class="social-post">
+        <div class="post-header">
+          <div class="platform-icon">💬</div>
+          <div class="platform-name">WHATSAPP</div>
+        </div>
+        <div class="post-content">
+          <div class="post-copy">🎪 AFRICA CONVENTION 2026 🎪
+
+"Go and bear much fruit" - John 15:16
+
+Theme: Doing Business and Bearing Fruitful
+📍 Arusha, Tanzania | June 18-22
+
+Join us for a life-changing 5-day fellowship!
+
+🎯 SCAN THE QR TO REGISTER NOW:
+
+[QR CODE]
+
+✅ 5 ticket types (10,000 TZS - $350 USD)
+✅ Network with 25+ African leaders
+✅ Transform your calling
+
+www.livinghope.or.tz
+
+Questions? 
++255 787 576 900</div>
+          <div class="post-meta">
+            ✨ Best time: 7-8 PM weekdays | 📊 Post frequency: 1-2x per week
+          </div>
+          <button class="copy-button">Copy Message</button>
+        </div>
+        <div class="cta-section">🎯 Create broadcast list + send to contacts</div>
+      </div>
+
+      <!-- Twitter Post 1 -->
+      <div class="social-post">
+        <div class="post-header">
+          <div class="platform-icon">𝕏</div>
+          <div class="platform-name">TWITTER/X</div>
+        </div>
+        <div class="post-content">
+          <div class="post-copy">🎪 Africa Convention 2026 is here! 
+"Go and bear much fruit" - John 15:16
+Theme: Doing Business & Bearing Fruitful
+📍 Arusha, Tanzania | June 18-22
+
+👉 SCAN THE QR & REGISTER NOW
+
+[QR CODE]</div>
+          <div class="hashtags">
+            <span class="hashtag">#AfricaConvention2026</span>
+            <span class="hashtag">#Leadership</span>
+          </div>
+          <div class="post-meta">
+            ✨ Best time: Business hours | 📊 Thread format recommended
+          </div>
+          <button class="copy-button">Copy Tweet</button>
+        </div>
+        <div class="cta-section">🎯 Create a 3-tweet thread for better reach</div>
+      </div>
+
+      <!-- Email Signature -->
+      <div class="social-post">
+        <div class="post-header">
+          <div class="platform-icon">✉️</div>
+          <div class="platform-name">EMAIL SIGNATURE</div>
+        </div>
+        <div class="post-content">
+          <div class="post-copy">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎪 AFRICA CONVENTION 2026 🎪
+
+"Go and bear much fruit" - John 15:16
+
+Join us June 18-22 in Arusha, Tanzania
+Register now → [QR Code or Link]
+
+www.livinghope.or.tz
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+          <div class="post-meta">
+            ✨ Add to all email signatures | 📊 Reaches: 100% of email recipients
+          </div>
+          <button class="copy-button">Copy HTML</button>
+        </div>
+        <div class="cta-section">🎯 Update in Gmail/Outlook settings</div>
+      </div>
+    </div>
+
+    <!-- Platform Tips -->
+    <div class="platform-tips">
+      <h2>💡 Platform Tips & Optimization</h2>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>📷 Instagram</h3>
+          <p>• Post Stories 3-5x per week with QR<br>• Best time: 7-9 PM Thursday<br>• Use Reels for event highlights<br>• Pin announcement to profile top</p>
+        </div>
+        <div class="tip-card">
+          <h3>👍 Facebook</h3>
+          <p>• Create event page<br>• Boost posts ($10-20)<br>• Target: Arusha + region<br>• Share to WCCM pages<br>• Post 2-3x per week</p>
+        </div>
+        <div class="tip-card">
+          <h3>💼 LinkedIn</h3>
+          <p>• Target professionals<br>• Use 10-15 hashtags<br>• Ask engagement questions<br>• Post 1x per week<br>• Tag relevant organizations</p>
+        </div>
+        <div class="tip-card">
+          <h3>💬 WhatsApp</h3>
+          <p>• Create broadcast list<br>• Personal messages from leaders<br>• Best time: 7-8 PM<br>• Send 1-2x per week<br>• Join WhatsApp groups</p>
+        </div>
+        <div class="tip-card">
+          <h3>𝕏 Twitter/X</h3>
+          <p>• Use threads (3 tweets)<br>• Retweet community posts<br>• Engage with followers<br>• Post business hours<br>• Use 5-6 hashtags</p>
+        </div>
+        <div class="tip-card">
+          <h3>📧 Email</h3>
+          <p>• Add to all signatures<br>• Weekly newsletter<br>• Reminder emails<br>• Subject: Action-oriented<br>• Include QR + link</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section">
+      <h2 style="color: #667eea;">📊 Expected Performance Metrics</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">5-10%</div>
+          <div class="stat-label">QR Scan Rate (Impressions)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">10-15%</div>
+          <div class="stat-label">Scan to Registration Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">200+</div>
+          <div class="stat-label">Instagram Story Views</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Facebook Post Reach</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">30+</div>
+          <div class="stat-label">Target Registrations (4 weeks)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">80%</div>
+          <div class="stat-label">Mobile Traffic (Expected)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Calendar -->
+    <div class="calendar-section">
+      <h2>📅 4-Week Content Calendar</h2>
+
+      <div class="week">
+        <h3>Week 1 (May 22-28): Launch Phase</h3>
+        <div class="week-items">
+          <div class="day-item">
+            <div class="day-label">Monday</div>
+            <div class="day-content">🚀 Launch announcement (all platforms)</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Wednesday</div>
+            <div class="day-content">📷 Instagram Stories + Posts</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Friday</div>
+            <div class="day-content">👍 Facebook announcement + WhatsApp</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Sunday</div>
+            <div class="day-content">📧 Email to database</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week">
+        <h3>Week 2 (May 29 - June 4): Build Momentum</h3>
+        <div class="week-items">
+          <div class="day-item">
+            <div class="day-label">Monday</div>
+            <div class="day-content">💼 LinkedIn "Why attend" post</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Wednesday</div>
+            <div class="day-content">🎬 Testimonial video with QR</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Thursday</div>
+            <div class="day-content">🖨️ Flyer distribution begins</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Saturday</div>
+            <div class="day-content">👥 Preview board promotion</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week">
+        <h3>Week 3 (June 5-11): Urgency Phase</h3>
+        <div class="week-items">
+          <div class="day-item">
+            <div class="day-label">Daily</div>
+            <div class="day-content">📱 Instagram Stories with QR</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Wednesday</div>
+            <div class="day-content">⚡ "Limited spots" urgency post</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Friday</div>
+            <div class="day-content">💰 Early bird pricing reminder</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Sunday</div>
+            <div class="day-content">👥 Preview board push</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week">
+        <h3>Week 4 (June 12-18): Final Push</h3>
+        <div class="week-items">
+          <div class="day-item">
+            <div class="day-label">Daily</div>
+            <div class="day-content">📱 Countdown stories</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Tuesday</div>
+            <div class="day-content">📧 "Last chance" email campaign</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Thursday</div>
+            <div class="day-content">🔔 Final registration reminder</div>
+          </div>
+          <div class="day-item">
+            <div class="day-label">Saturday</div>
+            <div class="day-content">🎉 Event is TOMORROW vibes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Codes Section -->
+  <div class="container" style="margin-bottom:40px">
+    <section style="background:white;border-radius:15px;padding:35px;margin-bottom:30px;box-shadow:0 10px 40px rgba(102,126,234,0.15)">
+      <h2 style="color:#667eea;margin-bottom:8px;font-size:28px">📱 Share These QR Codes</h2>
+      <p style="color:#555;margin-bottom:28px">Use in posts, stories, flyers &amp; print materials to drive traffic directly to the event.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px">
+        <div style="background:linear-gradient(135deg,rgba(102,126,234,0.06),rgba(240,147,251,0.06));border:2px solid rgba(102,126,234,0.25);border-radius:16px;padding:28px;text-align:center">
+          <img src="https_africa-convention_vercel_app.png" alt="Africa Convention Website QR" style="width:180px;height:180px;border-radius:12px;box-shadow:0 8px 24px rgba(102,126,234,0.2);margin-bottom:16px;display:block;margin-left:auto;margin-right:auto">
+          <h3 style="color:#667eea;margin:0 0 8px;font-size:16px">🌐 Online Registration Portal</h3>
+          <p style="color:#666;font-size:13px;margin-bottom:10px">Share this in all social posts to drive registrations</p>
+          <code style="background:#f0f0f8;padding:6px 12px;border-radius:6px;font-size:12px;color:#667eea">africa-convention.vercel.app</code>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(102,126,234,0.06),rgba(240,147,251,0.06));border:2px solid rgba(102,126,234,0.25);border-radius:16px;padding:28px;text-align:center">
+          <img src="view_attendees.png" alt="View Attendees QR" style="width:180px;height:180px;border-radius:12px;box-shadow:0 8px 24px rgba(102,126,234,0.2);margin-bottom:16px;display:block;margin-left:auto;margin-right:auto">
+          <h3 style="color:#667eea;margin:0 0 8px;font-size:16px">👥 Attendees Preview Board</h3>
+          <p style="color:#666;font-size:13px;margin-bottom:10px">Show social proof — who's already registered</p>
+          <code style="background:#f0f0f8;padding:6px 12px;border-radius:6px;font-size:12px;color:#667eea">africa-convention.vercel.app/preview</code>
+        </div>
+      </div>
+    </section>
+
+    <div style="text-align:center;margin-bottom:24px">
+      <button onclick="window.print()" style="padding:14px 36px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(102,126,234,0.4);font-family:inherit;transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+        📥 Download / Print This Document
+      </button>
+      <p style="color:#94a3b8;font-size:12px;margin-top:10px">Use your browser's Print → Save as PDF option</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Africa Convention 2026 - Social Media Campaign Guide</p>
+    <p style="margin-top: 20px; color: #667eea; font-style: italic;">"Go and bear much fruit" - John 15:16</p>
+    <p style="margin-top:16px;font-style:italic;font-size:11px;color:#94a3b8">© Faith&amp;Will Logi-Tec Solutions &nbsp;·&nbsp; Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;·&nbsp; raphayelchas@gmail.com &nbsp;·&nbsp; +255 743 868 755 &nbsp;·&nbsp; All Rights Reserved</p>
+  </footer>
+</body>
+</html>

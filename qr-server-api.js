@@ -153,6 +153,24 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS payment_proof_name VARCHAR(255)`);
       await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS documents JSONB DEFAULT '[]'`);
 
+      // Raffle tables
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS raffle_votes (
+          id SERIAL PRIMARY KEY,
+          voter_ticket_id VARCHAR(255) UNIQUE NOT NULL,
+          nominee_ticket_id VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS raffle_settings (
+          id INTEGER PRIMARY KEY DEFAULT 1,
+          voting_open BOOLEAN DEFAULT false,
+          reveal_ready BOOLEAN DEFAULT false
+        )
+      `);
+      await pool.query(`INSERT INTO raffle_settings (id, voting_open, reveal_ready) VALUES (1, false, false) ON CONFLICT (id) DO NOTHING`);
+
       console.log('✅ Database dynamic storage schemas verified and ready');
       return true;
     } catch (error) {
@@ -273,10 +291,13 @@ async function generateBadgePDF(a) {
       }
 
       // ── Footer — light blush band ─────────────────────────────────────────────
-      doc.rect(0, H - 30, W, 30).fill('#fce4ec');
+      doc.rect(0, H - 40, W, 40).fill('#fce4ec');
       doc.font('Helvetica').fontSize(7).fillColor('#64748b')
-        .text('Africa Convention 2026  ·  WCCM Tanzania  ·  wccm.tz@gmail.com  ·  www.livinghope.or.tz',
-          20, H - 19, { align: 'center', width: W - 40 });
+        .text('Africa Convention 2026  \xB7  WCCM Tanzania  \xB7  wccm.tz@gmail.com  \xB7  www.livinghope.or.tz',
+          20, H - 29, { align: 'center', width: W - 40 });
+      doc.font('Helvetica').fontSize(6).fillColor('#94a3b8')
+        .text('\xA9 Faith&Will Logi-Tec Solutions  \xB7  Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI  \xB7  raphayelchas@gmail.com  \xB7  +255 743 868 755',
+          20, H - 17, { align: 'center', width: W - 40 });
 
       doc.end();
     } catch (e) { reject(e); }
@@ -1244,6 +1265,555 @@ app.get('/api/health', async (req, res) => {
     env: process.env.NODE_ENV || 'unknown',
     timestamp: new Date().toISOString()
   });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  RAFFLE SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+
+// GET /api/raffle/status — public
+app.get('/api/raffle/status', async (req, res) => {
+  if (!pool) return res.json({ voting_open: false, reveal_ready: false });
+  try {
+    const r = await pool.query('SELECT * FROM raffle_settings WHERE id=1');
+    const s = r.rows[0] || { voting_open: false, reveal_ready: false };
+    res.json({ voting_open: s.voting_open, reveal_ready: s.reveal_ready });
+  } catch(e) { res.json({ voting_open: false, reveal_ready: false }); }
+});
+
+// GET /api/raffle/voter/:ticket_id — public voter lookup
+app.get('/api/raffle/voter/:ticket_id', async (req, res) => {
+  if (!pool) return res.json({ success: false, error: 'Database not ready' });
+  try {
+    const r = await pool.query('SELECT ticket_id, name, ticket_type, organization FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
+    if (!r.rows[0]) return res.json({ success: false, error: 'Ticket not found' });
+    const vote = await pool.query('SELECT nominee_ticket_id FROM raffle_votes WHERE voter_ticket_id=$1', [req.params.ticket_id]);
+    res.json({ success: true, voter: r.rows[0], already_voted: vote.rows.length > 0, voted_for: vote.rows[0]?.nominee_ticket_id || null });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// GET /api/raffle/nominees — public nominees list (only when voting open)
+app.get('/api/raffle/nominees', async (req, res) => {
+  if (!pool) return res.json({ success: false, error: 'Database not ready' });
+  try {
+    const settings = await pool.query('SELECT * FROM raffle_settings WHERE id=1');
+    if (!settings.rows[0]?.voting_open) return res.json({ success: false, not_open: true, error: 'Voting is not open yet' });
+    const r = await pool.query('SELECT ticket_id, name, ticket_type, organization FROM attendees ORDER BY name');
+    res.json({ success: true, nominees: r.rows });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// POST /api/raffle/vote
+app.post('/api/raffle/vote', async (req, res) => {
+  if (!pool) return res.json({ success: false, error: 'Database not ready' });
+  try {
+    const { voter_ticket_id, nominee_ticket_id } = req.body;
+    if (!voter_ticket_id || !nominee_ticket_id) return res.json({ success: false, error: 'Missing fields' });
+    if (voter_ticket_id.trim() === nominee_ticket_id.trim()) return res.json({ success: false, error: 'You cannot vote for yourself' });
+    const settings = await pool.query('SELECT * FROM raffle_settings WHERE id=1');
+    if (!settings.rows[0]?.voting_open) return res.json({ success: false, error: 'Voting is not open' });
+    const voter = await pool.query('SELECT ticket_id, name FROM attendees WHERE ticket_id=$1', [voter_ticket_id]);
+    if (!voter.rows[0]) return res.json({ success: false, error: 'Your ticket was not found' });
+    const nominee = await pool.query('SELECT ticket_id, name FROM attendees WHERE ticket_id=$1', [nominee_ticket_id]);
+    if (!nominee.rows[0]) return res.json({ success: false, error: 'Nominee ticket not found' });
+    await pool.query('INSERT INTO raffle_votes (voter_ticket_id, nominee_ticket_id) VALUES ($1, $2)', [voter_ticket_id.trim(), nominee_ticket_id.trim()]);
+    res.json({ success: true, message: 'Vote recorded!', nominee_name: nominee.rows[0].name });
+  } catch(e) {
+    if (e.code === '23505') return res.json({ success: false, error: 'You have already cast your vote' });
+    res.json({ success: false, error: e.message });
+  }
+});
+
+// GET /api/raffle/winners — public, only when reveal_ready
+app.get('/api/raffle/winners', async (req, res) => {
+  if (!pool) return res.json({ success: false, error: 'Database not ready' });
+  try {
+    const settings = await pool.query('SELECT * FROM raffle_settings WHERE id=1');
+    if (!settings.rows[0]?.reveal_ready) return res.json({ success: false, not_ready: true });
+    const r = await pool.query(`
+      SELECT rv.nominee_ticket_id, a.name, a.ticket_type, a.organization, COUNT(*)::int AS votes
+      FROM raffle_votes rv
+      JOIN attendees a ON a.ticket_id = rv.nominee_ticket_id
+      GROUP BY rv.nominee_ticket_id, a.name, a.ticket_type, a.organization
+      ORDER BY votes DESC LIMIT 3
+    `);
+    const total = await pool.query('SELECT COUNT(*)::int AS c FROM raffle_votes');
+    res.json({ success: true, winners: r.rows, total_votes: total.rows[0].c });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// GET /api/raffle/leaderboard — admin only
+app.get('/api/raffle/leaderboard', async (req, res) => {
+  if (!pool) return res.json({ success: false, error: 'Database not ready' });
+  const cookies = parseCookies(req);
+  if (!verifyAdminToken(cookies.admin_token)) return res.status(401).json({ success: false, error: 'Unauthorized' });
+  try {
+    const r = await pool.query(`
+      SELECT rv.nominee_ticket_id, a.name, a.ticket_type, a.organization, COUNT(*)::int AS votes
+      FROM raffle_votes rv
+      JOIN attendees a ON a.ticket_id = rv.nominee_ticket_id
+      GROUP BY rv.nominee_ticket_id, a.name, a.ticket_type, a.organization
+      ORDER BY votes DESC LIMIT 20
+    `);
+    const total = await pool.query('SELECT COUNT(*)::int AS c FROM raffle_votes');
+    const settings = await pool.query('SELECT * FROM raffle_settings WHERE id=1');
+    const s = settings.rows[0] || { voting_open: false, reveal_ready: false };
+    res.json({ success: true, leaderboard: r.rows, total_votes: total.rows[0].c, voting_open: s.voting_open, reveal_ready: s.reveal_ready });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// POST /api/raffle/toggle — admin toggle voting
+app.post('/api/raffle/toggle', async (req, res) => {
+  if (!pool) return res.json({ success: false, error: 'Database not ready' });
+  const cookies = parseCookies(req);
+  if (!verifyAdminToken(cookies.admin_token)) return res.status(401).json({ success: false, error: 'Unauthorized' });
+  try {
+    const r = await pool.query('SELECT voting_open FROM raffle_settings WHERE id=1');
+    const next = !r.rows[0]?.voting_open;
+    await pool.query('UPDATE raffle_settings SET voting_open=$1 WHERE id=1', [next]);
+    res.json({ success: true, voting_open: next });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// POST /api/raffle/reveal-toggle — admin toggle reveal
+app.post('/api/raffle/reveal-toggle', async (req, res) => {
+  if (!pool) return res.json({ success: false, error: 'Database not ready' });
+  const cookies = parseCookies(req);
+  if (!verifyAdminToken(cookies.admin_token)) return res.status(401).json({ success: false, error: 'Unauthorized' });
+  try {
+    const r = await pool.query('SELECT reveal_ready FROM raffle_settings WHERE id=1');
+    const next = !r.rows[0]?.reveal_ready;
+    await pool.query('UPDATE raffle_settings SET reveal_ready=$1 WHERE id=1', [next]);
+    res.json({ success: true, reveal_ready: next });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// POST /api/raffle/reset — admin reset
+app.post('/api/raffle/reset', async (req, res) => {
+  if (!pool) return res.json({ success: false, error: 'Database not ready' });
+  const cookies = parseCookies(req);
+  if (!verifyAdminToken(cookies.admin_token)) return res.status(401).json({ success: false, error: 'Unauthorized' });
+  try {
+    await pool.query('DELETE FROM raffle_votes');
+    await pool.query('UPDATE raffle_settings SET voting_open=false, reveal_ready=false WHERE id=1');
+    res.json({ success: true, message: 'Raffle reset' });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// ── PUBLIC RAFFLE PAGES ──────────────────────────────────────────────────────
+
+// GET /raffle — entry page
+app.get('/raffle', async (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎰 Raffle — Africa Convention 2026</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#e8f4fd 0%,#fdf0f7 40%,#eef4ff 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+    .card{background:white;border-radius:24px;padding:36px 32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(244,143,177,0.25);text-align:center}
+    .icon{font-size:52px;margin-bottom:12px}
+    h1{font-size:22px;font-weight:800;color:#1e293b;margin-bottom:6px}
+    .sub{color:#64748b;font-size:14px;margin-bottom:28px;line-height:1.5}
+    #scanner-box{width:100%;margin-bottom:18px;border-radius:14px;overflow:hidden;background:#f8fafc}
+    .btn{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:all 0.2s;font-family:inherit}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,143,177,0.45)}
+    .btn-outline{background:white;color:#e91e63;border:2px solid rgba(244,143,177,0.5)}
+    .btn-outline:hover{background:rgba(244,143,177,0.06);box-shadow:none}
+    .divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:#94a3b8;font-size:13px}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(244,143,177,0.25)}
+    input{width:100%;padding:12px 14px;border:2px solid rgba(244,143,177,0.3);border-radius:10px;font-size:15px;color:#374151;margin-bottom:12px;font-family:inherit;background:#fff}
+    input:focus{outline:none;border-color:#f06292;box-shadow:0 0 0 3px rgba(244,143,177,0.18)}
+    .msg{padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;margin-top:12px;display:none}
+    .msg.error{background:rgba(254,202,202,0.25);color:#e11d48;border-left:4px solid #f87171;display:block}
+    .msg.info{background:rgba(167,243,208,0.22);color:#059669;border-left:4px solid #34d399;display:block}
+    .status-badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:20px}
+    .status-open{background:rgba(167,243,208,0.3);color:#059669;border:1px solid rgba(167,243,208,0.6)}
+    .status-closed{background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.5)}
+    footer{text-align:center;padding:20px;font-style:italic;font-size:7px;color:#94a3b8;margin-top:18px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🎰</div>
+    <h1>Africa Convention Raffle</h1>
+    <p class="sub">Nominate a fellow delegate for an organiser gift.<br>Scan your badge QR — or type your Ticket ID.</p>
+    <div id="statusBadge" class="status-badge status-closed">Checking status…</div>
+
+    <div id="scanner-box"><div id="qr-entry" style="width:100%"></div></div>
+    <button class="btn" id="startBtn" onclick="startScan()">📷 Scan My Badge QR</button>
+    <button class="btn btn-outline" id="stopBtn" onclick="stopScan()" style="display:none">⏹ Stop Camera</button>
+
+    <div class="divider">or enter manually</div>
+    <input id="ticketInput" placeholder="Your Ticket ID (e.g. TKT-00001)" onkeydown="if(event.key==='Enter')enterTicket()">
+    <button class="btn" onclick="enterTicket()">▶ Continue to Vote</button>
+
+    <div id="msg" class="msg"></div>
+  </div>
+  <footer>© Faith&amp;Will Logi-Tec Solutions · Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI · raphayelchas@gmail.com · +255 743 868 755 · All Rights Reserved</footer>
+
+  <script>
+    var scanner = null;
+
+    fetch('/api/raffle/status').then(r=>r.json()).then(function(s){
+      var el = document.getElementById('statusBadge');
+      if(s.reveal_ready){ el.textContent='🏆 Results Available'; el.className='status-badge status-open'; window.location.href='/raffle/reveal'; return; }
+      if(s.voting_open){ el.textContent='✅ Voting is Open'; el.className='status-badge status-open'; }
+      else { el.textContent='🔒 Voting not yet open'; el.className='status-badge status-closed'; }
+    });
+
+    function startScan(){
+      document.getElementById('startBtn').style.display='none';
+      document.getElementById('stopBtn').style.display='block';
+      scanner = new Html5Qrcode('qr-entry');
+      scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:220}},function(code){
+        stopScan();
+        var tid;
+        try{ var obj=JSON.parse(code); tid=obj.ticket_id||code; }catch(_){ tid=code; }
+        window.location.href='/raffle/vote/'+encodeURIComponent(tid.trim());
+      },function(){});
+    }
+
+    function stopScan(){
+      if(scanner){ try{ scanner.stop().then(function(){ scanner.clear(); scanner=null; }); }catch(_){} }
+      document.getElementById('startBtn').style.display='block';
+      document.getElementById('stopBtn').style.display='none';
+    }
+
+    function enterTicket(){
+      var tid = document.getElementById('ticketInput').value.trim();
+      if(!tid){ showMsg('Please enter your Ticket ID','error'); return; }
+      window.location.href='/raffle/vote/'+encodeURIComponent(tid);
+    }
+
+    function showMsg(txt, type){
+      var el = document.getElementById('msg');
+      el.textContent = txt;
+      el.className = 'msg ' + type;
+    }
+  </script>
+</body>
+</html>`);
+});
+
+// GET /raffle/vote/:ticket_id — nomination page
+app.get('/raffle/vote/:ticket_id', async (req, res) => {
+  const ticket_id = req.params.ticket_id;
+  res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cast Your Vote — Africa Convention 2026</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#e8f4fd 0%,#fdf0f7 40%,#eef4ff 100%);min-height:100vh;padding:24px}
+    .header{max-width:600px;margin:0 auto 22px;text-align:center}
+    .header h1{font-size:22px;font-weight:800;color:#1e293b;margin-bottom:6px}
+    .voter-card{background:white;border-radius:16px;padding:16px 20px;max-width:600px;margin:0 auto 20px;box-shadow:0 4px 20px rgba(244,143,177,0.18);display:flex;align-items:center;gap:14px}
+    .voter-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#f48fb1,#ce93d8);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .voter-info h3{font-size:15px;font-weight:700;color:#1e293b}
+    .voter-info p{font-size:12px;color:#64748b}
+    .voted-banner{background:rgba(167,243,208,0.25);border:1px solid rgba(167,243,208,0.6);border-radius:12px;padding:16px 20px;max-width:600px;margin:0 auto 20px;text-align:center;color:#059669;font-weight:700;font-size:15px;display:none}
+    .search-wrap{max-width:600px;margin:0 auto 14px}
+    input[type=text]{width:100%;padding:12px 14px;border:2px solid rgba(244,143,177,0.3);border-radius:10px;font-size:14px;color:#374151;font-family:inherit;background:#fff}
+    input[type=text]:focus{outline:none;border-color:#f06292;box-shadow:0 0 0 3px rgba(244,143,177,0.18)}
+    .nominees{max-width:600px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:480px){.nominees{grid-template-columns:1fr}}
+    .nominee{background:white;border-radius:12px;padding:14px 16px;cursor:pointer;transition:all 0.2s;border:2px solid transparent;box-shadow:0 2px 10px rgba(244,143,177,0.1)}
+    .nominee:hover{border-color:#f48fb1;transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,143,177,0.22)}
+    .nominee.selected{border-color:#e91e63;background:rgba(244,143,177,0.08)}
+    .nominee-name{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:3px}
+    .nominee-meta{font-size:11px;color:#64748b}
+    .nominee-type{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;margin-top:4px;background:rgba(244,143,177,0.15);color:#e91e63}
+    .submit-wrap{max-width:600px;margin:20px auto 0;text-align:center}
+    .btn-submit{padding:14px 36px;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:inherit;display:none}
+    .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,143,177,0.45)}
+    .btn-back{display:inline-block;margin-top:14px;color:#94a3b8;font-size:13px;cursor:pointer;background:none;border:none;font-family:inherit}
+    .btn-back:hover{color:#e91e63;transform:none;box-shadow:none}
+    .empty{text-align:center;color:#94a3b8;padding:40px;font-size:14px;grid-column:1/-1}
+    .msg{padding:14px 18px;border-radius:10px;font-size:15px;font-weight:700;margin:0 auto 16px;max-width:600px;display:none}
+    .msg.error{background:rgba(254,202,202,0.25);color:#e11d48;border-left:4px solid #f87171;display:block}
+    .msg.success{background:rgba(167,243,208,0.22);color:#059669;border-left:4px solid #34d399;display:block}
+    .loading{text-align:center;padding:60px;color:#94a3b8;font-size:15px;max-width:600px;margin:0 auto}
+    footer{text-align:center;padding:24px 16px;font-style:italic;font-size:7px;color:#94a3b8;margin-top:20px}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div style="font-size:38px;margin-bottom:8px">🎰</div>
+    <h1>Cast Your Vote</h1>
+    <p style="color:#64748b;font-size:13px;margin-top:4px">Nominate a delegate — top 3 nominees win an organiser gift</p>
+  </div>
+
+  <div id="voterCard" class="voter-card" style="display:none">
+    <div class="voter-avatar">🎫</div>
+    <div class="voter-info">
+      <h3 id="voterName">—</h3>
+      <p id="voterMeta">—</p>
+    </div>
+  </div>
+
+  <div id="votedBanner" class="voted-banner"></div>
+  <div id="globalMsg" class="msg"></div>
+
+  <div id="loading" class="loading">Loading nominees…</div>
+
+  <div class="search-wrap" id="searchWrap" style="display:none">
+    <input type="text" id="searchInput" placeholder="🔍  Search by name or organisation…" oninput="filterNominees()">
+  </div>
+
+  <div class="nominees" id="nomineesList"></div>
+
+  <div class="submit-wrap" id="submitWrap" style="display:none">
+    <div style="margin-bottom:12px;color:#64748b;font-size:13px">Nominating: <strong id="selectedName" style="color:#e91e63"></strong></div>
+    <button class="btn-submit" id="submitBtn" onclick="submitVote()">🗳️ Confirm Vote</button>
+    <div><button class="btn-back" onclick="clearSelection()">↩ Change selection</button></div>
+  </div>
+
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn-back" onclick="window.location.href='/raffle'">← Back to Entry</button>
+  </div>
+
+  <footer>© Faith&amp;Will Logi-Tec Solutions · Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI · raphayelchas@gmail.com · +255 743 868 755 · All Rights Reserved</footer>
+
+  <script>
+    var VOTER_ID = ${JSON.stringify(ticket_id)};
+    var allNominees = [];
+    var selectedId = null;
+    var selectedName = '';
+    var alreadyVoted = false;
+
+    function esc(s){ var d=document.createElement('div'); d.appendChild(document.createTextNode(s||'')); return d.innerHTML; }
+
+    async function init(){
+      // Load voter info
+      var vr = await fetch('/api/raffle/voter/'+encodeURIComponent(VOTER_ID)).then(r=>r.json());
+      if(!vr.success){ showMsg(vr.error||'Ticket not found','error'); document.getElementById('loading').style.display='none'; return; }
+      document.getElementById('voterCard').style.display='flex';
+      document.getElementById('voterName').textContent = vr.voter.name;
+      document.getElementById('voterMeta').textContent = (vr.voter.organization||'') + (vr.voter.organization && vr.voter.ticket_type ? ' · ' : '') + (vr.voter.ticket_type||'');
+
+      if(vr.already_voted){
+        alreadyVoted = true;
+        var vb = document.getElementById('votedBanner');
+        vb.style.display='block';
+        vb.innerHTML = '✅ Your vote has been recorded. Thank you for participating! <br><small style="font-weight:400;opacity:0.8">You voted earlier in this session.</small>';
+        document.getElementById('loading').style.display='none';
+        return;
+      }
+
+      // Load nominees
+      var nr = await fetch('/api/raffle/nominees').then(r=>r.json());
+      document.getElementById('loading').style.display='none';
+      if(!nr.success){
+        if(nr.not_open) showMsg('Voting is not open yet. Please wait for the organiser to open the raffle.','error');
+        else showMsg(nr.error||'Error loading nominees','error');
+        return;
+      }
+      allNominees = nr.nominees.filter(function(n){ return n.ticket_id !== VOTER_ID; });
+      document.getElementById('searchWrap').style.display='block';
+      renderNominees(allNominees);
+    }
+
+    function renderNominees(list){
+      var el = document.getElementById('nomineesList');
+      if(!list.length){ el.innerHTML='<div class="empty">No delegates found</div>'; return; }
+      el.innerHTML = list.map(function(n){
+        return '<div class="nominee" id="nc-'+esc(n.ticket_id)+'" onclick="selectNominee('+JSON.stringify(n.ticket_id)+','+JSON.stringify(n.name)+')">'
+          + '<div class="nominee-name">'+esc(n.name)+'</div>'
+          + (n.organization ? '<div class="nominee-meta">'+esc(n.organization)+'</div>' : '')
+          + '<span class="nominee-type">'+esc(n.ticket_type||'delegate')+'</span>'
+          + '</div>';
+      }).join('');
+    }
+
+    function filterNominees(){
+      var q = document.getElementById('searchInput').value.toLowerCase();
+      var filtered = allNominees.filter(function(n){
+        return (n.name||'').toLowerCase().includes(q)||(n.organization||'').toLowerCase().includes(q);
+      });
+      renderNominees(filtered);
+    }
+
+    function selectNominee(id, name){
+      if(alreadyVoted) return;
+      document.querySelectorAll('.nominee').forEach(function(el){ el.classList.remove('selected'); });
+      var card = document.getElementById('nc-'+id);
+      if(card) card.classList.add('selected');
+      selectedId = id;
+      selectedName = name;
+      document.getElementById('selectedName').textContent = name;
+      var sw = document.getElementById('submitWrap');
+      sw.style.display='block';
+      document.getElementById('submitBtn').style.display='inline-block';
+      sw.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+
+    function clearSelection(){
+      selectedId = null; selectedName = '';
+      document.querySelectorAll('.nominee').forEach(function(el){ el.classList.remove('selected'); });
+      document.getElementById('submitWrap').style.display='none';
+    }
+
+    async function submitVote(){
+      if(!selectedId){ showMsg('Please select a nominee first','error'); return; }
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('submitBtn').textContent = 'Submitting…';
+      var r = await fetch('/api/raffle/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({voter_ticket_id:VOTER_ID,nominee_ticket_id:selectedId})}).then(r=>r.json());
+      if(r.success){
+        document.getElementById('nomineesList').style.display='none';
+        document.getElementById('searchWrap').style.display='none';
+        document.getElementById('submitWrap').style.display='none';
+        var vb = document.getElementById('votedBanner');
+        vb.style.display='block';
+        vb.innerHTML = '🎉 Vote cast! You nominated <strong>'+esc(r.nominee_name)+'</strong>.<br><small style="font-weight:400;opacity:0.8">Thank you for participating in the Africa Convention Raffle!</small>';
+      } else {
+        showMsg(r.error||'Error submitting vote','error');
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').textContent = '🗳️ Confirm Vote';
+      }
+    }
+
+    function showMsg(txt, type){
+      var el = document.getElementById('globalMsg');
+      el.textContent = txt;
+      el.className = 'msg '+type;
+    }
+
+    init();
+  </script>
+</body>
+</html>`);
+});
+
+// GET /raffle/reveal — animated winner reveal
+app.get('/raffle/reveal', async (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 Raffle Winners — Africa Convention 2026</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:hidden}
+    .stage{text-align:center;max-width:700px;width:100%}
+    .title{font-size:14px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(244,143,177,0.7);margin-bottom:8px}
+    h1{font-size:34px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+    .subtitle{color:rgba(200,160,255,0.65);font-size:14px;margin-bottom:40px}
+    .waiting{text-align:center;padding:60px 0}
+    .waiting .icon{font-size:64px;margin-bottom:16px;animation:pulse 2s ease-in-out infinite}
+    .waiting h2{color:rgba(240,220,255,0.85);font-size:22px;margin-bottom:10px}
+    .waiting p{color:rgba(200,160,255,0.55);font-size:14px}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+    .winners{display:flex;flex-direction:column;gap:18px;margin-top:10px}
+    .winner-card{border-radius:20px;padding:22px 28px;display:flex;align-items:center;gap:20px;opacity:0;transform:translateY(30px);transition:all 0.7s ease-out;position:relative;overflow:hidden}
+    .winner-card.show{opacity:1;transform:translateY(0)}
+    .winner-card.rank-1{background:linear-gradient(135deg,rgba(255,215,0,0.18),rgba(255,180,0,0.08));border:2px solid rgba(255,215,0,0.5);box-shadow:0 8px 40px rgba(255,215,0,0.2)}
+    .winner-card.rank-2{background:linear-gradient(135deg,rgba(192,192,192,0.18),rgba(160,160,160,0.08));border:2px solid rgba(192,192,192,0.5);box-shadow:0 8px 30px rgba(192,192,192,0.15)}
+    .winner-card.rank-3{background:linear-gradient(135deg,rgba(205,127,50,0.18),rgba(180,100,30,0.08));border:2px solid rgba(205,127,50,0.45);box-shadow:0 8px 24px rgba(205,127,50,0.15)}
+    .rank-badge{font-size:38px;flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))}
+    .winner-info{flex:1;text-align:left}
+    .winner-name{font-size:20px;font-weight:800;color:white;margin-bottom:4px}
+    .winner-meta{font-size:13px;color:rgba(200,160,255,0.7)}
+    .winner-votes{text-align:right;flex-shrink:0}
+    .votes-count{font-size:28px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .votes-label{font-size:11px;color:rgba(200,160,255,0.5);text-transform:uppercase;letter-spacing:1px}
+    .gift-label{display:inline-block;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-top:6px;background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
+    .total-votes{text-align:center;margin-top:28px;color:rgba(200,160,255,0.5);font-size:13px}
+    .confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1}
+    .particle{position:absolute;width:8px;height:8px;border-radius:50%;animation:fall linear infinite}
+    @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+    footer{text-align:center;padding:24px 16px;font-style:italic;font-size:7px;color:rgba(150,100,180,0.5);margin-top:20px}
+  </style>
+</head>
+<body>
+  <div class="confetti" id="confetti"></div>
+  <div class="stage">
+    <div class="title">Africa Convention 2026</div>
+    <h1>🏆 Raffle Results</h1>
+    <p class="subtitle">And the top nominees are…</p>
+
+    <div id="waiting" class="waiting">
+      <div class="icon">⏳</div>
+      <h2>Results Pending</h2>
+      <p>The organiser will reveal the winners shortly.<br>This page will update automatically.</p>
+    </div>
+
+    <div id="winnersSection" style="display:none">
+      <div class="winners" id="winnersList"></div>
+      <div class="total-votes" id="totalVotes"></div>
+    </div>
+  </div>
+  <footer>© Faith&amp;Will Logi-Tec Solutions · Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI · raphayelchas@gmail.com · +255 743 868 755 · All Rights Reserved</footer>
+
+  <script>
+    var medals = ['🥇','🥈','🥉'];
+    var giftLabels = ['🎁 1st Prize — Organiser Gift','🎁 2nd Prize — Organiser Gift','🎁 3rd Prize — Organiser Gift'];
+    var rankClasses = ['rank-1','rank-2','rank-3'];
+    var pollInterval = null;
+
+    function spawnConfetti(){
+      var colors=['#ffd700','#f48fb1','#ce93d8','#4fc3f7','#a5f3fc','#fce4ec'];
+      var c = document.getElementById('confetti');
+      for(var i=0;i<60;i++){
+        var p=document.createElement('div');
+        p.className='particle';
+        p.style.left=Math.random()*100+'%';
+        p.style.background=colors[Math.floor(Math.random()*colors.length)];
+        p.style.animationDuration=(3+Math.random()*4)+'s';
+        p.style.animationDelay=(Math.random()*3)+'s';
+        p.style.width=p.style.height=(6+Math.random()*8)+'px';
+        c.appendChild(p);
+      }
+    }
+
+    function esc(s){ var d=document.createElement('div'); d.appendChild(document.createTextNode(s||'')); return d.innerHTML; }
+
+    function showWinners(winners, total){
+      document.getElementById('waiting').style.display='none';
+      document.getElementById('winnersSection').style.display='block';
+      var list = document.getElementById('winnersList');
+      list.innerHTML = winners.map(function(w,i){
+        return '<div class="winner-card '+rankClasses[i]+'" id="wcard-'+i+'">'
+          + '<div class="rank-badge">'+medals[i]+'</div>'
+          + '<div class="winner-info">'
+          + '<div class="winner-name">'+esc(w.name)+'</div>'
+          + '<div class="winner-meta">'+(w.organization||w.ticket_type||'')+'</div>'
+          + '<span class="gift-label">'+giftLabels[i]+'</span>'
+          + '</div>'
+          + '<div class="winner-votes"><div class="votes-count">'+w.votes+'</div><div class="votes-label">votes</div></div>'
+          + '</div>';
+      }).join('');
+      document.getElementById('totalVotes').textContent = 'Total votes cast: ' + total;
+      spawnConfetti();
+      // Staggered reveal
+      winners.forEach(function(_,i){
+        setTimeout(function(){
+          var card = document.getElementById('wcard-'+i);
+          if(card) card.classList.add('show');
+        }, 400 + i * 700);
+      });
+    }
+
+    function poll(){
+      fetch('/api/raffle/winners').then(r=>r.json()).then(function(d){
+        if(d.success && d.winners && d.winners.length){
+          if(pollInterval){ clearInterval(pollInterval); pollInterval=null; }
+          showWinners(d.winners, d.total_votes);
+        }
+      }).catch(function(){});
+    }
+
+    poll();
+    pollInterval = setInterval(poll, 5000);
+  </script>
+</body>
+</html>`);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

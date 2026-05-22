@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Africa Convention 2026</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
   <style>
     [x-cloak] { display: none !important; }
@@ -128,6 +129,7 @@
       <button class="tab-btn" :class="{'active': activeTab==='checkout'}"  @click="switchTab('checkout')">📤 Check-out</button>
       <button class="tab-btn" :class="{'active': activeTab==='scanner'}"   @click="switchTab('scanner')">📷 QR Scanner</button>
       <button class="tab-btn" :class="{'active': activeTab==='statistics'}" @click="switchTab('statistics')">📈 Statistics</button>
+      <button class="tab-btn" :class="{'active': activeTab==='raffle'}"    @click="switchTab('raffle')">🎰 Raffle</button>
     </div>
     <div class="tabs-fade" id="tabsFade"></div>
   </div>
@@ -433,6 +435,62 @@
       </table>
     </div>
 
+    <!-- ── Raffle ── -->
+    <div id="raffle" class="tab-content"
+         x-show="activeTab==='raffle'"
+         x-transition:enter="tab-enter" x-transition:enter-start="tab-enter-start" x-transition:enter-end="tab-enter-end"
+         x-cloak>
+      <h2>🎰 Raffle Game</h2>
+
+      <!-- Controls row -->
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px;align-items:center">
+        <button id="raffleToggleBtn" onclick="raffleToggle()" style="min-width:160px">⏳ Loading…</button>
+        <button id="raffleRevealBtn" onclick="raffleRevealToggle()" style="min-width:180px;background:linear-gradient(135deg,#ffd700,#f59e0b);color:#1e293b">⏳ Loading…</button>
+        <button onclick="raffleReset()" style="background:linear-gradient(135deg,#fca5a5,#fde68a);color:#b91c1c;min-width:130px">🗑️ Reset Raffle</button>
+        <button onclick="loadRaffle()" style="background:rgba(255,255,255,0.85);color:#64748b;border:1px solid rgba(244,143,177,0.3);min-width:120px">🔄 Refresh</button>
+      </div>
+
+      <!-- QR Codes row -->
+      <div style="display:flex;flex-wrap:wrap;gap:24px;margin-bottom:28px">
+        <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(244,143,177,0.14);text-align:center;flex:1;min-width:200px">
+          <h3 style="margin-top:0;margin-bottom:12px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">📱 Voting Entry QR</h3>
+          <div id="raffleEntryQR" style="margin:0 auto 10px;width:180px;height:180px;background:#f8fafc;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+            <img id="raffleEntryQRImg" src="" style="width:100%;height:100%;display:none">
+            <span id="raffleEntryQRWait" style="color:#94a3b8;font-size:12px">Generating…</span>
+          </div>
+          <p style="font-size:11px;color:#64748b">Display this at the venue so delegates can scan to vote</p>
+          <a href="/raffle" target="_blank" style="font-size:12px;color:#e91e63;text-decoration:none;font-weight:700">/raffle ↗</a>
+        </div>
+        <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(244,143,177,0.14);text-align:center;flex:1;min-width:200px">
+          <h3 style="margin-top:0;margin-bottom:12px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">🏆 Results Reveal QR</h3>
+          <div id="raffleRevealQR" style="margin:0 auto 10px;width:180px;height:180px;background:#f8fafc;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+            <img id="raffleRevealQRImg" src="" style="width:100%;height:100%;display:none">
+            <span style="color:#94a3b8;font-size:12px">Generating…</span>
+          </div>
+          <p style="font-size:11px;color:#64748b">Display when ready — delegates scan to see the winners</p>
+          <a href="/raffle/reveal" target="_blank" style="font-size:12px;color:#e91e63;text-decoration:none;font-weight:700">/raffle/reveal ↗</a>
+        </div>
+      </div>
+
+      <!-- Stats + leaderboard -->
+      <div style="display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap">
+        <div class="stat-box" style="min-width:140px">
+          <div class="stat-number" id="raffleTotalVotes">—</div>
+          <div class="stat-label">Total Votes Cast</div>
+        </div>
+        <div class="stat-box" style="min-width:140px">
+          <div class="stat-number" id="raffleNomineesCount">—</div>
+          <div class="stat-label">Unique Nominees</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:4px">Live Vote Leaderboard (Top 20)</h3>
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Organisation</th><th>Type</th><th>Votes</th></tr></thead>
+        <tbody id="raffleLeaderboard"><tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:30px">Click Refresh to load leaderboard</td></tr></tbody>
+      </table>
+    </div>
+
   </div><!-- /.content-wrapper -->
   <footer style="flex-shrink:0;text-align:center;padding:6px 16px;font-style:italic;font-size:7px;color:#94a3b8;background:rgba(255,255,255,0.7);border-top:1px solid rgba(244,143,177,0.14);backdrop-filter:blur(8px)">
     © Faith&amp;Will Logi-Tec Solutions &nbsp;·&nbsp; Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;·&nbsp; raphayelchas@gmail.com &nbsp;·&nbsp; +255 743 868 755 &nbsp;·&nbsp; All Rights Reserved
@@ -611,6 +669,7 @@
         if (tab === 'pending')    loadPending();
         if (tab === 'approval')   loadApproval();
         if (tab === 'statistics') loadStatistics();
+        if (tab === 'raffle')     loadRaffle();
         if (tab === 'checkin')  { loadCheckins();  this.$nextTick(function(){ var el = document.getElementById('checkinInput');  if (el) el.focus(); }); }
         if (tab === 'checkout') { loadCheckouts(); this.$nextTick(function(){ var el = document.getElementById('checkoutInput'); if (el) el.focus(); }); }
       },
@@ -1123,6 +1182,87 @@
   // ── Utility ───────────────────────────────────────────────────────────────────
   function esc(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Raffle ────────────────────────────────────────────────────────────────────
+
+  var _raffleVotingOpen = false;
+  var _raffleRevealReady = false;
+
+  async function loadRaffle() {
+    try {
+      var r = await fetch('/api/raffle/leaderboard').then(function(x){ return x.json(); });
+      if (!r.success) return;
+      _raffleVotingOpen  = r.voting_open;
+      _raffleRevealReady = r.reveal_ready;
+      updateRaffleButtons();
+      document.getElementById('raffleTotalVotes').textContent  = r.total_votes;
+      document.getElementById('raffleNomineesCount').textContent = r.leaderboard.length;
+      var tbody = document.getElementById('raffleLeaderboard');
+      if (!r.leaderboard.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:30px">No votes yet</td></tr>';
+      } else {
+        var medals = ['🥇','🥈','🥉'];
+        tbody.innerHTML = r.leaderboard.map(function(row, i) {
+          return '<tr>'
+            + '<td>' + (medals[i] || (i + 1)) + '</td>'
+            + '<td><strong>' + esc(row.name) + '</strong></td>'
+            + '<td>' + esc(row.organization || '—') + '</td>'
+            + '<td>' + esc(row.ticket_type || '—') + '</td>'
+            + '<td><strong style="color:#e91e63">' + row.votes + '</strong></td>'
+            + '</tr>';
+        }).join('');
+      }
+      // Generate QR codes once
+      generateRaffleQRs();
+    } catch(e) { console.error('loadRaffle', e); }
+  }
+
+  function updateRaffleButtons() {
+    var tb = document.getElementById('raffleToggleBtn');
+    var rb = document.getElementById('raffleRevealBtn');
+    tb.textContent  = _raffleVotingOpen  ? '🔒 Close Voting'  : '🔓 Open Voting';
+    tb.style.background = _raffleVotingOpen ? 'linear-gradient(135deg,#fca5a5,#f87171)' : 'linear-gradient(135deg,#a7f3d0,#34d399)';
+    tb.style.color = _raffleVotingOpen ? 'white' : '#064e3b';
+    rb.textContent  = _raffleRevealReady ? '🙈 Hide Results'  : '🏆 Reveal Winners';
+  }
+
+  var _raffleQRsGenerated = false;
+  async function generateRaffleQRs() {
+    if (_raffleQRsGenerated) return;
+    _raffleQRsGenerated = true;
+    var base = window.location.origin;
+    try {
+      var entryQR  = await QRCode.toDataURL(base + '/raffle',        { width: 180, margin: 1 });
+      var revealQR = await QRCode.toDataURL(base + '/raffle/reveal', { width: 180, margin: 1 });
+      var ei = document.getElementById('raffleEntryQRImg');
+      var ew = document.getElementById('raffleEntryQRWait');
+      if (ei) { ei.src = entryQR;  ei.style.display = 'block'; if (ew) ew.style.display='none'; }
+      var ri = document.getElementById('raffleRevealQRImg');
+      if (ri) { ri.src = revealQR; ri.style.display = 'block'; }
+    } catch(e) {}
+  }
+
+  async function raffleToggle() {
+    if (!confirm(_raffleVotingOpen ? 'Close voting? Delegates will no longer be able to vote.' : 'Open voting? Delegates can now cast their votes.')) return;
+    var r = await fetch('/api/raffle/toggle', { method: 'POST' }).then(function(x){ return x.json(); });
+    if (r.success) { _raffleVotingOpen = r.voting_open; updateRaffleButtons(); }
+    else alert('Error: ' + r.error);
+  }
+
+  async function raffleRevealToggle() {
+    if (!confirm(_raffleRevealReady ? 'Hide results? The reveal page will return to "pending" state.' : 'Reveal winners? The public reveal page will show the top 3 nominees.')) return;
+    var r = await fetch('/api/raffle/reveal-toggle', { method: 'POST' }).then(function(x){ return x.json(); });
+    if (r.success) { _raffleRevealReady = r.reveal_ready; updateRaffleButtons(); }
+    else alert('Error: ' + r.error);
+  }
+
+  async function raffleReset() {
+    if (!confirm('⚠️ Reset the entire raffle? This will delete ALL votes and close voting. This cannot be undone.')) return;
+    if (!confirm('Are you sure? All raffle data will be permanently deleted.')) return;
+    var r = await fetch('/api/raffle/reset', { method: 'POST' }).then(function(x){ return x.json(); });
+    if (r.success) { _raffleQRsGenerated = false; loadRaffle(); }
+    else alert('Error: ' + r.error);
   }
 </script>
 </body>
