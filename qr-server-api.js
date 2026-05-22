@@ -309,7 +309,7 @@ app.get('/', (req, res) => {
     .cf-card { position:absolute; width:220px; height:280px; border-radius:18px; overflow:hidden; cursor:pointer; will-change:transform,opacity; transition:transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.6s ease,box-shadow 0.6s ease; }
     .cf-card img { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
     .cf-card .cf-gloss { position:absolute; inset:0; background:linear-gradient(145deg,rgba(255,255,255,0.25) 0%,transparent 52%); border-radius:18px; pointer-events:none; }
-    .cf-card.pos-center { transform:translateX(0) translateZ(90px) rotateY(0deg) scale(1.22); z-index:10; opacity:1; box-shadow:0 45px 110px rgba(244,143,177,0.65),0 0 0 2px rgba(255,255,255,0.8),0 0 60px rgba(186,104,200,0.22); -webkit-box-reflect:below 6px linear-gradient(transparent 48%,rgba(244,143,177,0.3) 72%,rgba(186,104,200,0.18)); }
+    .cf-card.pos-center { transform:translateX(0) translateZ(130px) rotateY(0deg) scale(1.42); z-index:10; opacity:1; box-shadow:0 55px 130px rgba(244,143,177,0.72),0 0 0 2px rgba(255,255,255,0.85),0 0 80px rgba(186,104,200,0.28); -webkit-box-reflect:below 8px linear-gradient(transparent 44%,rgba(244,143,177,0.36) 68%,rgba(186,104,200,0.22)); }
     .cf-card.pos-left1  { transform:translateX(-265px) translateZ(0) rotateY(54deg); z-index:7; opacity:0.72; box-shadow:0 14px 40px rgba(244,143,177,0.25); }
     .cf-card.pos-left2  { transform:translateX(-465px) translateZ(-120px) rotateY(66deg); z-index:5; opacity:0.32; }
     .cf-card.pos-right1 { transform:translateX(265px) translateZ(0) rotateY(-54deg); z-index:7; opacity:0.72; box-shadow:0 14px 40px rgba(244,143,177,0.25); }
@@ -319,16 +319,13 @@ app.get('/', (req, res) => {
     .cf-controls { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:14px; padding:22px 0 16px; }
     .cf-arrow { background:rgba(255,255,255,0.78); border:1px solid rgba(244,143,177,0.42); color:#e91e63; width:38px; height:38px; border-radius:50%; font-size:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; padding:0; flex-shrink:0; backdrop-filter:blur(10px); transform:none !important; box-shadow:none !important; }
     .cf-arrow:hover { background:rgba(255,255,255,0.97); box-shadow:0 4px 16px rgba(244,143,177,0.32) !important; transform:none !important; }
-    .cf-dots { display:flex; gap:7px; align-items:center; }
-    .cf-dot { width:6px; height:6px; border-radius:50%; background:rgba(233,30,99,0.22); cursor:pointer; transition:all 0.3s; }
-    .cf-dot.active { background:#e91e63; transform:scale(1.5); box-shadow:0 0 8px rgba(233,30,99,0.38); }
     /* Filmstrip */
     .cf-film { position:relative; z-index:1; display:flex; gap:8px; justify-content:flex-start; overflow-x:auto; padding:14px 20px; background:rgba(255,255,255,0.42); backdrop-filter:blur(14px); border-radius:16px; margin-top:14px; scrollbar-width:none; -ms-overflow-style:none; }
     .cf-film::-webkit-scrollbar { display:none; }
     .cf-thumb { width:58px; height:72px; border-radius:10px; overflow:hidden; cursor:pointer; opacity:0.45; transition:all 0.3s; flex-shrink:0; border:2px solid transparent; touch-action:manipulation; }
     .cf-thumb.active { opacity:1; border-color:#f48fb1; box-shadow:0 4px 16px rgba(244,143,177,0.45); transform:scale(1.08); }
     .cf-thumb img { width:100%; height:100%; object-fit:cover; pointer-events:none; display:block; }
-    @media(max-width:600px){ .cf-stage{height:280px} .cf-card{width:170px;height:215px} .cf-card.pos-center{transform:translateX(0) translateZ(60px) rotateY(0deg) scale(1.18)} .cf-card.pos-left1{transform:translateX(-200px) translateZ(0) rotateY(54deg)} .cf-card.pos-right1{transform:translateX(200px) translateZ(0) rotateY(-54deg)} .cf-card.pos-left2,.cf-card.pos-right2{opacity:0;pointer-events:none} .cf-film{gap:6px;padding:10px 14px} .cf-thumb{width:48px;height:60px} }
+    @media(max-width:600px){ .cf-stage{height:300px} .cf-card{width:170px;height:215px} .cf-card.pos-center{transform:translateX(0) translateZ(80px) rotateY(0deg) scale(1.38)} .cf-card.pos-left1{transform:translateX(-210px) translateZ(0) rotateY(54deg)} .cf-card.pos-right1{transform:translateX(210px) translateZ(0) rotateY(-54deg)} .cf-card.pos-left2,.cf-card.pos-right2{opacity:0;pointer-events:none} .cf-film{gap:6px;padding:10px 14px} .cf-thumb{width:48px;height:60px} }
 
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
     .modal.active { display: flex; }
@@ -441,7 +438,6 @@ app.get('/', (req, res) => {
     <div class="cf-shelf"></div>
     <div class="cf-controls">
       <button class="cf-arrow" onclick="cfPrev()">&#8249;</button>
-      <div class="cf-dots" id="cfDots"></div>
       <button class="cf-arrow" onclick="cfNext()">&#8250;</button>
     </div>
     <div class="cf-film" id="cfFilm"></div>
@@ -559,7 +555,6 @@ app.get('/', (req, res) => {
 
     function initCoverflow() {
       const stage = document.getElementById('cfStage');
-      const dotsEl = document.getElementById('cfDots');
       const filmEl = document.getElementById('cfFilm');
       if (!stage) return;
       if (!galleryImages.length) {
@@ -577,10 +572,6 @@ app.get('/', (req, res) => {
           else { cfGoTo(idx); }
         });
         stage.appendChild(card);
-        const dot = document.createElement('span');
-        dot.className = 'cf-dot';
-        dot.addEventListener('click', (function(idx){ return function(){ cfGoTo(idx); }; })(i));
-        dotsEl.appendChild(dot);
         const thumb = document.createElement('div');
         thumb.className = 'cf-thumb';
         thumb.dataset.idx = i;
@@ -618,7 +609,6 @@ app.get('/', (req, res) => {
         const d = raw > n / 2 ? raw - n : raw;
         card.className = 'cf-card ' + ({'-2':'pos-left2','-1':'pos-left1','0':'pos-center','1':'pos-right1','2':'pos-right2'}[String(d)] || 'pos-hidden');
       });
-      document.querySelectorAll('.cf-dot').forEach(function(dot, i) { dot.classList.toggle('active', i === (_cfActive % n)); });
       document.querySelectorAll('.cf-thumb').forEach(function(thumb, i) {
         const active = i === (_cfActive % n);
         thumb.classList.toggle('active', active);
