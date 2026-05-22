@@ -167,8 +167,11 @@ async function initializeDatabase() {
 // ─── SHARED HELPERS ───────────────────────────────────────────────────────────
 
 const TICKET_TYPE_COLORS = {
-  general: '#9b59b6', foreigners: '#e91e8c', youth: '#27ae60',
-  speaker: '#f39c12', business: '#2980b9'
+  general:    '#78909c',
+  foreigners: '#e91e63',
+  youth:      '#29b6f6',
+  speaker:    '#ba68c8',
+  business:   '#4fc3f7'
 };
 
 async function ensureQR(a) {
@@ -193,84 +196,87 @@ async function generateBadgePDF(a) {
       doc.on('error', reject);
 
       const W = 419, H = 595;
-      const accent = TICKET_TYPE_COLORS[a.ticket_type] || '#7b1fa2';
+      const accent = TICKET_TYPE_COLORS[a.ticket_type] || '#f06292';
 
-      // Background
-      doc.rect(0, 0, W, H).fill('#12002a');
+      // ── Background — light iOS blossom ────────────────────────────────────────
+      doc.rect(0, 0, W, H).fill('#fdf8ff');
 
-      // Header band — brochure image with dark overlay
+      // ── Header band — brochure image with soft blush tint overlay ─────────────
       const bronchourPath = path.join(__dirname, 'sysimages', 'bronchour.jpeg');
       try {
         if (fs.existsSync(bronchourPath)) {
-          doc.save().rect(0, 0, W, 115).clip();
+          doc.save().rect(0, 0, W, 120).clip();
           doc.image(bronchourPath, 0, 0, { width: W });
           doc.restore();
-          doc.save().fillOpacity(0.56).rect(0, 0, W, 115).fill('#1a0035').restore();
+          doc.save().fillOpacity(0.38).rect(0, 0, W, 120).fill('#1e293b').restore();
         } else {
-          doc.rect(0, 0, W, 115).fill('#3d0075');
+          doc.rect(0, 0, W, 120).fill('#fce4ec');
         }
       } catch (_) {
-        doc.rect(0, 0, W, 115).fill('#3d0075');
+        doc.rect(0, 0, W, 120).fill('#fce4ec');
       }
 
-      // Accent stripe
-      doc.rect(0, 115, W, 6).fill(accent);
+      // ── Accent stripe ─────────────────────────────────────────────────────────
+      doc.rect(0, 120, W, 5).fill(accent);
 
-      // Event title
-      doc.font('Helvetica-Bold').fontSize(17).fillColor('white')
-        .text('AFRICA CONVENTION 2026', 20, 22, { align: 'center', width: W - 40 });
-      doc.font('Helvetica').fontSize(10).fillColor('rgba(220,180,255,0.82)')
-        .text('Arusha, Tanzania  ·  June 18–22, 2026', 20, 46, { align: 'center', width: W - 40 });
-      doc.font('Helvetica').fontSize(9).fillColor('rgba(200,150,255,0.65)')
-        .text('Doing Business and Bearing Fruitful', 20, 64, { align: 'center', width: W - 40 });
-      doc.font('Helvetica-Bold').fontSize(9).fillColor(accent)
-        .text((a.ticket_type || 'GENERAL').toUpperCase() + ' PASS', 20, 84, { align: 'center', width: W - 40 });
+      // ── Event title — white over image ────────────────────────────────────────
+      doc.font('Helvetica-Bold').fontSize(16).fillColor('white')
+        .text('AFRICA CONVENTION 2026', 20, 18, { align: 'center', width: W - 40 });
+      doc.font('Helvetica').fontSize(10).fillColor('rgba(255,255,255,0.9)')
+        .text('Arusha, Tanzania  ·  June 18–22, 2026', 20, 42, { align: 'center', width: W - 40 });
+      doc.font('Helvetica').fontSize(9).fillColor('rgba(255,255,255,0.75)')
+        .text('Doing Business and Bearing Fruitful', 20, 60, { align: 'center', width: W - 40 });
+      doc.font('Helvetica-Bold').fontSize(8.5).fillColor('white')
+        .text('[ ' + (a.ticket_type || 'GENERAL').toUpperCase() + ' PASS ]', 20, 82, { align: 'center', width: W - 40 });
 
-      // Name
-      const nameSize = a.name.length > 22 ? 22 : 28;
-      doc.font('Helvetica-Bold').fontSize(nameSize).fillColor('white')
-        .text(a.name, 20, 138, { align: 'center', width: W - 40 });
+      // ── Delegate name ─────────────────────────────────────────────────────────
+      const nameSize = a.name.length > 22 ? 20 : 26;
+      doc.font('Helvetica-Bold').fontSize(nameSize).fillColor('#1e293b')
+        .text(a.name, 20, 142, { align: 'center', width: W - 40 });
 
-      let yPos = 138 + nameSize + 8;
+      let yPos = 142 + nameSize + 8;
       if (a.title) {
-        doc.font('Helvetica').fontSize(12).fillColor('rgba(220,180,255,0.8)')
+        doc.font('Helvetica').fontSize(12).fillColor('#64748b')
           .text(a.title, 20, yPos, { align: 'center', width: W - 40 });
         yPos += 18;
       }
       if (a.organization) {
-        doc.font('Helvetica-Bold').fontSize(11).fillColor('rgba(196,77,255,0.85)')
+        doc.font('Helvetica-Bold').fontSize(11).fillColor('#e91e63')
           .text(a.organization, 20, yPos, { align: 'center', width: W - 40 });
         yPos += 18;
       }
 
-      // QR Code centred
+      // ── QR Code — blush-bordered ──────────────────────────────────────────────
       const qrBuf = Buffer.from(qrDataURL.split(',')[1], 'base64');
-      const qrSize = 150;
+      const qrSize = 148;
       const qrX = (W - qrSize) / 2;
-      const qrY = Math.max(yPos + 16, 230);
-      doc.rect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20).fill('white');
+      const qrY = Math.max(yPos + 18, 232);
+      doc.roundedRect(qrX - 13, qrY - 13, qrSize + 26, qrSize + 26, 8).fill('#fce4ec');
+      doc.rect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12).fill('white');
       doc.image(qrBuf, qrX, qrY, { width: qrSize, height: qrSize });
 
-      // Ticket ID below QR
-      doc.font('Helvetica-Bold').fontSize(9).fillColor('rgba(196,77,255,0.8)')
+      // ── Ticket ID + label ─────────────────────────────────────────────────────
+      doc.font('Helvetica-Bold').fontSize(9).fillColor('#e91e63')
         .text(a.ticket_id, 20, qrY + qrSize + 16, { align: 'center', width: W - 40 });
-      doc.font('Helvetica').fontSize(8).fillColor('rgba(180,130,220,0.55)')
-        .text('Scan to verify entry', 20, qrY + qrSize + 30, { align: 'center', width: W - 40 });
+      doc.font('Helvetica').fontSize(8).fillColor('#94a3b8')
+        .text('Scan to verify entry', 20, qrY + qrSize + 29, { align: 'center', width: W - 40 });
 
-      // Info row
-      const infoY = H - 80;
-      doc.moveTo(30, infoY - 6).lineTo(W - 30, infoY - 6).strokeColor('rgba(196,77,255,0.2)').stroke();
-      doc.font('Helvetica').fontSize(8).fillColor('rgba(200,160,255,0.6)')
+      // ── Info row ──────────────────────────────────────────────────────────────
+      const infoY = H - 76;
+      doc.moveTo(30, infoY - 6).lineTo(W - 30, infoY - 6)
+        .strokeColor('#f8bbd0').lineWidth(0.8).stroke();
+      doc.font('Helvetica').fontSize(8).fillColor('#64748b')
         .text('✉ ' + a.email, 30, infoY, { width: W - 60 });
       if (a.phone) {
-        doc.text('✆ ' + a.phone, 30, infoY + 13, { width: W - 60 });
+        doc.font('Helvetica').fontSize(8).fillColor('#64748b')
+          .text('✆ ' + a.phone, 30, infoY + 13, { width: W - 60 });
       }
 
-      // Footer
-      doc.rect(0, H - 32, W, 32).fill('#3d0075');
-      doc.font('Helvetica').fontSize(7.5).fillColor('rgba(220,180,255,0.6)')
+      // ── Footer — light blush band ─────────────────────────────────────────────
+      doc.rect(0, H - 30, W, 30).fill('#fce4ec');
+      doc.font('Helvetica').fontSize(7).fillColor('#64748b')
         .text('Africa Convention 2026  ·  WCCM Tanzania  ·  wccm.tz@gmail.com  ·  www.livinghope.or.tz',
-          20, H - 21, { align: 'center', width: W - 40 });
+          20, H - 19, { align: 'center', width: W - 40 });
 
       doc.end();
     } catch (e) { reject(e); }
