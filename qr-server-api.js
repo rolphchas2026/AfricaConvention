@@ -309,11 +309,11 @@ app.get('/', (req, res) => {
     .cf-card { position:absolute; width:220px; height:280px; border-radius:18px; overflow:hidden; cursor:pointer; will-change:transform,opacity; transition:transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.6s ease,box-shadow 0.6s ease; }
     .cf-card img { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
     .cf-card .cf-gloss { position:absolute; inset:0; background:linear-gradient(145deg,rgba(255,255,255,0.25) 0%,transparent 52%); border-radius:18px; pointer-events:none; }
-    .cf-card.pos-center { transform:translateX(0) translateZ(90px) rotateY(0deg); z-index:10; opacity:1; box-shadow:0 30px 80px rgba(244,143,177,0.48),0 0 0 2px rgba(255,255,255,0.65); -webkit-box-reflect:below 4px linear-gradient(transparent 62%,rgba(244,143,177,0.14)); }
-    .cf-card.pos-left1  { transform:translateX(-240px) translateZ(0) rotateY(54deg); z-index:7; opacity:0.72; box-shadow:0 14px 40px rgba(244,143,177,0.25); }
-    .cf-card.pos-left2  { transform:translateX(-430px) translateZ(-120px) rotateY(66deg); z-index:5; opacity:0.32; }
-    .cf-card.pos-right1 { transform:translateX(240px) translateZ(0) rotateY(-54deg); z-index:7; opacity:0.72; box-shadow:0 14px 40px rgba(244,143,177,0.25); }
-    .cf-card.pos-right2 { transform:translateX(430px) translateZ(-120px) rotateY(-66deg); z-index:5; opacity:0.32; }
+    .cf-card.pos-center { transform:translateX(0) translateZ(90px) rotateY(0deg) scale(1.22); z-index:10; opacity:1; box-shadow:0 45px 110px rgba(244,143,177,0.65),0 0 0 2px rgba(255,255,255,0.8),0 0 60px rgba(186,104,200,0.22); -webkit-box-reflect:below 6px linear-gradient(transparent 48%,rgba(244,143,177,0.3) 72%,rgba(186,104,200,0.18)); }
+    .cf-card.pos-left1  { transform:translateX(-265px) translateZ(0) rotateY(54deg); z-index:7; opacity:0.72; box-shadow:0 14px 40px rgba(244,143,177,0.25); }
+    .cf-card.pos-left2  { transform:translateX(-465px) translateZ(-120px) rotateY(66deg); z-index:5; opacity:0.32; }
+    .cf-card.pos-right1 { transform:translateX(265px) translateZ(0) rotateY(-54deg); z-index:7; opacity:0.72; box-shadow:0 14px 40px rgba(244,143,177,0.25); }
+    .cf-card.pos-right2 { transform:translateX(465px) translateZ(-120px) rotateY(-66deg); z-index:5; opacity:0.32; }
     .cf-card.pos-hidden { opacity:0; transform:translateX(0) scale(0.2); pointer-events:none; z-index:1; transition:none; }
     .cf-shelf { position:relative; z-index:1; height:1px; background:linear-gradient(90deg,transparent 0%,rgba(244,143,177,0.38) 25%,rgba(244,143,177,0.38) 75%,transparent 100%); margin:0 60px; }
     .cf-controls { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:14px; padding:22px 0 16px; }
@@ -323,13 +323,12 @@ app.get('/', (req, res) => {
     .cf-dot { width:6px; height:6px; border-radius:50%; background:rgba(233,30,99,0.22); cursor:pointer; transition:all 0.3s; }
     .cf-dot.active { background:#e91e63; transform:scale(1.5); box-shadow:0 0 8px rgba(233,30,99,0.38); }
     /* Filmstrip */
-    .cf-film { position:relative; z-index:1; display:flex; gap:8px; justify-content:center; overflow-x:auto; padding:14px 20px; background:rgba(255,255,255,0.42); backdrop-filter:blur(14px); border-radius:16px; margin-top:14px; scrollbar-width:thin; scrollbar-color:rgba(244,143,177,0.4) transparent; }
-    .cf-film::-webkit-scrollbar { height:4px; }
-    .cf-film::-webkit-scrollbar-thumb { background:rgba(244,143,177,0.5); border-radius:2px; }
-    .cf-thumb { width:58px; height:72px; border-radius:10px; overflow:hidden; cursor:pointer; opacity:0.45; transition:all 0.3s; flex-shrink:0; border:2px solid transparent; }
+    .cf-film { position:relative; z-index:1; display:flex; gap:8px; justify-content:flex-start; overflow-x:auto; padding:14px 20px; background:rgba(255,255,255,0.42); backdrop-filter:blur(14px); border-radius:16px; margin-top:14px; scrollbar-width:none; -ms-overflow-style:none; }
+    .cf-film::-webkit-scrollbar { display:none; }
+    .cf-thumb { width:58px; height:72px; border-radius:10px; overflow:hidden; cursor:pointer; opacity:0.45; transition:all 0.3s; flex-shrink:0; border:2px solid transparent; touch-action:manipulation; }
     .cf-thumb.active { opacity:1; border-color:#f48fb1; box-shadow:0 4px 16px rgba(244,143,177,0.45); transform:scale(1.08); }
     .cf-thumb img { width:100%; height:100%; object-fit:cover; pointer-events:none; display:block; }
-    @media(max-width:600px){ .cf-stage{height:280px} .cf-card{width:170px;height:215px} .cf-card.pos-left1{transform:translateX(-185px) translateZ(0) rotateY(54deg)} .cf-card.pos-right1{transform:translateX(185px) translateZ(0) rotateY(-54deg)} .cf-card.pos-left2,.cf-card.pos-right2{opacity:0;pointer-events:none} .cf-film{gap:6px;padding:10px 14px} .cf-thumb{width:48px;height:60px} }
+    @media(max-width:600px){ .cf-stage{height:280px} .cf-card{width:170px;height:215px} .cf-card.pos-center{transform:translateX(0) translateZ(60px) rotateY(0deg) scale(1.18)} .cf-card.pos-left1{transform:translateX(-200px) translateZ(0) rotateY(54deg)} .cf-card.pos-right1{transform:translateX(200px) translateZ(0) rotateY(-54deg)} .cf-card.pos-left2,.cf-card.pos-right2{opacity:0;pointer-events:none} .cf-film{gap:6px;padding:10px 14px} .cf-thumb{width:48px;height:60px} }
 
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
     .modal.active { display: flex; }
@@ -593,7 +592,22 @@ app.get('/', (req, res) => {
       cfStartAuto();
       stage.addEventListener('mouseenter', cfStopAuto);
       stage.addEventListener('mouseleave', cfStartAuto);
-      stage.addEventListener('touchstart', cfStopAuto, {passive:true});
+      // Swipe gestures on stage
+      let _swX = null, _swY = null;
+      stage.addEventListener('touchstart', function(e) {
+        _swX = e.touches[0].clientX;
+        _swY = e.touches[0].clientY;
+        cfStopAuto();
+      }, {passive:true});
+      stage.addEventListener('touchend', function(e) {
+        if (_swX === null) return;
+        const dx = e.changedTouches[0].clientX - _swX;
+        const dy = e.changedTouches[0].clientY - _swY;
+        _swX = null; _swY = null;
+        if (Math.abs(dx) < 30 || Math.abs(dy) > Math.abs(dx)) return;
+        if (dx < 0) cfNext(); else cfPrev();
+        cfStartAuto();
+      }, {passive:true});
     }
 
     function cfRender() {
@@ -904,8 +918,9 @@ app.get('/admin', (req, res) => {
     input[type=text] { padding:11px 14px; border:1px solid rgba(244,143,177,0.35); border-radius:8px; font-size:14px; color:#374151; background:rgba(255,255,255,0.95); transition:all 0.3s; font-family:inherit; }
     input[type=text]:focus { outline:none; border-color:rgba(240,98,146,0.6); box-shadow:0 0 0 3px rgba(244,143,177,0.18); background:#fff; }
     input[type=text]::placeholder { color:#94a3b8; }
-    button { padding:10px 18px; background:linear-gradient(135deg,#f48fb1,#ce93d8); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:13px; transition:all 0.3s; font-family:inherit; }
+    button { padding:10px 18px; background:linear-gradient(135deg,#f48fb1,#ce93d8); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:13px; transition:all 0.3s; font-family:inherit; touch-action:manipulation; }
     button:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(244,143,177,0.45); }
+    @media(hover:none){ button:hover { transform:none; box-shadow:none; } }
     h2 { color:#1e293b; margin-bottom:18px; font-size:22px; font-weight:700; }
     h3 { color:#e91e63; margin:26px 0 12px; font-weight:600; font-size:15px; }
     .info-msg { padding:13px 16px; margin-bottom:14px; border-radius:8px; font-weight:600; font-size:14px; }
@@ -945,8 +960,8 @@ app.get('/admin', (req, res) => {
     <button onclick="logout()" class="btn-logout">Logout</button>
   </header>
   <div class="tabs-wrapper">
-    <button class="tab-btn active" data-tab="academy">🎓 Academy</button>
-    <button class="tab-btn" data-tab="overview">📊 Overview</button>
+    <button class="tab-btn" data-tab="academy">🎓 Academy</button>
+    <button class="tab-btn active" data-tab="overview">📊 Overview</button>
     <button class="tab-btn" data-tab="pending">⏳ Pending</button>
     <button class="tab-btn" data-tab="approval">✅ Approval</button>
     <button class="tab-btn" data-tab="checkin">📥 Check-in</button>
@@ -956,7 +971,7 @@ app.get('/admin', (req, res) => {
   </div>
   <div class="content-wrapper">
 
-    <div id="academy" class="tab-content active">
+    <div id="academy" class="tab-content">
       <h2>Convention Hub</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:900px;margin-top:8px">
         <div style="background:rgba(255,255,255,0.92);border-radius:14px;padding:28px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 4px 20px rgba(244,143,177,0.12)">
@@ -974,7 +989,7 @@ app.get('/admin', (req, res) => {
       </div>
     </div>
 
-    <div id="overview" class="tab-content">
+    <div id="overview" class="tab-content active">
       <h2>Overview</h2>
       <a class="preview-btn" href="/preview" target="_blank">📋 Open Client Preview →</a>
       <br>
@@ -1654,7 +1669,7 @@ app.post('/api/admin-login', (req, res) => {
 });
 
 app.get('/api/admin-logout', (req, res) => {
-  res.redirect('/');
+  res.redirect('/admin-login');
 });
 
 app.put('/api/attendees/:ticket_id', async (req, res) => {
