@@ -801,6 +801,7 @@ app.get('/admin', (req, res) => {
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Africa Convention 2026</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
@@ -841,8 +842,32 @@ app.get('/admin', (req, res) => {
     .info-msg { padding:13px 16px; margin-bottom:14px; border-radius:8px; font-weight:600; font-size:14px; }
     .info-msg.success { background:rgba(167,243,208,0.22); color:#059669; border-left:4px solid #34d399; }
     .info-msg.error   { background:rgba(254,202,202,0.22); color:#e11d48; border-left:4px solid #f87171; }
-    iframe { width:100%; height:680px; border:1px solid rgba(244,143,177,0.2); border-radius:12px; box-shadow:0 4px 24px rgba(244,143,177,0.12); }
     .preview-btn { display:inline-block; margin-bottom:18px; padding:10px 22px; background:linear-gradient(135deg,#81d4fa,#b2ebf2); color:#01579b; text-decoration:none; border-radius:20px; font-weight:700; font-size:13px; }
+    .btn-logout { color:#e91e63; padding:9px 22px; background:rgba(255,255,255,0.75); border-radius:25px; cursor:pointer; text-decoration:none; transition:all 0.3s; backdrop-filter:blur(10px); font-size:13px; font-weight:600; border:1px solid rgba(244,143,177,0.35); transform:none !important; box-shadow:none !important; }
+    .btn-logout:hover { background:rgba(255,255,255,0.98); transform:none !important; box-shadow:none !important; }
+    /* ── CoverFlow ──────────────────────────────────────── */
+    .cf-wrap { background:linear-gradient(180deg,#0f0718 0%,#1a0d2e 45%,#0d1520 100%); border-radius:20px; padding:40px 0 28px; overflow:hidden; position:relative; user-select:none; }
+    .cf-header { text-align:center; margin-bottom:28px; }
+    .cf-header h2 { font-size:26px; font-weight:800; color:#fff; margin:0 0 4px; letter-spacing:0.04em; text-shadow:0 0 30px rgba(244,143,177,0.5); }
+    .cf-header p { font-size:12px; color:rgba(255,255,255,0.35); letter-spacing:0.1em; text-transform:uppercase; margin:0; }
+    .cf-stage { position:relative; height:320px; perspective:1400px; perspective-origin:50% 50%; display:flex; align-items:center; justify-content:center; overflow:visible; }
+    .cf-card { position:absolute; width:220px; height:275px; border-radius:12px; overflow:hidden; cursor:pointer; will-change:transform,opacity; transition:transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.6s ease,box-shadow 0.6s ease; }
+    .cf-card img { width:100%;height:100%;object-fit:cover;display:block;pointer-events:none; }
+    .cf-card .cf-gloss { position:absolute;inset:0;background:linear-gradient(145deg,rgba(255,255,255,0.16) 0%,transparent 50%);border-radius:12px;pointer-events:none; }
+    .cf-card.pos-center { transform:translateX(0) translateZ(80px) rotateY(0deg); z-index:10; opacity:1; box-shadow:0 35px 90px rgba(0,0,0,0.85),0 0 0 1px rgba(255,255,255,0.1); -webkit-box-reflect:below 3px linear-gradient(transparent 55%,rgba(0,0,0,0.38)); }
+    .cf-card.pos-left1  { transform:translateX(-230px) translateZ(0px) rotateY(54deg); z-index:7; opacity:0.78; box-shadow:0 18px 45px rgba(0,0,0,0.65); }
+    .cf-card.pos-left2  { transform:translateX(-410px) translateZ(-110px) rotateY(66deg); z-index:5; opacity:0.38; box-shadow:0 10px 25px rgba(0,0,0,0.5); }
+    .cf-card.pos-right1 { transform:translateX(230px) translateZ(0px) rotateY(-54deg); z-index:7; opacity:0.78; box-shadow:0 18px 45px rgba(0,0,0,0.65); }
+    .cf-card.pos-right2 { transform:translateX(410px) translateZ(-110px) rotateY(-66deg); z-index:5; opacity:0.38; box-shadow:0 10px 25px rgba(0,0,0,0.5); }
+    .cf-card.pos-hidden { opacity:0; transform:translateX(0) scale(0.25); pointer-events:none; z-index:1; transition:none; }
+    .cf-shelf { height:1px; background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.12) 25%,rgba(255,255,255,0.12) 75%,transparent 100%); margin:0 60px 0; }
+    .cf-controls { display:flex; align-items:center; justify-content:center; gap:14px; padding:22px 0 0; }
+    .cf-arrow { background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.14); color:rgba(255,255,255,0.7); width:36px; height:36px; border-radius:50%; font-size:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s,color 0.2s; padding:0; line-height:1; flex-shrink:0; transform:none !important; box-shadow:none !important; }
+    .cf-arrow:hover { background:rgba(255,255,255,0.18); color:#fff; transform:none !important; box-shadow:none !important; }
+    .cf-dots { display:flex; gap:6px; align-items:center; }
+    .cf-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.22); cursor:pointer; transition:all 0.3s; display:inline-block; }
+    .cf-dot.active { background:#f48fb1; transform:scale(1.5); }
+    @media(max-width:600px){ .cf-card{width:170px;height:210px} .cf-card.pos-left1{transform:translateX(-170px) translateZ(0) rotateY(54deg)} .cf-card.pos-right1{transform:translateX(170px) translateZ(0) rotateY(-54deg)} .cf-card.pos-left2,.cf-card.pos-right2{opacity:0;pointer-events:none} }
     .preview-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(129,212,250,0.4); }
     .btn-edit   { padding:4px 9px; background:linear-gradient(135deg,#81d4fa,#b2ebf2); color:#01579b; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; }
     .btn-del    { padding:4px 9px; background:linear-gradient(135deg,#fca5a5,#fde68a); color:#b91c1c; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; }
@@ -871,7 +896,7 @@ app.get('/admin', (req, res) => {
 <div class="container">
   <header>
     <h1>🎪 Admin Dashboard</h1>
-    <a onclick="logout()">Logout</a>
+    <button onclick="logout()" class="btn-logout">Logout</button>
   </header>
   <div class="tabs-wrapper">
     <button class="tab-btn active" data-tab="academy">🎓 Academy</button>
@@ -886,8 +911,19 @@ app.get('/admin', (req, res) => {
   <div class="content-wrapper">
 
     <div id="academy" class="tab-content active">
-      <h2>Academy</h2>
-      <iframe src="/documentation/training.html" title="Training Materials"></iframe>
+      <div class="cf-wrap">
+        <div class="cf-header">
+          <h2>Africa Convention 2026</h2>
+          <p>Arusha, Tanzania &nbsp;·&nbsp; June 18–22</p>
+        </div>
+        <div class="cf-stage" id="cfStage"></div>
+        <div class="cf-shelf"></div>
+        <div class="cf-controls">
+          <button class="cf-arrow" onclick="cfPrev()">&#8249;</button>
+          <div class="cf-dots" id="cfDots"></div>
+          <button class="cf-arrow" onclick="cfNext()">&#8250;</button>
+        </div>
+      </div>
     </div>
 
     <div id="overview" class="tab-content">
@@ -1051,6 +1087,52 @@ app.get('/admin', (req, res) => {
   const token = new URLSearchParams(window.location.search).get('token');
   let qrScanner = null;
   const recentScans = [];
+
+  // ── CoverFlow ───────────────────────────────────────────────────────────────
+  const _cfImages = ${JSON.stringify(getGalleryImages())};
+  let _cfActive = 0, _cfTimer = null;
+  const CF_INTERVAL = 3800;
+
+  function initCoverflow() {
+    const stage = document.getElementById('cfStage');
+    const dotsEl = document.getElementById('cfDots');
+    if (!stage || !_cfImages.length) return;
+    _cfImages.forEach(function(src, i) {
+      const card = document.createElement('div');
+      card.className = 'cf-card pos-hidden';
+      card.dataset.idx = i;
+      card.innerHTML = '<img src="' + src + '" alt=""><div class="cf-gloss"></div>';
+      card.addEventListener('click', function() { cfGoTo(parseInt(this.dataset.idx)); });
+      stage.appendChild(card);
+      const dot = document.createElement('span');
+      dot.className = 'cf-dot';
+      dot.addEventListener('click', (function(idx){ return function(){ cfGoTo(idx); }; })(i));
+      dotsEl.appendChild(dot);
+    });
+    cfRender();
+    cfStartAuto();
+    stage.addEventListener('mouseenter', cfStopAuto);
+    stage.addEventListener('mouseleave', cfStartAuto);
+    stage.addEventListener('touchstart', cfStopAuto, {passive:true});
+  }
+
+  function cfRender() {
+    const n = _cfImages.length;
+    const cards = document.querySelectorAll('.cf-card');
+    const dots = document.querySelectorAll('.cf-dot');
+    cards.forEach(function(card, i) {
+      const raw = (i - _cfActive % n + n) % n;
+      const d = raw > n / 2 ? raw - n : raw;
+      card.className = 'cf-card ' + ({'-2':'pos-left2','-1':'pos-left1','0':'pos-center','1':'pos-right1','2':'pos-right2'}[String(d)] || 'pos-hidden');
+    });
+    dots.forEach(function(dot, i) { dot.classList.toggle('active', i === (_cfActive % n)); });
+  }
+
+  function cfGoTo(i) { _cfActive = ((i % _cfImages.length) + _cfImages.length) % _cfImages.length; cfRender(); }
+  function cfNext() { cfGoTo(_cfActive + 1); }
+  function cfPrev() { cfGoTo(_cfActive - 1); }
+  function cfStartAuto() { cfStopAuto(); if (_cfImages.length > 1) _cfTimer = setInterval(cfNext, CF_INTERVAL); }
+  function cfStopAuto()  { if (_cfTimer) { clearInterval(_cfTimer); _cfTimer = null; } }
 
   // Tab system
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1474,7 +1556,8 @@ app.get('/admin', (req, res) => {
   // Wire scanner tab
   document.querySelector('[data-tab="scanner"]').addEventListener('click', function() {});
 
-  // Load overview on mount
+  // Boot
+  initCoverflow();
   loadOverview();
 </script>
 </body>
