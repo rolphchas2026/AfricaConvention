@@ -592,6 +592,11 @@ app.get('/', (req, res) => {
               <div class="sponsor-logo-ph"><img src="/sysimages/sponsors/httpssabrahmsafaris_com.png" alt="Sabrahm Safaris"></div>
               <span>Sabrahm Safaris</span>
             </a>
+            <a href="https://www.rwandair.com" target="_blank" rel="noopener" class="sponsor-slot">
+              <div class="sponsor-tooltip">Follow RwandAir · rwandair.com</div>
+              <div class="sponsor-logo-ph"><img src="/sysimages/sponsors/rwandair_com.svg" alt="RwandAir"></div>
+              <span>RwandAir</span>
+            </a>
           </div>
         </div>
       </div>
@@ -946,6 +951,13 @@ app.get('/preview', async (req, res) => {
         </div>
         <span style="font-size:11px;color:#94a3b8;transition:color 0.2s">Sabrahm Safaris</span>
         <span class="prev-sp-tip" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) scale(0.9);background:#1e293b;color:white;font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:all 0.2s">Follow Sabrahm Safaris · sabrahmsafaris.com</span>
+      </a>
+      <a href="https://www.rwandair.com" target="_blank" rel="noopener" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;transition:all 0.3s" class="prev-sponsor">
+        <div style="width:110px;height:62px;background:#fff;border:1px solid rgba(244,143,177,0.3);border-radius:10px;overflow:hidden;transition:all 0.3s;display:flex;align-items:center;justify-content:center">
+          <img src="/sysimages/sponsors/rwandair_com.svg" alt="RwandAir" style="width:100%;height:100%;object-fit:contain">
+        </div>
+        <span style="font-size:11px;color:#94a3b8;transition:color 0.2s">RwandAir</span>
+        <span class="prev-sp-tip" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) scale(0.9);background:#1e293b;color:white;font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:all 0.2s">Follow RwandAir · rwandair.com</span>
       </a>
     </div>
   </div>
