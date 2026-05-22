@@ -304,11 +304,32 @@ app.get('/', (req, res) => {
     .gallery-heading h2 { font-size:44px; font-weight:800; color:#1e293b; text-shadow:0 0 30px rgba(244,143,177,0.5),0 2px 8px rgba(0,0,0,0.06); letter-spacing:0.02em; animation:glowPulse 3s ease-in-out infinite; margin-bottom:0; }
     .gallery-heading p { font-size:17px; color:#64748b; text-shadow:none; margin-top:12px; margin-bottom:0; }
     @keyframes glowPulse { 0%,100%{text-shadow:0 0 30px rgba(244,143,177,0.5),0 2px 8px rgba(0,0,0,0.06)} 50%{text-shadow:0 0 55px rgba(244,143,177,0.75),0 0 80px rgba(186,104,200,0.35),0 2px 8px rgba(0,0,0,0.06)} }
-    .gallery { position:relative; z-index:1; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
-    .gallery-item { cursor: pointer; border-radius: 20px; overflow: hidden; box-shadow:0 0 0 1px rgba(244,143,177,0.22),0 8px 30px rgba(244,143,177,0.18); transition: all 0.35s; background:rgba(255,255,255,0.88); backdrop-filter:blur(12px); }
-    .gallery-item:hover { transform: translateY(-10px) scale(1.02); box-shadow:0 0 0 1px rgba(244,143,177,0.5),0 22px 55px rgba(244,143,177,0.28),0 0 40px rgba(129,212,250,0.18); }
-    .gallery-item img { width: 100%; height: 250px; object-fit: cover; display: block; }
-    .gallery-caption { padding: 14px 16px 20px; font-size: 15px; font-weight: 700; color:#374151; text-align: center; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border-top:1px solid rgba(244,143,177,0.18); }
+    /* ── Landing CoverFlow ─────────────────────────────────────── */
+    .cf-stage { position:relative; z-index:1; height:360px; perspective:1400px; perspective-origin:50% 50%; display:flex; align-items:center; justify-content:center; overflow:visible; }
+    .cf-card { position:absolute; width:220px; height:280px; border-radius:18px; overflow:hidden; cursor:pointer; will-change:transform,opacity; transition:transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.6s ease,box-shadow 0.6s ease; }
+    .cf-card img { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+    .cf-card .cf-gloss { position:absolute; inset:0; background:linear-gradient(145deg,rgba(255,255,255,0.25) 0%,transparent 52%); border-radius:18px; pointer-events:none; }
+    .cf-card.pos-center { transform:translateX(0) translateZ(90px) rotateY(0deg); z-index:10; opacity:1; box-shadow:0 30px 80px rgba(244,143,177,0.48),0 0 0 2px rgba(255,255,255,0.65); -webkit-box-reflect:below 4px linear-gradient(transparent 62%,rgba(244,143,177,0.14)); }
+    .cf-card.pos-left1  { transform:translateX(-240px) translateZ(0) rotateY(54deg); z-index:7; opacity:0.72; box-shadow:0 14px 40px rgba(244,143,177,0.25); }
+    .cf-card.pos-left2  { transform:translateX(-430px) translateZ(-120px) rotateY(66deg); z-index:5; opacity:0.32; }
+    .cf-card.pos-right1 { transform:translateX(240px) translateZ(0) rotateY(-54deg); z-index:7; opacity:0.72; box-shadow:0 14px 40px rgba(244,143,177,0.25); }
+    .cf-card.pos-right2 { transform:translateX(430px) translateZ(-120px) rotateY(-66deg); z-index:5; opacity:0.32; }
+    .cf-card.pos-hidden { opacity:0; transform:translateX(0) scale(0.2); pointer-events:none; z-index:1; transition:none; }
+    .cf-shelf { position:relative; z-index:1; height:1px; background:linear-gradient(90deg,transparent 0%,rgba(244,143,177,0.38) 25%,rgba(244,143,177,0.38) 75%,transparent 100%); margin:0 60px; }
+    .cf-controls { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:14px; padding:22px 0 16px; }
+    .cf-arrow { background:rgba(255,255,255,0.78); border:1px solid rgba(244,143,177,0.42); color:#e91e63; width:38px; height:38px; border-radius:50%; font-size:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; padding:0; flex-shrink:0; backdrop-filter:blur(10px); transform:none !important; box-shadow:none !important; }
+    .cf-arrow:hover { background:rgba(255,255,255,0.97); box-shadow:0 4px 16px rgba(244,143,177,0.32) !important; transform:none !important; }
+    .cf-dots { display:flex; gap:7px; align-items:center; }
+    .cf-dot { width:6px; height:6px; border-radius:50%; background:rgba(233,30,99,0.22); cursor:pointer; transition:all 0.3s; }
+    .cf-dot.active { background:#e91e63; transform:scale(1.5); box-shadow:0 0 8px rgba(233,30,99,0.38); }
+    /* Filmstrip */
+    .cf-film { position:relative; z-index:1; display:flex; gap:8px; justify-content:center; overflow-x:auto; padding:14px 20px; background:rgba(255,255,255,0.42); backdrop-filter:blur(14px); border-radius:16px; margin-top:14px; scrollbar-width:thin; scrollbar-color:rgba(244,143,177,0.4) transparent; }
+    .cf-film::-webkit-scrollbar { height:4px; }
+    .cf-film::-webkit-scrollbar-thumb { background:rgba(244,143,177,0.5); border-radius:2px; }
+    .cf-thumb { width:58px; height:72px; border-radius:10px; overflow:hidden; cursor:pointer; opacity:0.45; transition:all 0.3s; flex-shrink:0; border:2px solid transparent; }
+    .cf-thumb.active { opacity:1; border-color:#f48fb1; box-shadow:0 4px 16px rgba(244,143,177,0.45); transform:scale(1.08); }
+    .cf-thumb img { width:100%; height:100%; object-fit:cover; pointer-events:none; display:block; }
+    @media(max-width:600px){ .cf-stage{height:280px} .cf-card{width:170px;height:215px} .cf-card.pos-left1{transform:translateX(-185px) translateZ(0) rotateY(54deg)} .cf-card.pos-right1{transform:translateX(185px) translateZ(0) rotateY(-54deg)} .cf-card.pos-left2,.cf-card.pos-right2{opacity:0;pointer-events:none} .cf-film{gap:6px;padding:10px 14px} .cf-thumb{width:48px;height:60px} }
 
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
     .modal.active { display: flex; }
@@ -417,7 +438,14 @@ app.get('/', (req, res) => {
       <h2>Event Gallery</h2>
       <p>Experience the Africa Convention 2026</p>
     </div>
-    <div class="gallery" id="gallery"></div>
+    <div class="cf-stage" id="cfStage"></div>
+    <div class="cf-shelf"></div>
+    <div class="cf-controls">
+      <button class="cf-arrow" onclick="cfPrev()">&#8249;</button>
+      <div class="cf-dots" id="cfDots"></div>
+      <button class="cf-arrow" onclick="cfNext()">&#8250;</button>
+    </div>
+    <div class="cf-film" id="cfFilm"></div>
   </div>
 
   <div class="section" id="register">
@@ -524,30 +552,71 @@ app.get('/', (req, res) => {
 
   <script>
     const galleryImages = ${JSON.stringify(getGalleryImages())};
-    const gallery = document.getElementById('gallery');
     const ticketsContainer = document.getElementById('ticketsContainer');
 
-    function formatImageTitle(filename) {
-      return decodeURIComponent(filename)
-        .replace(/\\.[^/.]+$/, '')
-        .replace(/[-_]/g, ' ')
-        .replace(/\\b\\w/g, (c) => c.toUpperCase());
+    // ── CoverFlow + Filmstrip ──────────────────────────────────────
+    let _cfActive = 0, _cfTimer = null;
+    const CF_INTERVAL = 4200;
+
+    function initCoverflow() {
+      const stage = document.getElementById('cfStage');
+      const dotsEl = document.getElementById('cfDots');
+      const filmEl = document.getElementById('cfFilm');
+      if (!stage) return;
+      if (!galleryImages.length) {
+        stage.innerHTML = '<p style="color:#94a3b8;padding:80px 20px;text-align:center;font-size:15px;position:relative;z-index:1">Gallery coming soon — photos will appear here.</p>';
+        return;
+      }
+      galleryImages.forEach(function(src, i) {
+        const card = document.createElement('div');
+        card.className = 'cf-card pos-hidden';
+        card.dataset.idx = i;
+        card.innerHTML = '<img src="' + src + '" alt=""><div class="cf-gloss"></div>';
+        card.addEventListener('click', function() {
+          const idx = parseInt(this.dataset.idx);
+          if (idx === _cfActive) { openGallery(idx); }
+          else { cfGoTo(idx); }
+        });
+        stage.appendChild(card);
+        const dot = document.createElement('span');
+        dot.className = 'cf-dot';
+        dot.addEventListener('click', (function(idx){ return function(){ cfGoTo(idx); }; })(i));
+        dotsEl.appendChild(dot);
+        const thumb = document.createElement('div');
+        thumb.className = 'cf-thumb';
+        thumb.dataset.idx = i;
+        thumb.innerHTML = '<img src="' + src + '" alt="">';
+        thumb.addEventListener('click', (function(idx){ return function(){ cfGoTo(idx); }; })(i));
+        filmEl.appendChild(thumb);
+      });
+      cfRender();
+      cfStartAuto();
+      stage.addEventListener('mouseenter', cfStopAuto);
+      stage.addEventListener('mouseleave', cfStartAuto);
+      stage.addEventListener('touchstart', cfStopAuto, {passive:true});
     }
 
-    function renderGallery() {
-      if (!gallery) return;
-      gallery.innerHTML = '';
-      galleryImages.forEach((img, i) => {
-        const title = formatImageTitle(img.split('/').pop());
-        const div = document.createElement('div');
-        div.className = 'gallery-item';
-        div.innerHTML =
-          '<img src="' + img + '" alt="' + title + '" title="' + title + '">' +
-          '<div class="gallery-caption">' + title + '</div>';
-        div.onclick = function() { openGallery(i); };
-        gallery.appendChild(div);
+    function cfRender() {
+      const n = galleryImages.length;
+      if (!n) return;
+      document.querySelectorAll('.cf-card').forEach(function(card, i) {
+        const raw = (i - _cfActive % n + n) % n;
+        const d = raw > n / 2 ? raw - n : raw;
+        card.className = 'cf-card ' + ({'-2':'pos-left2','-1':'pos-left1','0':'pos-center','1':'pos-right1','2':'pos-right2'}[String(d)] || 'pos-hidden');
+      });
+      document.querySelectorAll('.cf-dot').forEach(function(dot, i) { dot.classList.toggle('active', i === (_cfActive % n)); });
+      document.querySelectorAll('.cf-thumb').forEach(function(thumb, i) {
+        const active = i === (_cfActive % n);
+        thumb.classList.toggle('active', active);
+        if (active) { try { thumb.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); } catch(e){} }
       });
     }
+
+    function cfGoTo(i) { _cfActive = ((i % galleryImages.length) + galleryImages.length) % galleryImages.length; cfRender(); }
+    function cfNext() { cfGoTo(_cfActive + 1); }
+    function cfPrev() { cfGoTo(_cfActive - 1); }
+    function cfStartAuto() { cfStopAuto(); if (galleryImages.length > 1) _cfTimer = setInterval(cfNext, CF_INTERVAL); }
+    function cfStopAuto() { if (_cfTimer) { clearInterval(_cfTimer); _cfTimer = null; } }
 
     function openGallery(index) {
       document.getElementById('modalImage').src = galleryImages[index];
@@ -628,7 +697,7 @@ app.get('/', (req, res) => {
       }
     }
 
-    renderGallery();
+    initCoverflow();
     renderTicketOptions();
   </script>
 </body>
@@ -845,29 +914,6 @@ app.get('/admin', (req, res) => {
     .preview-btn { display:inline-block; margin-bottom:18px; padding:10px 22px; background:linear-gradient(135deg,#81d4fa,#b2ebf2); color:#01579b; text-decoration:none; border-radius:20px; font-weight:700; font-size:13px; }
     .btn-logout { color:#e91e63; padding:9px 22px; background:rgba(255,255,255,0.75); border-radius:25px; cursor:pointer; text-decoration:none; transition:all 0.3s; backdrop-filter:blur(10px); font-size:13px; font-weight:600; border:1px solid rgba(244,143,177,0.35); transform:none !important; box-shadow:none !important; }
     .btn-logout:hover { background:rgba(255,255,255,0.98); transform:none !important; box-shadow:none !important; }
-    /* ── CoverFlow ──────────────────────────────────────── */
-    .cf-wrap { background:linear-gradient(180deg,#0f0718 0%,#1a0d2e 45%,#0d1520 100%); border-radius:20px; padding:40px 0 28px; overflow:hidden; position:relative; user-select:none; }
-    .cf-header { text-align:center; margin-bottom:28px; }
-    .cf-header h2 { font-size:26px; font-weight:800; color:#fff; margin:0 0 4px; letter-spacing:0.04em; text-shadow:0 0 30px rgba(244,143,177,0.5); }
-    .cf-header p { font-size:12px; color:rgba(255,255,255,0.35); letter-spacing:0.1em; text-transform:uppercase; margin:0; }
-    .cf-stage { position:relative; height:320px; perspective:1400px; perspective-origin:50% 50%; display:flex; align-items:center; justify-content:center; overflow:visible; }
-    .cf-card { position:absolute; width:220px; height:275px; border-radius:12px; overflow:hidden; cursor:pointer; will-change:transform,opacity; transition:transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.6s ease,box-shadow 0.6s ease; }
-    .cf-card img { width:100%;height:100%;object-fit:cover;display:block;pointer-events:none; }
-    .cf-card .cf-gloss { position:absolute;inset:0;background:linear-gradient(145deg,rgba(255,255,255,0.16) 0%,transparent 50%);border-radius:12px;pointer-events:none; }
-    .cf-card.pos-center { transform:translateX(0) translateZ(80px) rotateY(0deg); z-index:10; opacity:1; box-shadow:0 35px 90px rgba(0,0,0,0.85),0 0 0 1px rgba(255,255,255,0.1); -webkit-box-reflect:below 3px linear-gradient(transparent 55%,rgba(0,0,0,0.38)); }
-    .cf-card.pos-left1  { transform:translateX(-230px) translateZ(0px) rotateY(54deg); z-index:7; opacity:0.78; box-shadow:0 18px 45px rgba(0,0,0,0.65); }
-    .cf-card.pos-left2  { transform:translateX(-410px) translateZ(-110px) rotateY(66deg); z-index:5; opacity:0.38; box-shadow:0 10px 25px rgba(0,0,0,0.5); }
-    .cf-card.pos-right1 { transform:translateX(230px) translateZ(0px) rotateY(-54deg); z-index:7; opacity:0.78; box-shadow:0 18px 45px rgba(0,0,0,0.65); }
-    .cf-card.pos-right2 { transform:translateX(410px) translateZ(-110px) rotateY(-66deg); z-index:5; opacity:0.38; box-shadow:0 10px 25px rgba(0,0,0,0.5); }
-    .cf-card.pos-hidden { opacity:0; transform:translateX(0) scale(0.25); pointer-events:none; z-index:1; transition:none; }
-    .cf-shelf { height:1px; background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.12) 25%,rgba(255,255,255,0.12) 75%,transparent 100%); margin:0 60px 0; }
-    .cf-controls { display:flex; align-items:center; justify-content:center; gap:14px; padding:22px 0 0; }
-    .cf-arrow { background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.14); color:rgba(255,255,255,0.7); width:36px; height:36px; border-radius:50%; font-size:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s,color 0.2s; padding:0; line-height:1; flex-shrink:0; transform:none !important; box-shadow:none !important; }
-    .cf-arrow:hover { background:rgba(255,255,255,0.18); color:#fff; transform:none !important; box-shadow:none !important; }
-    .cf-dots { display:flex; gap:6px; align-items:center; }
-    .cf-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.22); cursor:pointer; transition:all 0.3s; display:inline-block; }
-    .cf-dot.active { background:#f48fb1; transform:scale(1.5); }
-    @media(max-width:600px){ .cf-card{width:170px;height:210px} .cf-card.pos-left1{transform:translateX(-170px) translateZ(0) rotateY(54deg)} .cf-card.pos-right1{transform:translateX(170px) translateZ(0) rotateY(-54deg)} .cf-card.pos-left2,.cf-card.pos-right2{opacity:0;pointer-events:none} }
     .preview-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(129,212,250,0.4); }
     .btn-edit   { padding:4px 9px; background:linear-gradient(135deg,#81d4fa,#b2ebf2); color:#01579b; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; }
     .btn-del    { padding:4px 9px; background:linear-gradient(135deg,#fca5a5,#fde68a); color:#b91c1c; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; }
@@ -911,17 +957,19 @@ app.get('/admin', (req, res) => {
   <div class="content-wrapper">
 
     <div id="academy" class="tab-content active">
-      <div class="cf-wrap">
-        <div class="cf-header">
-          <h2>Africa Convention 2026</h2>
-          <p>Arusha, Tanzania &nbsp;·&nbsp; June 18–22</p>
+      <h2>Convention Hub</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:900px;margin-top:8px">
+        <div style="background:rgba(255,255,255,0.92);border-radius:14px;padding:28px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 4px 20px rgba(244,143,177,0.12)">
+          <h3>📍 Event Details</h3>
+          <p style="color:#64748b;font-size:15px;line-height:1.8;margin-top:10px"><strong>Dates:</strong> June 18–22, 2026<br><strong>Venue:</strong> Arusha, Tanzania<br><strong>Organiser:</strong> WCCM Tanzania<br><strong>Theme:</strong> Doing Business and Bearing Fruitful</p>
         </div>
-        <div class="cf-stage" id="cfStage"></div>
-        <div class="cf-shelf"></div>
-        <div class="cf-controls">
-          <button class="cf-arrow" onclick="cfPrev()">&#8249;</button>
-          <div class="cf-dots" id="cfDots"></div>
-          <button class="cf-arrow" onclick="cfNext()">&#8250;</button>
+        <div style="background:rgba(255,255,255,0.92);border-radius:14px;padding:28px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 4px 20px rgba(244,143,177,0.12)">
+          <h3>📋 Programme</h3>
+          <p style="color:#94a3b8;font-size:14px;line-height:1.75;margin-top:10px;font-style:italic">Programme schedule not yet uploaded.<br><br>Drop <code style="background:rgba(244,143,177,0.1);padding:2px 6px;border-radius:4px;font-style:normal">programme.html</code> or <code style="background:rgba(244,143,177,0.1);padding:2px 6px;border-radius:4px;font-style:normal">programme.pdf</code> into the <code style="background:rgba(244,143,177,0.1);padding:2px 6px;border-radius:4px;font-style:normal">/documentation/</code> folder to display it here.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.92);border-radius:14px;padding:28px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 4px 20px rgba(244,143,177,0.12)">
+          <h3>📞 Contact</h3>
+          <p style="color:#64748b;font-size:15px;line-height:1.8;margin-top:10px">+255 787 576 900<br>+255 713 276 655<br>wccm.tz@gmail.com<br><a href="http://www.livinghope.or.tz" target="_blank" style="color:#e91e63;text-decoration:none">www.livinghope.or.tz</a></p>
         </div>
       </div>
     </div>
@@ -1087,52 +1135,6 @@ app.get('/admin', (req, res) => {
   const token = new URLSearchParams(window.location.search).get('token');
   let qrScanner = null;
   const recentScans = [];
-
-  // ── CoverFlow ───────────────────────────────────────────────────────────────
-  const _cfImages = ${JSON.stringify(getGalleryImages())};
-  let _cfActive = 0, _cfTimer = null;
-  const CF_INTERVAL = 3800;
-
-  function initCoverflow() {
-    const stage = document.getElementById('cfStage');
-    const dotsEl = document.getElementById('cfDots');
-    if (!stage || !_cfImages.length) return;
-    _cfImages.forEach(function(src, i) {
-      const card = document.createElement('div');
-      card.className = 'cf-card pos-hidden';
-      card.dataset.idx = i;
-      card.innerHTML = '<img src="' + src + '" alt=""><div class="cf-gloss"></div>';
-      card.addEventListener('click', function() { cfGoTo(parseInt(this.dataset.idx)); });
-      stage.appendChild(card);
-      const dot = document.createElement('span');
-      dot.className = 'cf-dot';
-      dot.addEventListener('click', (function(idx){ return function(){ cfGoTo(idx); }; })(i));
-      dotsEl.appendChild(dot);
-    });
-    cfRender();
-    cfStartAuto();
-    stage.addEventListener('mouseenter', cfStopAuto);
-    stage.addEventListener('mouseleave', cfStartAuto);
-    stage.addEventListener('touchstart', cfStopAuto, {passive:true});
-  }
-
-  function cfRender() {
-    const n = _cfImages.length;
-    const cards = document.querySelectorAll('.cf-card');
-    const dots = document.querySelectorAll('.cf-dot');
-    cards.forEach(function(card, i) {
-      const raw = (i - _cfActive % n + n) % n;
-      const d = raw > n / 2 ? raw - n : raw;
-      card.className = 'cf-card ' + ({'-2':'pos-left2','-1':'pos-left1','0':'pos-center','1':'pos-right1','2':'pos-right2'}[String(d)] || 'pos-hidden');
-    });
-    dots.forEach(function(dot, i) { dot.classList.toggle('active', i === (_cfActive % n)); });
-  }
-
-  function cfGoTo(i) { _cfActive = ((i % _cfImages.length) + _cfImages.length) % _cfImages.length; cfRender(); }
-  function cfNext() { cfGoTo(_cfActive + 1); }
-  function cfPrev() { cfGoTo(_cfActive - 1); }
-  function cfStartAuto() { cfStopAuto(); if (_cfImages.length > 1) _cfTimer = setInterval(cfNext, CF_INTERVAL); }
-  function cfStopAuto()  { if (_cfTimer) { clearInterval(_cfTimer); _cfTimer = null; } }
 
   // Tab system
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1557,7 +1559,6 @@ app.get('/admin', (req, res) => {
   document.querySelector('[data-tab="scanner"]').addEventListener('click', function() {});
 
   // Boot
-  initCoverflow();
   loadOverview();
 </script>
 </body>
