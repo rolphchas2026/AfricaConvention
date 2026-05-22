@@ -1154,6 +1154,14 @@ app.get('/admin', (req, res) => {
 </div>
 
 <script>
+  // Global error trap — shows any JS crash as a visible banner instead of silent failure
+  window.onerror = function(msg, src, line, col) {
+    var b = document.getElementById('_errBanner');
+    if (!b) { b = document.createElement('div'); b.id = '_errBanner'; b.style = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#fee2e2;color:#b91c1c;padding:10px 18px;font-size:13px;font-weight:700;border-bottom:2px solid #fca5a5'; document.body.prepend(b); }
+    b.textContent = '⚠️ JS Error: ' + msg + ' (line ' + line + ')';
+    return false;
+  };
+
   const token = new URLSearchParams(window.location.search).get('token');
   let qrScanner = null;
   const recentScans = [];
@@ -1293,7 +1301,7 @@ app.get('/admin', (req, res) => {
   }
 
   // Check-in handler
-  document.getElementById('checkinInput').addEventListener('keypress', async e => {
+  try { document.getElementById('checkinInput').addEventListener('keypress', async e => {
     if (e.key !== 'Enter') return;
     const tid = e.target.value.trim(); if (!tid) return;
     try {
@@ -1306,10 +1314,10 @@ app.get('/admin', (req, res) => {
       e.target.value = '';
       setTimeout(() => { loadCheckins(); loadOverview(); }, 500);
     } catch(e) { document.getElementById('checkinMsg').innerHTML = '<div class="info-msg error">❌ Network error</div>'; }
-  });
+  }); } catch(e) { console.warn('checkinInput not found:', e.message); }
 
   // Check-out handler
-  document.getElementById('checkoutInput').addEventListener('keypress', async e => {
+  try { document.getElementById('checkoutInput').addEventListener('keypress', async e => {
     if (e.key !== 'Enter') return;
     const tid = e.target.value.trim(); if (!tid) return;
     try {
@@ -1322,7 +1330,7 @@ app.get('/admin', (req, res) => {
       e.target.value = '';
       setTimeout(() => { loadCheckouts(); loadOverview(); }, 500);
     } catch(e) { document.getElementById('checkoutMsg').innerHTML = '<div class="info-msg error">❌ Network error</div>'; }
-  });
+  }); } catch(e) { console.warn('checkoutInput not found:', e.message); }
 
   function logout() { window.location.href = '/api/admin-logout'; }
 
@@ -1388,8 +1396,8 @@ app.get('/admin', (req, res) => {
     } catch(e) { alert('Network error'); }
   }
 
-  document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEdit(); });
-  document.getElementById('fileModal').addEventListener('click', function(e) { if (e.target === this) closeFileModal(); });
+  try { document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEdit(); }); } catch(e) {}
+  try { document.getElementById('fileModal').addEventListener('click', function(e) { if (e.target === this) closeFileModal(); }); } catch(e) {}
 
   // ── Badge actions ──────────────────────────────────────────────────────────
 
@@ -1589,7 +1597,7 @@ app.get('/admin', (req, res) => {
   }
 
   // Wire scanner tab
-  document.querySelector('[data-tab="scanner"]').addEventListener('click', function() {});
+  try { document.querySelector('[data-tab="scanner"]').addEventListener('click', function() {}); } catch(e) {}
 
   // Tabs overflow fade indicator
   (function() {
