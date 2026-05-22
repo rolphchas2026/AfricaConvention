@@ -413,11 +413,16 @@ app.get('/', (req, res) => {
     .footer-brand p { color: #64748b; font-size: 14px; line-height: 1.75; }
     .footer-sponsors h4 { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 22px; }
     .sponsor-grid { display: flex; flex-wrap: wrap; gap: 16px; }
-    .sponsor-slot { display: flex; flex-direction: column; align-items: center; gap: 9px; text-decoration: none; transition: all 0.3s; }
-    .sponsor-logo-ph { width: 110px; height: 62px; background: rgba(255,255,255,0.85); border: 1px dashed rgba(244,143,177,0.4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: rgba(240,98,146,0.45); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; transition: all 0.3s; }
-    .sponsor-slot:hover .sponsor-logo-ph { background: rgba(244,143,177,0.1); border-color: rgba(240,98,146,0.5); color: rgba(233,30,99,0.75); }
+    .sponsor-slot { display: flex; flex-direction: column; align-items: center; gap: 9px; text-decoration: none; transition: all 0.3s; position: relative; }
+    .sponsor-logo-ph { width: 110px; height: 62px; background: rgba(255,255,255,0.85); border: 1px dashed rgba(244,143,177,0.4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: rgba(240,98,146,0.45); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; transition: all 0.3s; overflow: hidden; }
+    .sponsor-logo-ph img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; transition: transform 0.3s; }
+    .sponsor-slot:hover .sponsor-logo-ph { background: rgba(244,143,177,0.06); border-color: rgba(240,98,146,0.5); box-shadow: 0 6px 20px rgba(244,143,177,0.25); transform: translateY(-3px); }
+    .sponsor-slot:hover .sponsor-logo-ph img { transform: scale(1.06); }
     .sponsor-slot span { font-size: 11px; color: #94a3b8; transition: color 0.3s; }
     .sponsor-slot:hover span { color: #e91e63; }
+    .sponsor-tooltip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) scale(0.9); background: #1e293b; color: white; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 8px; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.2s; }
+    .sponsor-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1e293b; }
+    .sponsor-slot:hover .sponsor-tooltip { opacity: 1; transform: translateX(-50%) scale(1); }
     .footer-bottom { border-top: 1px solid rgba(244,143,177,0.15); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
     .footer-bottom p { font-size: 13px; color: #94a3b8; }
     .footer-bottom a { color: #ba68c8; text-decoration: none; transition: color 0.2s; }
@@ -572,12 +577,21 @@ app.get('/', (req, res) => {
         <div class="footer-sponsors">
           <h4>Our Sponsors &amp; Partners</h4>
           <div class="sponsor-grid">
-            <a href="#" class="sponsor-slot"><div class="sponsor-logo-ph">LOGO</div><span>Sponsor One</span></a>
-            <a href="#" class="sponsor-slot"><div class="sponsor-logo-ph">LOGO</div><span>Sponsor Two</span></a>
-            <a href="#" class="sponsor-slot"><div class="sponsor-logo-ph">LOGO</div><span>Sponsor Three</span></a>
-            <a href="#" class="sponsor-slot"><div class="sponsor-logo-ph">LOGO</div><span>Sponsor Four</span></a>
-            <a href="#" class="sponsor-slot"><div class="sponsor-logo-ph">LOGO</div><span>Sponsor Five</span></a>
-            <a href="#" class="sponsor-slot"><div class="sponsor-logo-ph">LOGO</div><span>Sponsor Six</span></a>
+            <a href="https://malikale.com" target="_blank" rel="noopener" class="sponsor-slot">
+              <div class="sponsor-tooltip">Follow Malikale · malikale.com</div>
+              <div class="sponsor-logo-ph"><img src="/sysimages/sponsors/httpsmalikale_com.png" alt="Malikale"></div>
+              <span>Malikale</span>
+            </a>
+            <a href="https://www.newsafarihotel.com" target="_blank" rel="noopener" class="sponsor-slot">
+              <div class="sponsor-tooltip">Follow New Safari Hotel · newsafarihotel.com</div>
+              <div class="sponsor-logo-ph"><img src="/sysimages/sponsors/httpsnewsafarihotel_com-tanzania_com_en.png" alt="New Safari Hotel"></div>
+              <span>New Safari Hotel</span>
+            </a>
+            <a href="https://sabrahmsafaris.com" target="_blank" rel="noopener" class="sponsor-slot">
+              <div class="sponsor-tooltip">Follow Sabrahm Safaris · sabrahmsafaris.com</div>
+              <div class="sponsor-logo-ph"><img src="/sysimages/sponsors/httpssabrahmsafaris_com.png" alt="Sabrahm Safaris"></div>
+              <span>Sabrahm Safaris</span>
+            </a>
           </div>
         </div>
       </div>
@@ -908,6 +922,40 @@ app.get('/preview', async (req, res) => {
     </table>
   </div>
   <button class="refresh" onclick="location.reload()">🔄 Refresh</button>
+
+  <div style="margin:28px 48px 0;padding:24px 28px;background:rgba(255,255,255,0.88);border:1px solid rgba(244,143,177,0.18);border-radius:16px">
+    <p style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-bottom:18px">Our Sponsors &amp; Partners</p>
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center">
+      <a href="https://malikale.com" target="_blank" rel="noopener" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;transition:all 0.3s" class="prev-sponsor">
+        <div style="width:110px;height:62px;background:#fff;border:1px solid rgba(244,143,177,0.3);border-radius:10px;overflow:hidden;transition:all 0.3s;display:flex;align-items:center;justify-content:center">
+          <img src="/sysimages/sponsors/httpsmalikale_com.png" alt="Malikale" style="width:100%;height:100%;object-fit:contain">
+        </div>
+        <span style="font-size:11px;color:#94a3b8;transition:color 0.2s">Malikale</span>
+        <span class="prev-sp-tip" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) scale(0.9);background:#1e293b;color:white;font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:all 0.2s">Follow Malikale · malikale.com</span>
+      </a>
+      <a href="https://www.newsafarihotel.com" target="_blank" rel="noopener" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;transition:all 0.3s" class="prev-sponsor">
+        <div style="width:110px;height:62px;background:#fff;border:1px solid rgba(244,143,177,0.3);border-radius:10px;overflow:hidden;transition:all 0.3s;display:flex;align-items:center;justify-content:center">
+          <img src="/sysimages/sponsors/httpsnewsafarihotel_com-tanzania_com_en.png" alt="New Safari Hotel" style="width:100%;height:100%;object-fit:contain">
+        </div>
+        <span style="font-size:11px;color:#94a3b8;transition:color 0.2s">New Safari Hotel</span>
+        <span class="prev-sp-tip" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) scale(0.9);background:#1e293b;color:white;font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:all 0.2s">Follow New Safari Hotel · newsafarihotel.com</span>
+      </a>
+      <a href="https://sabrahmsafaris.com" target="_blank" rel="noopener" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;transition:all 0.3s" class="prev-sponsor">
+        <div style="width:110px;height:62px;background:#fff;border:1px solid rgba(244,143,177,0.3);border-radius:10px;overflow:hidden;transition:all 0.3s;display:flex;align-items:center;justify-content:center">
+          <img src="/sysimages/sponsors/httpssabrahmsafaris_com.png" alt="Sabrahm Safaris" style="width:100%;height:100%;object-fit:contain">
+        </div>
+        <span style="font-size:11px;color:#94a3b8;transition:color 0.2s">Sabrahm Safaris</span>
+        <span class="prev-sp-tip" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) scale(0.9);background:#1e293b;color:white;font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:all 0.2s">Follow Sabrahm Safaris · sabrahmsafaris.com</span>
+      </a>
+    </div>
+  </div>
+  <style>
+    .prev-sponsor:hover > div { border-color:rgba(240,98,146,0.5); box-shadow:0 6px 20px rgba(244,143,177,0.25); transform:translateY(-3px); }
+    .prev-sponsor:hover > span:first-of-type { color:#e91e63 !important; }
+    .prev-sponsor:hover .prev-sp-tip { opacity:1 !important; transform:translateX(-50%) scale(1) !important; }
+    .prev-sp-tip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#1e293b; }
+  </style>
+
   <footer style="text-align:center;padding:10px 20px;font-style:italic;font-size:7px;color:#94a3b8;border-top:1px solid rgba(244,143,177,0.12);margin-top:12px">© Faith&amp;Will Logi-Tec Solutions &nbsp;·&nbsp; Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;·&nbsp; raphayelchas@gmail.com &nbsp;·&nbsp; +255 743 868 755 &nbsp;·&nbsp; All Rights Reserved</footer>
 </body>
 </html>`);
