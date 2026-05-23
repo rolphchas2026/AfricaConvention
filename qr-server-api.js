@@ -561,11 +561,11 @@ app.get('/', (req, res) => {
         <label>Ticket Type</label>
         <select id="ticketType" required>
           <option value="">Select Ticket Type</option>
-          <option value="general">General Admin (Local) - 10,000 TZS</option>
-          <option value="foreigners">Foreigners (VIP) - $350 USD</option>
-          <option value="youth">Youth - $200 USD</option>
-          <option value="speaker">Speaker - $300 USD</option>
-          <option value="business">Business - $250 USD</option>
+          <option value="general">General Admin (Local) — 10,000 TZS</option>
+          <option value="foreigners">Foreigners (VIP) — $245 USD</option>
+          <option value="youth">Youth — $95 USD</option>
+          <option value="speaker">Speaker — $195 USD</option>
+          <option value="business">Business — $145 USD</option>
         </select>
       </div>
       <div class="form-group">
@@ -788,34 +788,50 @@ app.get('/', (req, res) => {
         var priceStr = data.currency === 'USD' ? '$' + data.price.toLocaleString() + ' USD' : data.price.toLocaleString() + ' TZS';
         var royaltyPrice = Math.round(data.price * 0.95);
         var royaltySaving = data.price - royaltyPrice;
-        var royaltyStr = data.currency === 'USD' ? '$' + royaltyPrice + ' USD / day' : royaltyPrice.toLocaleString() + ' TZS / day';
+        var royaltyStr = data.currency === 'USD' ? '$' + royaltyPrice + ' USD' : royaltyPrice.toLocaleString() + ' TZS';
         var royaltySaveStr = data.currency === 'USD' ? '$' + royaltySaving : royaltySaving.toLocaleString() + ' TZS';
+        card.id = 'ticketCard_' + type;
         card.innerHTML =
           '<h3>' + data.icon + ' ' + data.name + '</h3>' +
-          '<p class="price">' + priceStr + ' <span style="font-size:13px;font-weight:500;color:#94a3b8">/ day</span></p>' +
+          '<p class="price">' + priceStr + ' <span style="font-size:13px;font-weight:500;color:#94a3b8">whole visit</span></p>' +
           '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">' +
-            '<div style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:1px solid rgba(180,83,9,0.18);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px">&#129351; 5% Royalty Discount</div>' +
-            '<span style="font-size:13px;font-weight:800;color:#059669">' + royaltyStr + '</span>' +
-            '<span style="font-size:11px;color:#94a3b8">save ' + royaltySaveStr + '</span>' +
+            '<div style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:1px solid rgba(180,83,9,0.18);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px">&#129351; 5% Royalty &nbsp;&middot;&nbsp; save ' + royaltySaveStr + '</div>' +
+            '<span style="font-size:14px;font-weight:900;color:#059669">' + royaltyStr + '</span>' +
           '</div>' +
           '<div style="display:inline-flex;align-items:center;gap:5px;background:#f0f9ff;color:#0284c7;border:1px solid rgba(2,132,199,0.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:14px">&#128274; FIXED BASE PRICE &nbsp;&middot;&nbsp; No early-bird discount</div>' +
           '<p style="margin:0 0 12px;color:#666;font-size:13px;line-height:1.55">Includes access to convention sessions, networking, and event materials.</p>' +
-          '<p style="margin:0 0 14px;font-size:12px;color:#0284c7;line-height:1.6;padding:8px 12px;background:rgba(224,242,254,0.6);border-radius:8px;border-left:3px solid #38bdf8">&#128197; Looking for accommodation? See our early-bird <strong>Packages</strong> below &darr; with up to <strong>40% off</strong> hotel.</p>' +
-          '<button type="button" onclick="selectTicketType(\\'' + type + '\\')">Select This Ticket</button>';
+          '<a href="#packages" style="display:block;margin:0 0 14px;font-size:12px;color:#0284c7;line-height:1.6;padding:8px 12px;background:rgba(224,242,254,0.6);border-radius:8px;border-left:3px solid #38bdf8;text-decoration:none">&#127968; View accommodation plans for early bird booking &darr; &nbsp;up to <strong>40% off</strong> hotel.</a>' +
+          '<button type="button" id="ticketBtn_' + type + '" onclick="selectTicketType(\\'' + type + '\\')">Select This Ticket</button>';
         ticketsContainer.appendChild(card);
       });
     }
 
     function selectTicketType(type) {
       const select = document.getElementById('ticketType');
-      if (select) {
-        select.value = type;
-        const formEl = document.getElementById('register');
-        if (formEl) {
-          const rect = formEl.getBoundingClientRect();
-          if (rect.top > window.innerHeight || rect.bottom < 0) {
-            formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+      if (select) select.value = type;
+      document.querySelectorAll('.ticket-card').forEach(function(c) {
+        c.style.outline = '';
+        c.style.boxShadow = '';
+      });
+      document.querySelectorAll('[id^="ticketBtn_"]').forEach(function(b) {
+        b.innerHTML = 'Select This Ticket';
+        b.style.background = '';
+      });
+      var card = document.getElementById('ticketCard_' + type);
+      if (card) {
+        card.style.outline = '2px solid #e91e63';
+        card.style.boxShadow = '0 0 0 4px rgba(233,30,99,0.12)';
+        var btn = document.getElementById('ticketBtn_' + type);
+        if (btn) {
+          btn.innerHTML = '&#10003; Selected';
+          btn.style.background = 'linear-gradient(135deg,#c2185b,#e91e63)';
+        }
+      }
+      const formEl = document.getElementById('register');
+      if (formEl) {
+        const rect = formEl.getBoundingClientRect();
+        if (rect.top > window.innerHeight || rect.bottom < 0) {
+          formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }
     }
@@ -945,7 +961,7 @@ app.get('/', (req, res) => {
         for (var ti3 = 0; ti3 < tkEntries.length; ti3++) {
           var tkType = tkEntries[ti3][0];
           var tkData = tkEntries[ti3][1];
-          var tkPriceStr = tkData.currency === 'USD' ? '$' + tkData.price.toLocaleString() + ' USD / day' : tkData.price.toLocaleString() + ' TZS / day';
+          var tkPriceStr = tkData.currency === 'USD' ? '$' + tkData.price.toLocaleString() + ' USD &middot; whole visit' : tkData.price.toLocaleString() + ' TZS &middot; whole visit';
           html += '<label style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1.5px solid transparent;border-radius:10px;padding:10px 12px;cursor:pointer;transition:all 0.2s">';
           html += '<input type="radio" name="ticket_' + idx + '" value="' + tkType + '" onchange="updatePkgCalc(' + idx + ')" style="width:16px;height:16px;accent-color:#e91e63">';
           html += '<span style="flex:1"><span style="font-weight:700;font-size:13px;color:#1e293b">' + tkData.icon + ' ' + tkData.name + '</span><br>';
