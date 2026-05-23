@@ -70,10 +70,10 @@ app.use('/documentation', express.static(docsPath));
 
 const TICKET_TYPES = {
   'general': { name: 'General Admin (Local)', price: 10000, currency: 'TZS', icon: '👔' },
-  'foreigners': { name: 'Foreigners (VIP)', price: 350, currency: 'USD', icon: '✈️' },
-  'youth': { name: 'Youth', price: 200, currency: 'USD', icon: '🎓' },
-  'speaker': { name: 'Speaker', price: 300, currency: 'USD', icon: '🎤' },
-  'business': { name: 'Business', price: 250, currency: 'USD', icon: '💼' }
+  'foreigners': { name: 'Foreigners (VIP)', price: 245, currency: 'USD', icon: '✈️' },
+  'youth': { name: 'Youth', price: 95, currency: 'USD', icon: '🎓' },
+  'speaker': { name: 'Speaker', price: 195, currency: 'USD', icon: '🎤' },
+  'business': { name: 'Business', price: 145, currency: 'USD', icon: '💼' }
 };
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
