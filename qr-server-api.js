@@ -314,6 +314,7 @@ app.get('/', (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Africa Convention 2026</title>
+  <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(160deg, #e8f4fd 0%, #fdf0f7 30%, #eef4ff 60%, #e8f5fd 100%); min-height: 100vh; color: #333; }
@@ -790,6 +791,7 @@ app.get('/admin-login', (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login — Africa Convention 2026</title>
+  <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e8f4fd 0%,#fdf0f7 30%,#eef4ff 60%,#e8f6fd 100%);position:relative;overflow:hidden}
@@ -872,6 +874,7 @@ app.get('/preview', async (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Africa Convention 2026 — Live Preview</title>
+  <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -1478,6 +1481,7 @@ app.get('/raffle', async (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎰 Raffle — Africa Convention 2026</title>
+  <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -1576,6 +1580,7 @@ app.get('/raffle/vote/:ticket_id', async (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cast Your Vote — Africa Convention 2026</title>
+  <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#e8f4fd 0%,#fdf0f7 40%,#eef4ff 100%);min-height:100vh;padding:24px}
@@ -1766,6 +1771,7 @@ app.get('/raffle/reveal', async (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🏆 Raffle Winners — Africa Convention 2026</title>
+  <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:hidden}
