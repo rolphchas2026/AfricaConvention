@@ -111,6 +111,16 @@
     .fab-result { min-height:52px; padding:14px 16px; background:rgba(248,250,252,0.9); border:1px solid rgba(244,143,177,0.2); border-radius:12px; color:#94a3b8; font-size:13px; margin-bottom:12px; }
     .fab-recent { font-size:12px; color:#374151; }
     .fab-recent-title { font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .pb-share-btn { display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;transition:opacity 0.2s;white-space:nowrap;flex-shrink:0;border:none; }
+    .pb-share-btn:hover { opacity:0.85; }
+    @media print {
+      header,.tabs-outer,.tabs-fade,.content-wrapper > *:not(#pbPrintRegion) { display:none!important; }
+      .content-wrapper { padding:0!important;height:auto!important;overflow:visible!important; }
+      #pbPrintRegion { display:block!important; }
+      #pbContent { display:block!important;border:none!important;box-shadow:none!important;border-radius:0!important; }
+      .pb-share-bar,.pb-share-bar * { display:none!important; }
+      body { background:white!important; }
+    }
   </style>
 </head>
 <body x-data="adminApp()">
@@ -145,7 +155,7 @@
       <h2>Convention Hub</h2>
 
       <!-- ══ Pricing Strategy Briefing ══ -->
-      <div style="max-width:900px;margin:18px 0 26px">
+      <div id="pbPrintRegion" style="max-width:900px;margin:18px 0 26px">
         <button onclick="pbToggle()" id="pbBtn"
           style="width:100%;padding:22px 28px;background:linear-gradient(135deg,#1e293b,#334155);color:white;border:2px solid rgba(244,143,177,0.28);border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between;align-items:center;text-align:left;box-shadow:0 8px 32px rgba(0,0,0,0.22);letter-spacing:0.2px;transition:box-shadow 0.25s">
           <span style="display:flex;align-items:flex-start;gap:14px">
@@ -159,6 +169,16 @@
         </button>
 
         <div id="pbContent" style="display:none;margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid rgba(244,143,177,0.22);box-shadow:0 8px 36px rgba(0,0,0,0.08)">
+
+          <!-- Share bar -->
+          <div class="pb-share-bar" style="background:linear-gradient(135deg,#1e293b,#334155);padding:14px 28px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;border-bottom:1px solid rgba(244,143,177,0.22)">
+            <span style="font-size:11px;font-weight:700;color:rgba(244,143,177,0.9);text-transform:uppercase;letter-spacing:1.2px;flex-shrink:0">Share briefing:</span>
+            <button onclick="window.print()" class="pb-share-btn" style="background:white;color:#1e293b">&#128196; Save / Print PDF</button>
+            <a href="https://wa.me/?text=Africa%20Convention%202026%20%E2%80%94%20Accommodation%20Packages.%20Early-bird%20savings%20up%20to%2040%25%20on%20hotel%20(Jun%2017%E2%80%9322%2C%20Arusha).%20Ordinary%20Single%20from%20%24525%20%C2%B7%20Double%20Single%20from%20%24615%20%C2%B7%20Suite%20VVIP%20from%20%241%2C290%20%C2%B7%20Double%20Suite%20from%20%24930.%20Book%20before%20May%2030%20for%2040%25%20off.%20Contact%3A%20%2B255%20787%20576%20900%20%7C%20wccm.tz%40gmail.com" target="_blank" rel="noopener" class="pb-share-btn" style="background:#25d366;color:white">&#128241; WhatsApp</a>
+            <a href="mailto:?subject=Africa%20Convention%202026%20%E2%80%94%20Accommodation%20Package%20Pricing&body=Dear%20Guest%2C%0A%0AWe%20are%20pleased%20to%20share%20the%20accommodation%20pricing%20for%20Africa%20Convention%202026%20%E2%80%94%20June%2017%E2%80%9322%20in%20Arusha%2C%20Tanzania.%0A%0AOPTION%20B%20%E2%80%94%20Accommodation-Only%20Discount%20%2B%20Fixed%20Services%20%24240%0A%0AD-Tier%20(40%25%20off%2C%20before%20May%2030)%3A%0A%20%20Ordinary%20Single%3A%20%24525%20%7C%20Double%20Single%3A%20%24615%20%7C%20Triple%3A%20%24690%0A%20%20Suite%20VVIP%3A%20%241%2C290%20%7C%20Double%20Suite%3A%20%24930%0A%0AAll%20packages%20include%3A%205%20nights%20B%26B%20%2B%20Daily%20Lunch%20%2B%20Commute%20%2B%20Badge%20%2B%20Raffle%20Entry%0A%0AFor%20registration%20contact%3A%0A%2B255%20787%20576%20900%20%7C%20%2B255%20713%20276%20655%0Awccm.tz%40gmail.com%0A%0ABest%20regards%2C%0AAfrica%20Convention%202026%20Team" class="pb-share-btn" style="background:#4a90d9;color:white">&#9993; Email</a>
+            <a href="https://wa.me/+255787576900?text=Hello%2C%20I%20saw%20the%20Africa%20Convention%202026%20pricing%20and%20would%20like%20more%20information." target="_blank" rel="noopener" class="pb-share-btn" style="background:#e91e63;color:white">&#128172; Direct Enquiry</a>
+            <button onclick="pbCopyLink()" id="pbCopyBtn" class="pb-share-btn" style="background:rgba(255,255,255,0.12);color:white;border:1px solid rgba(255,255,255,0.3)">&#128279; Copy Link</button>
+          </div>
 
           <!-- Preamble -->
           <div style="background:#f8fafc;padding:24px 28px;border-bottom:1px solid rgba(244,143,177,0.12)">
@@ -1463,6 +1483,21 @@
     c.style.display = open ? 'none' : 'block';
     a.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
     if (!open) { setTimeout(function(){ document.getElementById('pbBtn').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
+  }
+
+  function pbCopyLink() {
+    var url = window.location.href.split('?')[0];
+    var btn = document.getElementById('pbCopyBtn');
+    function done() { if (btn) { btn.innerHTML = '&#10003; Copied!'; setTimeout(function(){ btn.innerHTML = '&#128279; Copy Link'; }, 2200); } }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(function() {
+        var ta = document.createElement('textarea'); ta.value = url;
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done();
+      });
+    } else {
+      var ta = document.createElement('textarea'); ta.value = url;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done();
+    }
   }
 </script>
 </body>

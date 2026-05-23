@@ -904,7 +904,7 @@ app.get('/', (req, res) => {
         html += '</div>';
         var safeName = pkg.name.replace(/\'/g, "\\'");
         var safeTier = tier.label.replace(/\'/g, "\\'");
-        html += '<button class="pkg-book-btn" style="background:linear-gradient(135deg,' + tier.color + ',#e91e63);color:white" onclick="bookPkg(\'' + safeName + '\',' + price + ',\'' + safeTier + '\')">Book This Package &#8212; ' + tier.label + ' $' + price.toLocaleString() + '</button>';
+        html += '<button class="pkg-book-btn" style="background:linear-gradient(135deg,' + tier.color + ',#e91e63);color:white" onclick="bookPkg(\\'' + safeName + '\\',' + price + ',\\'' + safeTier + '\\')">Book This Package &#8212; ' + tier.label + ' $' + price.toLocaleString() + '</button>';
         html += '</div></div>';
       }
       grid.innerHTML = html;
