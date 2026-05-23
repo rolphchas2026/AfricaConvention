@@ -671,6 +671,8 @@ app.get('/', (req, res) => {
     // ── CoverFlow + Filmstrip ──────────────────────────────────────
     let _cfActive = 0, _cfTimer = null;
     const CF_INTERVAL = 4200;
+    var _lastPageScroll = 0;
+    window.addEventListener('scroll', function(){ _lastPageScroll = Date.now(); }, { passive: true });
 
     function initCoverflow() {
       const stage = document.getElementById('cfStage');
@@ -731,7 +733,12 @@ app.get('/', (req, res) => {
       document.querySelectorAll('.cf-thumb').forEach(function(thumb, i) {
         const active = i === (_cfActive % n);
         thumb.classList.toggle('active', active);
-        if (active) { try { thumb.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); } catch(e){} }
+        if (active) {
+          var gs = document.querySelector('.gallery-section');
+          var galleryInView = gs && (function(){ var r = gs.getBoundingClientRect(); return r.top < window.innerHeight && r.bottom > 0; })();
+          var scrollIdle = Date.now() - _lastPageScroll > 12000;
+          if (galleryInView || scrollIdle) { try { thumb.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); } catch(e){} }
+        }
       });
     }
 
