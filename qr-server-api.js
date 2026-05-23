@@ -786,10 +786,19 @@ app.get('/', (req, res) => {
         const card = document.createElement('div');
         card.className = 'ticket-card';
         var priceStr = data.currency === 'USD' ? '$' + data.price.toLocaleString() + ' USD' : data.price.toLocaleString() + ' TZS';
+        var royaltyPrice = Math.round(data.price * 0.95);
+        var royaltySaving = data.price - royaltyPrice;
+        var royaltyStr = data.currency === 'USD' ? '$' + royaltyPrice + ' USD / day' : royaltyPrice.toLocaleString() + ' TZS / day';
+        var royaltySaveStr = data.currency === 'USD' ? '$' + royaltySaving : royaltySaving.toLocaleString() + ' TZS';
         card.innerHTML =
           '<h3>' + data.icon + ' ' + data.name + '</h3>' +
           '<p class="price">' + priceStr + ' <span style="font-size:13px;font-weight:500;color:#94a3b8">/ day</span></p>' +
-          '<div style="display:inline-flex;align-items:center;gap:5px;background:#f0f9ff;color:#0284c7;border:1px solid rgba(2,132,199,0.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:14px">&#128274; FIXED PRICE &nbsp;&middot;&nbsp; No early-bird discount</div>' +
+          '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">' +
+            '<div style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:1px solid rgba(180,83,9,0.18);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px">&#129351; 5% Royalty Discount</div>' +
+            '<span style="font-size:13px;font-weight:800;color:#059669">' + royaltyStr + '</span>' +
+            '<span style="font-size:11px;color:#94a3b8">save ' + royaltySaveStr + '</span>' +
+          '</div>' +
+          '<div style="display:inline-flex;align-items:center;gap:5px;background:#f0f9ff;color:#0284c7;border:1px solid rgba(2,132,199,0.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:14px">&#128274; FIXED BASE PRICE &nbsp;&middot;&nbsp; No early-bird discount</div>' +
           '<p style="margin:0 0 12px;color:#666;font-size:13px;line-height:1.55">Includes access to convention sessions, networking, and event materials.</p>' +
           '<p style="margin:0 0 14px;font-size:12px;color:#0284c7;line-height:1.6;padding:8px 12px;background:rgba(224,242,254,0.6);border-radius:8px;border-left:3px solid #38bdf8">&#128197; Looking for accommodation? See our early-bird <strong>Packages</strong> below &darr; with up to <strong>40% off</strong> hotel.</p>' +
           '<button type="button" onclick="selectTicketType(\\'' + type + '\\')">Select This Ticket</button>';
@@ -927,7 +936,7 @@ app.get('/', (req, res) => {
         html += '<div class="pkg-breakdown-row"><span>Delegate Badge &amp; Raffle Entry <span style="background:#e2e8f0;color:#64748b;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">FIXED</span></span><span>$15</span></div>';
         html += '<div class="pkg-breakdown-row total"><span>Package Total (accommodation + services)</span><span>$' + price.toLocaleString() + '</span></div>';
         html += '</div>';
-        html += '<div class="pkg-fixed-note">&#128274; Early-bird discount applies to accommodation only. Lunch, commute, badge &amp; raffle ($240) are fixed costs and never discounted.</div>';
+        html += '<div class="pkg-fixed-note">&#128274; Early-bird discount applies to accommodation only. The $240 fixed charges (lunch, commute, delegate badge &amp; raffle) cover <strong>venue and organisation hire</strong> — these are never discounted.</div>';
         html += '</div>';
         // RIGHT: ticket selector + live grand total + book button
         html += '<div class="pkg-detail-right">';
