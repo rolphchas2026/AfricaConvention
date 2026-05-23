@@ -69,7 +69,7 @@ app.use('/sysimages', express.static(imagesPath));
 app.use('/documentation', express.static(docsPath));
 
 const TICKET_TYPES = {
-  'general': { name: 'General Admin (Local)', price: 10000, currency: 'TZS', icon: '👔' },
+  'general': { name: 'Local attending Ministers', price: 15000, currency: 'TZS', icon: '👔' },
   'foreigners': { name: 'Foreigners (VIP)', price: 245, currency: 'USD', icon: '✈️' },
   'youth': { name: 'Youth', price: 95, currency: 'USD', icon: '🎓' },
   'speaker': { name: 'Speaker', price: 195, currency: 'USD', icon: '🎤' },
@@ -152,6 +152,7 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS payment_proof TEXT`);
       await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS payment_proof_name VARCHAR(255)`);
       await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS documents JSONB DEFAULT '[]'`);
+      await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS accommodation_type VARCHAR(100) DEFAULT ''`);
 
       // Raffle tables
       await pool.query(`
@@ -561,11 +562,22 @@ app.get('/', (req, res) => {
         <label>Ticket Type</label>
         <select id="ticketType" required>
           <option value="">Select Ticket Type</option>
-          <option value="general">General Admin (Local) — 10,000 TZS</option>
+          <option value="general">Local attending Ministers — 15,000 TZS</option>
           <option value="foreigners">Foreigners (VIP) — $245 USD</option>
           <option value="youth">Youth — $95 USD</option>
           <option value="speaker">Speaker — $195 USD</option>
           <option value="business">Business — $145 USD</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Accommodation Package</label>
+        <select id="accommodationType">
+          <option value="">None / Self-arranged</option>
+          <option value="Ordinary Single">Ordinary Single</option>
+          <option value="Double Single">Double Single</option>
+          <option value="Triple Single">Triple Single</option>
+          <option value="Suite Single VVIP">Suite Single VVIP</option>
+          <option value="Double Suite">Double Suite</option>
         </select>
       </div>
       <div class="form-group">
@@ -838,6 +850,7 @@ app.get('/', (req, res) => {
 
     async function registerAttendee() {
       const ticket_type = document.getElementById('ticketType').value;
+      const accommodation_type = document.getElementById('accommodationType').value;
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const phone = document.getElementById('phone').value.trim();
@@ -854,7 +867,7 @@ app.get('/', (req, res) => {
         const res = await fetch('/api/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticket_type, name, email, phone, organization, title })
+          body: JSON.stringify({ ticket_type, accommodation_type, name, email, phone, organization, title })
         });
         const data = await res.json();
         if (data.success) {
@@ -1300,7 +1313,7 @@ app.get('/admin', (req, res) => {
 app.post('/api/register', async (req, res) => {
   try {
     if (!pool) return res.json({ success: false, error: 'Database not ready' });
-    const { ticket_type, name, email, phone, organization, title } = req.body;
+    const { ticket_type, accommodation_type, name, email, phone, organization, title } = req.body;
     if (!ticket_type || !name || !email || !phone) return res.json({ success: false, error: 'Missing required fields' });
     const ticket = TICKET_TYPES[ticket_type];
     if (!ticket) return res.json({ success: false, error: 'Invalid ticket type' });
@@ -1309,8 +1322,8 @@ app.post('/api/register', async (req, res) => {
       JSON.stringify({ ticket_id: ticketId, name, type: ticket_type }), { width: 300, margin: 1 }
     );
     await pool.query(
-      'INSERT INTO attendees (ticket_id, name, email, phone, organization, title, ticket_type, ticket_price, currency, payment_status, qr_code) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)',
-      [ticketId, name, email, phone, organization || '', title || '', ticket_type, ticket.price, ticket.currency, 'APPROVED', qrCode]
+      'INSERT INTO attendees (ticket_id, name, email, phone, organization, title, ticket_type, ticket_price, currency, payment_status, qr_code, accommodation_type) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',
+      [ticketId, name, email, phone, organization || '', title || '', ticket_type, ticket.price, ticket.currency, 'APPROVED', qrCode, accommodation_type || '']
     );
     res.json({ success: true, ticket_id: ticketId });
   } catch (error) {
@@ -1412,11 +1425,11 @@ app.put('/api/attendees/:ticket_id', async (req, res) => {
   try {
     if (!pool) return res.json({ success: false, error: 'Database not ready' });
     const { ticket_id } = req.params;
-    const { name, email, phone, organization, title, ticket_type, payment_status, verified } = req.body;
+    const { name, email, phone, organization, title, ticket_type, accommodation_type, payment_status, verified } = req.body;
     if (!name || !email) return res.json({ success: false, error: 'Name and email required' });
     const result = await pool.query(
-      'UPDATE attendees SET name=$1, email=$2, phone=$3, organization=$4, title=$5, ticket_type=$6, payment_status=$7, verified=$8 WHERE ticket_id=$9',
-      [name, email, phone || '', organization || '', title || '', ticket_type, payment_status, !!verified, ticket_id]
+      'UPDATE attendees SET name=$1, email=$2, phone=$3, organization=$4, title=$5, ticket_type=$6, payment_status=$7, verified=$8, accommodation_type=$9 WHERE ticket_id=$10',
+      [name, email, phone || '', organization || '', title || '', ticket_type, payment_status, !!verified, accommodation_type || '', ticket_id]
     );
     if (result.rowCount === 0) return res.json({ success: false, error: 'Attendee not found' });
     res.json({ success: true });

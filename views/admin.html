@@ -518,7 +518,7 @@
       <div class="stat-box"><div class="stat-number" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
       <h3>All Registrations</h3>
       <table>
-        <thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Registered</th><th>Status</th><th>Badge</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Registered</th><th>Status</th><th>Badge</th><th>Actions</th></tr></thead>
         <tbody id="overviewList"></tbody>
       </table>
     </div>
@@ -530,7 +530,7 @@
          x-cloak>
       <h2>Pending Registrations</h2>
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Status</th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Organization</th><th>Status</th></tr></thead>
         <tbody id="pendingList"></tbody>
       </table>
     </div>
@@ -542,7 +542,7 @@
          x-cloak>
       <h2>Approval Queue</h2>
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="approvalList"></tbody>
       </table>
     </div>
@@ -640,7 +640,7 @@
       <div id="statsByType"></div>
       <h3>Full Attendee List</h3>
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Organization</th><th>Checked In</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Organization</th><th>Checked In</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="attendeesList"></tbody>
       </table>
     </div>
@@ -799,11 +799,22 @@
       <div class="form-row" style="margin-bottom:0"><label>Title</label><input type="text" x-model="editForm.title"></div>
     </div>
     <div class="form-row"><label>Organization</label><input type="text" x-model="editForm.organization"></div>
+    <div class="form-row">
+      <label>Accommodation Package</label>
+      <select x-model="editForm.accommodationType">
+        <option value="">None / Self-arranged</option>
+        <option value="Ordinary Single">Ordinary Single</option>
+        <option value="Double Single">Double Single</option>
+        <option value="Triple Single">Triple Single</option>
+        <option value="Suite Single VVIP">Suite Single VVIP</option>
+        <option value="Double Suite">Double Suite</option>
+      </select>
+    </div>
     <div class="form-grid">
       <div class="form-row" style="margin-bottom:0">
         <label>Ticket Type</label>
         <select x-model="editForm.ticketType">
-          <option value="general">General Admin (Local)</option>
+          <option value="general">Local attending Ministers</option>
           <option value="foreigners">Foreigners (VIP)</option>
           <option value="youth">Youth</option>
           <option value="speaker">Speaker</option>
@@ -848,7 +859,7 @@
       fabMode:   'checkin',
       editForm: {
         ticketId: '', name: '', email: '', phone: '', title: '',
-        organization: '', ticketType: 'general', paymentStatus: 'PENDING', verified: false
+        organization: '', accommodationType: '', ticketType: 'general', paymentStatus: 'PENDING', verified: false
       },
       editError: '',
       checkinInput:  '',
@@ -940,14 +951,15 @@
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              name:           this.editForm.name.trim(),
-              email:          this.editForm.email.trim(),
-              phone:          this.editForm.phone.trim(),
-              title:          this.editForm.title.trim(),
-              organization:   this.editForm.organization.trim(),
-              ticket_type:    this.editForm.ticketType,
-              payment_status: this.editForm.paymentStatus,
-              verified:       this.editForm.verified
+              name:               this.editForm.name.trim(),
+              email:              this.editForm.email.trim(),
+              phone:              this.editForm.phone.trim(),
+              title:              this.editForm.title.trim(),
+              organization:       this.editForm.organization.trim(),
+              accommodation_type: this.editForm.accommodationType,
+              ticket_type:        this.editForm.ticketType,
+              payment_status:     this.editForm.paymentStatus,
+              verified:           this.editForm.verified
             })
           });
           var result = await res.json();
@@ -993,6 +1005,7 @@
           '<td>' + esc(a.name) + '</td>' +
           '<td style="font-size:12px">' + esc(a.email) + '</td>' +
           '<td>' + a.ticket_type + '</td>' +
+          '<td style="font-size:12px">' + esc(a.accommodation_type || '—') + '</td>' +
           '<td style="font-size:12px">' + new Date(a.created_at).toLocaleDateString() + '</td>' +
           '<td><span class="badge ' + (a.payment_status === 'APPROVED' ? 'badge-approved' : 'badge-pending') + '">' + a.payment_status + '</span></td>' +
           '<td style="font-size:12px">' + (a.badge_generated ? '<span style="color:#059669">✅</span>' : '—') + (a.badge_sent ? ' <span style="color:#059669;font-size:10px">📧</span>' : '') + '</td>' +
@@ -1006,7 +1019,7 @@
           '</td></tr>';
       }).join('');
     } catch(e) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:#e11d48">⚠️ ' + (e.message || 'Failed to load') + ' — <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:28px;color:#e11d48">⚠️ ' + (e.message || 'Failed to load') + ' — <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
     }
   }
 
@@ -1016,9 +1029,9 @@
       var data = await fetchAttendees();
       var pending = data.filter(function(a){ return a.payment_status === 'PENDING'; });
       document.getElementById('pendingList').innerHTML = pending.length
-        ? pending.map(function(a){ return '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.organization || '—') + '</td><td><span class="badge badge-pending">Pending</span></td></tr>'; }).join('')
-        : '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px">No pending registrations</td></tr>';
-    } catch(e) { document.getElementById('pendingList').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
+        ? pending.map(function(a){ return '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.accommodation_type || '—') + '</td><td>' + esc(a.organization || '—') + '</td><td><span class="badge badge-pending">Pending</span></td></tr>'; }).join('')
+        : '<tr><td colspan="6" style="text-align:center;color:#999;padding:30px">No pending registrations</td></tr>';
+    } catch(e) { document.getElementById('pendingList').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
   }
 
   // ── Approval ──────────────────────────────────────────────────────────────────
@@ -1027,10 +1040,11 @@
       var data = await fetchAttendees();
       document.getElementById('approvalList').innerHTML = data.map(function(a){
         return '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.email) + '</td><td>' + a.ticket_type + '</td>' +
+          '<td>' + esc(a.accommodation_type || '—') + '</td>' +
           '<td><span class="badge ' + (a.payment_status === 'APPROVED' ? 'badge-approved' : 'badge-pending') + '">' + a.payment_status + '</span></td>' +
           '<td><button onclick="approve(\'' + a.ticket_id + '\')">' + (a.payment_status === 'APPROVED' ? 'Re-approve' : 'Approve') + '</button></td></tr>';
       }).join('');
-    } catch(e) { document.getElementById('approvalList').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
+    } catch(e) { document.getElementById('approvalList').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
   }
 
   async function approve(tid) {
@@ -1052,7 +1066,7 @@
       document.getElementById('statsByType').innerHTML = Object.entries(counts)
         .map(function(e){ return '<div class="stat-box"><div class="stat-number">' + e[1] + '</div><div class="stat-label">' + e[0] + '</div></div>'; }).join('');
       document.getElementById('attendeesList').innerHTML = data.map(function(a){
-        return '<tr><td>' + esc(a.name) + '</td><td style="font-size:12px">' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.organization || '—') + '</td><td>' + (a.checked_in ? '✅' : '—') + '</td>' +
+        return '<tr><td>' + esc(a.name) + '</td><td style="font-size:12px">' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.accommodation_type || '—') + '</td><td>' + esc(a.organization || '—') + '</td><td>' + (a.checked_in ? '✅' : '—') + '</td>' +
           '<td><span class="badge ' + (a.payment_status === 'APPROVED' ? 'badge-approved' : 'badge-pending') + '">' + a.payment_status + '</span></td>' +
           '<td style="white-space:nowrap">' +
             '<button class="btn-edit"  title="Edit attendee"    onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
@@ -1115,10 +1129,11 @@
     app.editForm.email         = a.email || '';
     app.editForm.phone         = a.phone || '';
     app.editForm.title         = a.title || '';
-    app.editForm.organization  = a.organization || '';
-    app.editForm.ticketType    = a.ticket_type || 'general';
-    app.editForm.paymentStatus = a.payment_status || 'PENDING';
-    app.editForm.verified      = !!a.verified;
+    app.editForm.organization      = a.organization || '';
+    app.editForm.accommodationType = a.accommodation_type || '';
+    app.editForm.ticketType        = a.ticket_type || 'general';
+    app.editForm.paymentStatus     = a.payment_status || 'PENDING';
+    app.editForm.verified          = !!a.verified;
     app.editError = '';
     app.editOpen  = true;
   }
