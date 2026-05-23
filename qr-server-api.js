@@ -457,6 +457,40 @@ app.get('/', (req, res) => {
       .hero-cta, .hero-cta-outline { padding: 13px 26px; font-size: 15px; }
       .gallery-heading h2 { font-size: 32px; }
     }
+
+    /* packages pricing cards */
+    .pkg-tier-live { display: inline-flex; align-items: center; gap: 10px; padding: 10px 24px; border-radius: 30px; font-size: 14px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 18px; }
+    .pkg-countdown { display: inline-block; background: rgba(30,41,59,0.08); border-radius: 20px; padding: 8px 22px; font-size: 13px; font-weight: 700; color: #475569; margin-top: 10px; }
+    .pkg-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 22px; max-width: 1200px; margin: 0 auto; }
+    .pkg-card { background: white; border-radius: 20px; box-shadow: 0 8px 28px rgba(0,0,0,0.1); overflow: hidden; transition: box-shadow 0.3s, transform 0.3s; }
+    .pkg-card.featured { box-shadow: 0 12px 40px rgba(233,30,99,0.18); }
+    .pkg-card:hover { transform: translateY(-4px); box-shadow: 0 18px 45px rgba(0,0,0,0.16); }
+    .pkg-card:nth-child(1), .pkg-card:nth-child(2), .pkg-card:nth-child(3) { grid-column: span 2; }
+    .pkg-card:nth-child(4), .pkg-card:nth-child(5) { grid-column: span 3; }
+    .pkg-card-head { padding: 26px 24px 20px; cursor: pointer; }
+    .pkg-card-icon { font-size: 32px; margin-bottom: 10px; }
+    .pkg-card-name { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+    .pkg-card-price-tag { font-size: 30px; font-weight: 900; margin-bottom: 6px; }
+    .pkg-card-tier-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.8px; }
+    .pkg-card-cta-text { font-size: 12px; color: #64748b; line-height: 1.55; margin-bottom: 14px; }
+    .pkg-card-toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #e91e63; border: none; background: none; cursor: pointer; padding: 0; }
+    .pkg-detail { display: none; padding: 0 24px 24px; }
+    .pkg-card.open .pkg-detail { display: block; border-top: 1px solid #f1f5f9; }
+    .pkg-detail-intro { font-size: 13px; color: #475569; line-height: 1.6; padding: 14px 0; }
+    .pkg-tier-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+    .pkg-tier-table th { background: #f8fafc; color: #64748b; font-weight: 700; padding: 8px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pkg-tier-table th:first-child { text-align: left; }
+    .pkg-tier-table td { padding: 8px; text-align: center; border-top: 1px solid #f1f5f9; font-size: 12px; }
+    .pkg-tier-table td:first-child { text-align: left; font-weight: 600; color: #374151; }
+    .pkg-tier-row-current td { background: rgba(233,30,99,0.05); }
+    .pkg-tier-row-expired td { opacity: 0.4; }
+    .pkg-breakdown { background: #f8fafc; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px; }
+    .pkg-breakdown-row { display: flex; justify-content: space-between; padding: 4px 0; color: #475569; }
+    .pkg-breakdown-row.total { font-weight: 900; color: #1e293b; border-top: 1px solid #e2e8f0; margin-top: 6px; padding-top: 8px; font-size: 15px; }
+    .pkg-book-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.3s; }
+    .pkg-book-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(233,30,99,0.35); }
+    @media (max-width: 1023px) { .pkg-grid { grid-template-columns: repeat(2,1fr); } .pkg-card:nth-child(n) { grid-column: span 1; } }
+    @media (max-width: 639px) { .pkg-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -467,6 +501,7 @@ app.get('/', (req, res) => {
       <div class="nav-links">
         <a href="#register">Register</a>
         <a href="#tickets">Tickets</a>
+        <a href="#packages">Packages</a>
         <a href="#contact">Contact</a>
         <a href="/admin-login" class="nav-admin">Admin Login</a>
       </div>
@@ -479,6 +514,7 @@ app.get('/', (req, res) => {
     <div class="hero-btns">
       <a href="#register" class="hero-cta">Register Now</a>
       <a href="#tickets" class="hero-cta-outline">View Tickets</a>
+      <a href="#packages" class="hero-cta-outline">View Packages</a>
     </div>
   </div>
     
@@ -505,6 +541,7 @@ app.get('/', (req, res) => {
     <h2>Register for the Convention</h2>
     <p>Choose your ticket type and register</p>
     <div class="registration-form">
+      <div id="pkgSelectedBanner" style="display:none;background:linear-gradient(135deg,#fce4ec,#f3e8ff);border:1.5px solid #f06292;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:14px;color:#7c3aed;font-weight:600;justify-content:space-between;align-items:flex-start;gap:12px"><span id="pkgBannerText"></span><button onclick="document.getElementById('pkgSelectedBanner').style.display='none'" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:#94a3b8;font-size:20px;line-height:1;padding:0">&#215;</button></div>
       <div id="regMsg"></div>
       <div class="form-group">
         <label>Ticket Type</label>
@@ -547,6 +584,16 @@ app.get('/', (req, res) => {
     <h2>Ticket Options</h2>
     <p>Select your tier to continue</p>
     <div class="tickets" id="ticketsContainer"></div>
+  </div>
+
+  <div class="section" id="packages">
+    <div style="text-align:center;margin-bottom:44px">
+      <div class="pkg-tier-live" id="pkgTierBadge" style="background:#dcfce7;color:#16a34a">&#11044; LIVE TIER: D &middot; Early Bird &nbsp;&middot;&nbsp; 40% off hotel accommodation</div>
+      <h2>Convention Accommodation Packages</h2>
+      <p>5 nights &middot; Arusha hotel &middot; All convention services included &middot; Early-bird savings on accommodation (Option B)</p>
+      <div class="pkg-countdown" id="pkgCountdown">Calculating tier deadline&hellip;</div>
+    </div>
+    <div class="pkg-grid" id="pkgGrid"></div>
   </div>
 
   <div class="section" id="contact">
@@ -597,7 +644,7 @@ app.get('/', (req, res) => {
             </a>
             <a href="https://www.rwandair.com" target="_blank" rel="noopener" class="sponsor-slot">
               <div class="sponsor-tooltip">Follow RwandAir · rwandair.com</div>
-              <div class="sponsor-logo-ph"><img src="/sysimages/sponsors/rwandair_com.svg" alt="RwandAir"></div>
+              <div class="sponsor-logo-ph"><img src="/sysimages/sponsors/rwand_air.png" alt="RwandAir"></div>
               <span>RwandAir</span>
             </a>
           </div>
@@ -732,7 +779,13 @@ app.get('/', (req, res) => {
       const select = document.getElementById('ticketType');
       if (select) {
         select.value = type;
-        select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const formEl = document.getElementById('register');
+        if (formEl) {
+          const rect = formEl.getBoundingClientRect();
+          if (rect.top > window.innerHeight || rect.bottom < 0) {
+            formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
       }
     }
 
@@ -772,6 +825,126 @@ app.get('/', (req, res) => {
         msgDiv.innerHTML = '<div style="color: #c92a2a; background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px;">❌ Network error occurred.</div>';
       }
     }
+
+    // ── Packages / Pricing Cards ────────────────────────────────────
+    var PKG_TIERS = [
+      { label: 'D · Early Bird',   dates: 'May 23 – May 29', end: new Date('2026-05-30'), disc: 0.40, color: '#16a34a', bg: '#dcfce7', urgency: 'Deepest saving — 40% off your hotel accommodation. This rate expires May 29. Book now to lock the largest discount available.' },
+      { label: 'C · Standard',     dates: 'May 30 – Jun 4',  end: new Date('2026-06-05'), disc: 0.30, color: '#0284c7', bg: '#dbeafe', urgency: 'Save 30% on accommodation — this tier closes June 4. Secure your room rate before the price steps up.' },
+      { label: 'B · Advantage',    dates: 'Jun 5 – Jun 10',  end: new Date('2026-06-11'), disc: 0.20, color: '#d97706', bg: '#fef3c7', urgency: 'Final 20% saving window — only days remain before rates rise permanently. Reserve your place while this tier is open.' },
+      { label: 'A · Last Chance',  dates: 'Jun 11 – Jun 16', end: new Date('2026-06-17'), disc: 0.10, color: '#dc2626', bg: '#fee2e2', urgency: 'Last-chance discount — 10% off hotel. This is your final opportunity to receive any saving before walk-in pricing takes effect.' },
+      { label: 'Full Rate',             dates: 'Jun 17+',              end: null,                   disc: 0,    color: '#64748b', bg: '#f1f5f9', urgency: 'Early-booking windows are closed. Register now to secure your convention place at the standard rate.' }
+    ];
+    var PKG_EMOJI = { 'Ordinary Single': '🛏️', 'Double Single': '🏨', 'Triple Single': '🛒️', 'Suite Single VVIP': '👑', 'Double Suite': '🏖️' };
+    var PKGS = [
+      { name: 'Ordinary Single',   accom: 475  },
+      { name: 'Double Single',     accom: 625  },
+      { name: 'Triple Single',     accom: 750  },
+      { name: 'Suite Single VVIP', accom: 1750, featured: true },
+      { name: 'Double Suite',      accom: 1150 }
+    ];
+    function optB(accom, disc) { return Math.round(accom * (1 - disc)) + 240; }
+    function pkgCurrentTier() {
+      var now = new Date();
+      for (var i = 0; i < PKG_TIERS.length - 1; i++) { if (now < PKG_TIERS[i].end) return i; }
+      return PKG_TIERS.length - 1;
+    }
+    function renderPkgCards() {
+      var ti = pkgCurrentTier();
+      var tier = PKG_TIERS[ti];
+      var grid = document.getElementById('pkgGrid');
+      if (!grid) return;
+      var html = '';
+      for (var idx = 0; idx < PKGS.length; idx++) {
+        var pkg = PKGS[idx];
+        var price = optB(pkg.accom, tier.disc);
+        var emoji = PKG_EMOJI[pkg.name] || '🛏️';
+        html += '<div class="pkg-card' + (pkg.featured ? ' featured' : '') + '" id="pkgCard' + idx + '">';
+        html += '<div class="pkg-card-head" onclick="togglePkgCard(' + idx + ')">';
+        html += '<div class="pkg-card-icon">' + emoji + '</div>';
+        html += '<div class="pkg-card-name">' + pkg.name + '</div>';
+        html += '<div class="pkg-card-tier-pill" style="background:' + tier.bg + ';color:' + tier.color + '">&#11044; ' + tier.label + '</div>';
+        html += '<div class="pkg-card-price-tag" style="color:' + tier.color + '">$' + price.toLocaleString() + '</div>';
+        html += '<div class="pkg-card-cta-text">' + tier.urgency + '</div>';
+        html += '<button class="pkg-card-toggle">View Details &#9660;</button>';
+        html += '</div>';
+        html += '<div class="pkg-detail">';
+        html += '<div class="pkg-detail-intro">5 nights accommodation (Jun 17&#8211;21) + 5 days services (Jun 18&#8211;22) &middot; Bed &amp; Breakfast &middot; Lunch, commute, delegate badge &amp; raffle entry all bundled.</div>';
+        html += '<table class="pkg-tier-table"><thead><tr><th>Tier</th><th>Dates</th><th>Hotel Discount</th><th>Package Total</th><th>Status</th></tr></thead><tbody>';
+        for (var ti2 = 0; ti2 < PKG_TIERS.length; ti2++) {
+          var t = PKG_TIERS[ti2];
+          var p2 = optB(pkg.accom, t.disc);
+          var isCurrent = ti2 === ti;
+          var isExpired = ti2 < ti;
+          var rowCls = isCurrent ? 'pkg-tier-row-current' : (isExpired ? 'pkg-tier-row-expired' : '');
+          var priceCell = isExpired ? '<s>$' + p2.toLocaleString() + '</s>' : '<strong style="color:' + t.color + '">$' + p2.toLocaleString() + '</strong>';
+          var statusBadge = isCurrent
+            ? '<span style="background:#e91e63;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">ACTIVE</span>'
+            : (isExpired ? '<span style="color:#94a3b8;font-size:11px">Expired</span>' : '<span style="color:#94a3b8;font-size:11px">Upcoming</span>');
+          html += '<tr class="' + rowCls + '"><td>' + t.label + '</td><td style="white-space:nowrap">' + t.dates + '</td>';
+          html += '<td>' + (t.disc > 0 ? Math.round(t.disc * 100) + '% off accom' : 'None') + '</td>';
+          html += '<td>' + priceCell + '</td><td>' + statusBadge + '</td></tr>';
+        }
+        html += '</tbody></table>';
+        var discSaving = pkg.accom - Math.round(pkg.accom * (1 - tier.disc));
+        html += '<div class="pkg-breakdown">';
+        html += '<div class="pkg-breakdown-row"><span>Bed &amp; Breakfast (5 nights)</span><span>$' + pkg.accom.toLocaleString() + '</span></div>';
+        if (tier.disc > 0) {
+          html += '<div class="pkg-breakdown-row" style="color:#16a34a"><span>Early-bird saving (' + Math.round(tier.disc * 100) + '% off accommodation)</span><span>&#8722;$' + discSaving + '</span></div>';
+        }
+        html += '<div class="pkg-breakdown-row"><span>Lunch &amp; Daily Commute (5 days)</span><span>$225</span></div>';
+        html += '<div class="pkg-breakdown-row"><span>Delegate Badge &amp; Raffle Entry</span><span>$15</span></div>';
+        html += '<div class="pkg-breakdown-row total"><span>Package Total</span><span>$' + price.toLocaleString() + '</span></div>';
+        html += '</div>';
+        var safeName = pkg.name.replace(/\'/g, "\\'");
+        var safeTier = tier.label.replace(/\'/g, "\\'");
+        html += '<button class="pkg-book-btn" style="background:linear-gradient(135deg,' + tier.color + ',#e91e63);color:white" onclick="bookPkg(\'' + safeName + '\',' + price + ',\'' + safeTier + '\')">Book This Package &#8212; ' + tier.label + ' $' + price.toLocaleString() + '</button>';
+        html += '</div></div>';
+      }
+      grid.innerHTML = html;
+      var badge = document.getElementById('pkgTierBadge');
+      if (badge) {
+        badge.style.background = tier.bg;
+        badge.style.color = tier.color;
+        badge.innerHTML = '&#11044; LIVE TIER: ' + tier.label + ' &nbsp;&middot;&nbsp; ' + (tier.disc > 0 ? Math.round(tier.disc * 100) + '% off accommodation' : 'No discount — walk-in rate');
+      }
+    }
+    function togglePkgCard(idx) {
+      var card = document.getElementById('pkgCard' + idx);
+      if (!card) return;
+      var wasOpen = card.classList.contains('open');
+      document.querySelectorAll('.pkg-card.open').forEach(function(c) { c.classList.remove('open'); });
+      if (!wasOpen) {
+        card.classList.add('open');
+        setTimeout(function() { card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
+      }
+    }
+    function bookPkg(name, price, tierLabel) {
+      var banner = document.getElementById('pkgSelectedBanner');
+      var bannerText = document.getElementById('pkgBannerText');
+      if (banner && bannerText) {
+        bannerText.textContent = 'Selected: ' + name + ' — ' + tierLabel + ' $' + price.toLocaleString() + '. Fill in your details below and click Register Now.';
+        banner.style.display = 'flex';
+      }
+      var formEl = document.getElementById('register');
+      if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function updatePkgCountdown() {
+      var ti = pkgCurrentTier();
+      var tier = PKG_TIERS[ti];
+      var el = document.getElementById('pkgCountdown');
+      if (!el) return;
+      if (!tier.end) { el.textContent = 'Walk-in rate is now active'; return; }
+      var diff = tier.end - new Date();
+      if (diff <= 0) { renderPkgCards(); return; }
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      el.textContent = 'Tier closes in: ' + (d > 0 ? d + 'd ' : '') + h + 'h ' + m + 'm ' + s + 's';
+    }
+    renderPkgCards();
+    updatePkgCountdown();
+    setInterval(updatePkgCountdown, 1000);
 
     initCoverflow();
     renderTicketOptions();
@@ -959,7 +1132,7 @@ app.get('/preview', async (req, res) => {
       </a>
       <a href="https://www.rwandair.com" target="_blank" rel="noopener" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;transition:all 0.3s" class="prev-sponsor">
         <div style="width:110px;height:62px;background:#fff;border:1px solid rgba(244,143,177,0.3);border-radius:10px;overflow:hidden;transition:all 0.3s;display:flex;align-items:center;justify-content:center">
-          <img src="/sysimages/sponsors/rwandair_com.svg" alt="RwandAir" style="width:100%;height:100%;object-fit:contain">
+          <img src="/sysimages/sponsors/rwand_air.png" alt="RwandAir" style="width:100%;height:100%;object-fit:contain">
         </div>
         <span style="font-size:11px;color:#94a3b8;transition:color 0.2s">RwandAir</span>
         <span class="prev-sp-tip" style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) scale(0.9);background:#1e293b;color:white;font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:all 0.2s">Follow RwandAir · rwandair.com</span>
