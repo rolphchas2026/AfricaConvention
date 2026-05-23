@@ -461,36 +461,50 @@ app.get('/', (req, res) => {
     /* packages pricing cards */
     .pkg-tier-live { display: inline-flex; align-items: center; gap: 10px; padding: 10px 24px; border-radius: 30px; font-size: 14px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 18px; }
     .pkg-countdown { display: inline-block; background: rgba(30,41,59,0.08); border-radius: 20px; padding: 8px 22px; font-size: 13px; font-weight: 700; color: #475569; margin-top: 10px; }
-    .pkg-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 22px; max-width: 1200px; margin: 0 auto; }
-    .pkg-card { background: white; border-radius: 20px; box-shadow: 0 8px 28px rgba(0,0,0,0.1); overflow: hidden; transition: box-shadow 0.3s, transform 0.3s; }
+    .pkg-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px; max-width: 1200px; margin: 0 auto; }
+    .pkg-card { background: white; border-radius: 20px; box-shadow: 0 8px 28px rgba(0,0,0,0.1); overflow: hidden; transition: box-shadow 0.4s, transform 0.3s; }
     .pkg-card.featured { box-shadow: 0 12px 40px rgba(233,30,99,0.18); }
-    .pkg-card:hover { transform: translateY(-4px); box-shadow: 0 18px 45px rgba(0,0,0,0.16); }
-    .pkg-card:nth-child(1), .pkg-card:nth-child(2), .pkg-card:nth-child(3) { grid-column: span 2; }
-    .pkg-card:nth-child(4), .pkg-card:nth-child(5) { grid-column: span 3; }
+    .pkg-card:not(.open):hover { transform: translateY(-4px); box-shadow: 0 18px 45px rgba(0,0,0,0.16); }
+    .pkg-card.open { grid-column: 1 / -1 !important; box-shadow: 0 20px 60px rgba(56,189,248,0.22), 0 0 0 2px rgba(56,189,248,0.3); }
     .pkg-card-head { padding: 26px 24px 20px; cursor: pointer; }
+    .pkg-card.open .pkg-card-head { padding: 22px 28px 16px; display: flex; align-items: center; gap: 18px; background: linear-gradient(135deg,#f0f9ff,#e0f2fe); }
     .pkg-card-icon { font-size: 32px; margin-bottom: 10px; }
+    .pkg-card.open .pkg-card-icon { font-size: 44px; margin-bottom: 0; flex-shrink: 0; }
     .pkg-card-name { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+    .pkg-card.open .pkg-card-name { font-size: 20px; margin-bottom: 4px; }
     .pkg-card-price-tag { font-size: 30px; font-weight: 900; margin-bottom: 6px; }
+    .pkg-card.open .pkg-card-price-tag { font-size: 34px; margin-bottom: 0; }
     .pkg-card-tier-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.8px; }
     .pkg-card-cta-text { font-size: 12px; color: #64748b; line-height: 1.55; margin-bottom: 14px; }
-    .pkg-card-toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #e91e63; border: none; background: none; cursor: pointer; padding: 0; }
-    .pkg-detail { display: none; padding: 0 24px 24px; }
-    .pkg-card.open .pkg-detail { display: block; border-top: 1px solid #f1f5f9; }
-    .pkg-detail-intro { font-size: 13px; color: #475569; line-height: 1.6; padding: 14px 0; }
+    .pkg-card.open .pkg-card-cta-text { display: none; }
+    .pkg-card-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #e91e63; border: 1.5px solid rgba(240,98,146,0.35); background: rgba(240,98,146,0.06); cursor: pointer; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; }
+    .pkg-card-toggle:hover { background: rgba(240,98,146,0.12); }
+    .pkg-detail { display: none; }
+    .pkg-card.open .pkg-detail { display: block; border-top: 2px solid rgba(56,189,248,0.25); }
+    .pkg-detail-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 28px 32px; }
+    .pkg-detail-left { }
+    .pkg-detail-right { display: flex; flex-direction: column; gap: 18px; }
+    .pkg-detail-intro { font-size: 13px; color: #475569; line-height: 1.6; padding: 0 0 14px; }
     .pkg-tier-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
-    .pkg-tier-table th { background: #f8fafc; color: #64748b; font-weight: 700; padding: 8px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pkg-tier-table th { background: #f8fafc; color: #64748b; font-weight: 700; padding: 8px 10px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
     .pkg-tier-table th:first-child { text-align: left; }
-    .pkg-tier-table td { padding: 8px; text-align: center; border-top: 1px solid #f1f5f9; font-size: 12px; }
+    .pkg-tier-table td { padding: 8px 10px; text-align: center; border-top: 1px solid #f1f5f9; font-size: 12px; }
     .pkg-tier-table td:first-child { text-align: left; font-weight: 600; color: #374151; }
     .pkg-tier-row-current td { background: rgba(233,30,99,0.05); }
     .pkg-tier-row-expired td { opacity: 0.4; }
-    .pkg-breakdown { background: #f8fafc; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px; }
+    .pkg-breakdown { background: #f8fafc; border-radius: 10px; padding: 14px 16px; margin-bottom: 4px; font-size: 13px; }
     .pkg-breakdown-row { display: flex; justify-content: space-between; padding: 4px 0; color: #475569; }
     .pkg-breakdown-row.total { font-weight: 900; color: #1e293b; border-top: 1px solid #e2e8f0; margin-top: 6px; padding-top: 8px; font-size: 15px; }
-    .pkg-book-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.3s; }
-    .pkg-book-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(233,30,99,0.35); }
-    @media (max-width: 1023px) { .pkg-grid { grid-template-columns: repeat(2,1fr); } .pkg-card:nth-child(n) { grid-column: span 1; } }
-    @media (max-width: 639px) { .pkg-grid { grid-template-columns: 1fr; } }
+    .pkg-grand-total { background: linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius: 12px; padding: 16px 18px; border: 1.5px solid rgba(56,189,248,0.35); }
+    .pkg-grand-row { display: flex; justify-content: space-between; font-size: 13px; color: #475569; padding: 3px 0; }
+    .pkg-grand-row.grand { font-size: 18px; font-weight: 900; color: #0c4a6e; border-top: 2px solid rgba(56,189,248,0.35); margin-top: 8px; padding-top: 10px; }
+    .pkg-fixed-note { background: rgba(248,250,252,0.95); border-left: 3px solid #94a3b8; padding: 10px 14px; font-size: 11px; color: #64748b; line-height: 1.6; border-radius: 0 8px 8px 0; }
+    .pkg-book-btn { width: 100%; padding: 17px; border: none; border-radius: 12px; font-size: 15px; font-weight: 900; cursor: pointer; transition: all 0.35s; background: linear-gradient(135deg,#bae6fd,#7dd3fc,#38bdf8); color: #0c4a6e; letter-spacing: 0.3px; }
+    .pkg-book-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(186,230,253,0.6); background: linear-gradient(135deg,#fce4ec,#f9a8d4,#e879f9); color: #701a75; }
+    .pkg-section-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin: 14px 0 8px; }
+    @media (max-width: 1024px) { .pkg-grid { grid-template-columns: repeat(3, 1fr); } .pkg-detail-inner { grid-template-columns: 1fr; gap: 20px; padding: 20px; } }
+    @media (max-width: 768px) { .pkg-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .pkg-grid { grid-template-columns: 1fr; } .pkg-detail-inner { padding: 14px; } }
   </style>
 </head>
 <body>
@@ -771,13 +785,14 @@ app.get('/', (req, res) => {
       Object.entries(ticketTypes).forEach(function([type, data]) {
         const card = document.createElement('div');
         card.className = 'ticket-card';
+        var priceStr = data.currency === 'USD' ? '$' + data.price.toLocaleString() + ' USD' : data.price.toLocaleString() + ' TZS';
         card.innerHTML =
           '<h3>' + data.icon + ' ' + data.name + '</h3>' +
-          '<p class="price">' + data.price.toLocaleString() + ' ' + data.currency + '</p>' +
-          '<p style="margin: 0 0 18px; color: #666; font-size: 14px; line-height: 1.5;">' +
-            'Includes access to convention sessions, networking, and event materials.' +
-          '</p>' +
-          '<button type="button" onclick="selectTicketType(\\'' + type + '\\')">Select</button>';
+          '<p class="price">' + priceStr + '</p>' +
+          '<div style="display:inline-flex;align-items:center;gap:5px;background:#f0f9ff;color:#0284c7;border:1px solid rgba(2,132,199,0.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:14px">&#128274; FIXED PRICE &nbsp;&middot;&nbsp; No early-bird discount</div>' +
+          '<p style="margin:0 0 12px;color:#666;font-size:13px;line-height:1.55">Includes access to convention sessions, networking, and event materials.</p>' +
+          '<p style="margin:0 0 14px;font-size:12px;color:#0284c7;line-height:1.6;padding:8px 12px;background:rgba(224,242,254,0.6);border-radius:8px;border-left:3px solid #38bdf8">&#128197; Looking for accommodation? See our early-bird <strong>Packages</strong> below &darr; with up to <strong>40% off</strong> hotel.</p>' +
+          '<button type="button" onclick="selectTicketType(\\'' + type + '\\')">Select This Ticket</button>';
         ticketsContainer.appendChild(card);
       });
     }
@@ -860,22 +875,31 @@ app.get('/', (req, res) => {
       var tier = PKG_TIERS[ti];
       var grid = document.getElementById('pkgGrid');
       if (!grid) return;
+      var tkEntries = Object.entries(ticketTypes);
       var html = '';
       for (var idx = 0; idx < PKGS.length; idx++) {
         var pkg = PKGS[idx];
         var price = optB(pkg.accom, tier.disc);
         var emoji = PKG_EMOJI[pkg.name] || '🛏️';
         html += '<div class="pkg-card' + (pkg.featured ? ' featured' : '') + '" id="pkgCard' + idx + '">';
+        // card head
         html += '<div class="pkg-card-head" onclick="togglePkgCard(' + idx + ')">';
         html += '<div class="pkg-card-icon">' + emoji + '</div>';
+        html += '<div style="flex:1">';
         html += '<div class="pkg-card-name">' + pkg.name + '</div>';
         html += '<div class="pkg-card-tier-pill" style="background:' + tier.bg + ';color:' + tier.color + '">&#11044; ' + tier.label + '</div>';
         html += '<div class="pkg-card-price-tag" style="color:' + tier.color + '">$' + price.toLocaleString() + '</div>';
         html += '<div class="pkg-card-cta-text">' + tier.urgency + '</div>';
-        html += '<button class="pkg-card-toggle">View Details &#9660;</button>';
         html += '</div>';
+        html += '<button class="pkg-card-toggle" id="pkgToggleBtn' + idx + '">View Details &#9660;</button>';
+        html += '</div>';
+        // expandable detail panel
         html += '<div class="pkg-detail">';
+        html += '<div class="pkg-detail-inner">';
+        // LEFT: tier table + cost breakdown
+        html += '<div class="pkg-detail-left">';
         html += '<div class="pkg-detail-intro">5 nights accommodation (Jun 17&#8211;21) + 5 days services (Jun 18&#8211;22) &middot; Bed &amp; Breakfast &middot; Lunch, commute, delegate badge &amp; raffle entry all bundled.</div>';
+        html += '<div class="pkg-section-label">&#128197; Tier Pricing</div>';
         html += '<table class="pkg-tier-table"><thead><tr><th>Tier</th><th>Dates</th><th>Hotel Discount</th><th>Package Total</th><th>Status</th></tr></thead><tbody>';
         for (var ti2 = 0; ti2 < PKG_TIERS.length; ti2++) {
           var t = PKG_TIERS[ti2];
@@ -893,18 +917,43 @@ app.get('/', (req, res) => {
         }
         html += '</tbody></table>';
         var discSaving = pkg.accom - Math.round(pkg.accom * (1 - tier.disc));
+        html += '<div class="pkg-section-label">&#128181; Package Breakdown</div>';
         html += '<div class="pkg-breakdown">';
         html += '<div class="pkg-breakdown-row"><span>Bed &amp; Breakfast (5 nights)</span><span>$' + pkg.accom.toLocaleString() + '</span></div>';
         if (tier.disc > 0) {
           html += '<div class="pkg-breakdown-row" style="color:#16a34a"><span>Early-bird saving (' + Math.round(tier.disc * 100) + '% off accommodation)</span><span>&#8722;$' + discSaving + '</span></div>';
         }
-        html += '<div class="pkg-breakdown-row"><span>Lunch &amp; Daily Commute (5 days)</span><span>$225</span></div>';
-        html += '<div class="pkg-breakdown-row"><span>Delegate Badge &amp; Raffle Entry</span><span>$15</span></div>';
-        html += '<div class="pkg-breakdown-row total"><span>Package Total</span><span>$' + price.toLocaleString() + '</span></div>';
+        html += '<div class="pkg-breakdown-row"><span>Lunch &amp; Daily Commute (5 days) <span style="background:#e2e8f0;color:#64748b;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">FIXED</span></span><span>$225</span></div>';
+        html += '<div class="pkg-breakdown-row"><span>Delegate Badge &amp; Raffle Entry <span style="background:#e2e8f0;color:#64748b;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">FIXED</span></span><span>$15</span></div>';
+        html += '<div class="pkg-breakdown-row total"><span>Package Total (accommodation + services)</span><span>$' + price.toLocaleString() + '</span></div>';
+        html += '</div>';
+        html += '<div class="pkg-fixed-note">&#128274; Early-bird discount applies to accommodation only. Lunch, commute, badge &amp; raffle ($240) are fixed costs and never discounted.</div>';
+        html += '</div>';
+        // RIGHT: ticket selector + live grand total + book button
+        html += '<div class="pkg-detail-right">';
+        html += '<div class="pkg-section-label">&#127915; Select Your Ticket</div>';
+        html += '<div style="display:flex;flex-direction:column;gap:8px">';
+        for (var ti3 = 0; ti3 < tkEntries.length; ti3++) {
+          var tkType = tkEntries[ti3][0];
+          var tkData = tkEntries[ti3][1];
+          var tkPriceStr = tkData.currency === 'USD' ? '$' + tkData.price.toLocaleString() + ' USD' : tkData.price.toLocaleString() + ' TZS';
+          html += '<label style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1.5px solid transparent;border-radius:10px;padding:10px 12px;cursor:pointer;transition:all 0.2s">';
+          html += '<input type="radio" name="ticket_' + idx + '" value="' + tkType + '" onchange="updatePkgCalc(' + idx + ')" style="width:16px;height:16px;accent-color:#e91e63">';
+          html += '<span style="flex:1"><span style="font-weight:700;font-size:13px;color:#1e293b">' + tkData.icon + ' ' + tkData.name + '</span><br>';
+          html += '<span style="font-size:12px;color:#64748b">' + tkPriceStr + ' &nbsp;<span style="background:#f0f9ff;color:#0284c7;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:800">FIXED</span></span></span>';
+          html += '</label>';
+        }
+        html += '</div>';
+        html += '<div class="pkg-grand-total" id="pkgCalc' + idx + '">';
+        html += '<div class="pkg-grand-row"><span>Package (accommodation + services)</span><span style="font-weight:700">$' + price.toLocaleString() + '</span></div>';
+        html += '<div class="pkg-grand-row" id="pkgTicketRow' + idx + '"><span style="color:#94a3b8">+ Ticket (select above)</span><span style="color:#94a3b8">—</span></div>';
+        html += '<div class="pkg-grand-row grand" id="pkgGrandRow' + idx + '"><span>Your Total</span><span style="color:#0c4a6e">$' + price.toLocaleString() + ' + ticket</span></div>';
         html += '</div>';
         var safeName = pkg.name.replace(/\'/g, "\\'");
         var safeTier = tier.label.replace(/\'/g, "\\'");
-        html += '<button class="pkg-book-btn" style="background:linear-gradient(135deg,' + tier.color + ',#e91e63);color:white" onclick="bookPkg(\\'' + safeName + '\\',' + price + ',\\'' + safeTier + '\\')">Book This Package &#8212; ' + tier.label + ' $' + price.toLocaleString() + '</button>';
+        html += '<button class="pkg-book-btn" onclick="bookPkgFull(' + idx + ', \\'' + safeName + '\\',' + price + ', \\'' + safeTier + '\\')">Book This Package &#8212; ' + tier.label + ' $' + price.toLocaleString() + '</button>';
+        html += '</div>';
+        html += '</div>';
         html += '</div></div>';
       }
       grid.innerHTML = html;
@@ -920,16 +969,58 @@ app.get('/', (req, res) => {
       if (!card) return;
       var wasOpen = card.classList.contains('open');
       document.querySelectorAll('.pkg-card.open').forEach(function(c) { c.classList.remove('open'); });
+      document.querySelectorAll('[id^="pkgToggleBtn"]').forEach(function(b) { b.innerHTML = 'View Details &#9660;'; });
       if (!wasOpen) {
         card.classList.add('open');
-        setTimeout(function() { card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
+        var btn = document.getElementById('pkgToggleBtn' + idx);
+        if (btn) btn.innerHTML = 'Close &#9650;';
+        setTimeout(function() { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
       }
     }
-    function bookPkg(name, price, tierLabel) {
+    function updatePkgCalc(idx) {
+      var pkg = PKGS[idx];
+      var ti = pkgCurrentTier();
+      var accomPrice = optB(pkg.accom, PKG_TIERS[ti].disc);
+      var sel = document.querySelector('input[name="ticket_' + idx + '"]:checked');
+      if (!sel) return;
+      var tdata = ticketTypes[sel.value];
+      var isUSD = tdata.currency === 'USD';
+      var tpriceLbl = isUSD ? '$' + tdata.price.toLocaleString() + ' USD' : tdata.price.toLocaleString() + ' TZS';
+      var ticketRow = document.getElementById('pkgTicketRow' + idx);
+      var grandRow = document.getElementById('pkgGrandRow' + idx);
+      if (ticketRow) {
+        ticketRow.innerHTML = '<span>' + tdata.icon + ' ' + tdata.name + ' <span style="background:#e2e8f0;color:#64748b;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">FIXED</span></span><span style="font-weight:700">' + tpriceLbl + '</span>';
+      }
+      if (grandRow) {
+        if (isUSD) {
+          var grand = accomPrice + tdata.price;
+          grandRow.innerHTML = '<span>Your Total (USD)</span><span style="color:#0284c7;font-size:20px;font-weight:900">$' + grand.toLocaleString() + '</span>';
+        } else {
+          grandRow.innerHTML = '<span>Your Total</span><span>$' + accomPrice.toLocaleString() + ' <small>+</small> ' + tdata.price.toLocaleString() + ' TZS</span>';
+        }
+      }
+      document.querySelectorAll('input[name="ticket_' + idx + '"]').forEach(function(inp) {
+        var lbl = inp.parentNode;
+        if (lbl && lbl.tagName === 'LABEL') {
+          lbl.style.background = inp.checked ? 'rgba(186,230,253,0.35)' : '#f8fafc';
+          lbl.style.borderColor = inp.checked ? '#38bdf8' : 'transparent';
+        }
+      });
+    }
+    function bookPkgFull(idx, pkgName, accomPrice, tierLabel) {
       var banner = document.getElementById('pkgSelectedBanner');
       var bannerText = document.getElementById('pkgBannerText');
+      var sel = document.querySelector('input[name="ticket_' + idx + '"]:checked');
+      var msg = 'Package: ' + pkgName + ' &#8212; ' + tierLabel + ' $' + accomPrice.toLocaleString();
+      if (sel) {
+        var tdata = ticketTypes[sel.value];
+        var tpriceLbl = tdata.currency === 'USD' ? '$' + tdata.price.toLocaleString() + ' USD' : tdata.price.toLocaleString() + ' TZS';
+        msg += ' &nbsp;+&nbsp; Ticket: ' + tdata.icon + ' ' + tdata.name + ' ' + tpriceLbl + ' (fixed)';
+        var selectEl = document.getElementById('ticketType');
+        if (selectEl) selectEl.value = sel.value;
+      }
       if (banner && bannerText) {
-        bannerText.textContent = 'Selected: ' + name + ' — ' + tierLabel + ' $' + price.toLocaleString() + '. Fill in your details below and click Register Now.';
+        bannerText.innerHTML = msg + '. Fill in your details below and click Register Now.';
         banner.style.display = 'flex';
       }
       var formEl = document.getElementById('register');
