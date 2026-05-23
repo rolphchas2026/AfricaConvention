@@ -797,23 +797,31 @@ app.get('/', (req, res) => {
       Object.entries(ticketTypes).forEach(function([type, data]) {
         const card = document.createElement('div');
         card.className = 'ticket-card';
-        var priceStr = data.currency === 'USD' ? '$' + data.price.toLocaleString() + ' USD' : data.price.toLocaleString() + ' TZS';
-        var royaltyPrice = Math.round(data.price * 0.95);
-        var royaltySaving = data.price - royaltyPrice;
-        var royaltyStr = data.currency === 'USD' ? '$' + royaltyPrice + ' USD' : royaltyPrice.toLocaleString() + ' TZS';
-        var royaltySaveStr = data.currency === 'USD' ? '$' + royaltySaving : royaltySaving.toLocaleString() + ' TZS';
         card.id = 'ticketCard_' + type;
-        card.innerHTML =
-          '<h3>' + data.icon + ' ' + data.name + '</h3>' +
-          '<p class="price">' + priceStr + ' <span style="font-size:13px;font-weight:500;color:#94a3b8">whole visit</span></p>' +
-          '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">' +
-            '<div style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:1px solid rgba(180,83,9,0.18);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px">&#129351; 5% Royalty &nbsp;&middot;&nbsp; save ' + royaltySaveStr + '</div>' +
-            '<span style="font-size:14px;font-weight:900;color:#059669">' + royaltyStr + '</span>' +
-          '</div>' +
-          '<div style="display:inline-flex;align-items:center;gap:5px;background:#f0f9ff;color:#0284c7;border:1px solid rgba(2,132,199,0.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:14px">&#128274; FIXED BASE PRICE &nbsp;&middot;&nbsp; No early-bird discount</div>' +
-          '<p style="margin:0 0 12px;color:#666;font-size:13px;line-height:1.55">Includes access to convention sessions, networking, and event materials.</p>' +
-          '<a href="#packages" style="display:block;margin:0 0 14px;font-size:12px;color:#0284c7;line-height:1.6;padding:8px 12px;background:rgba(224,242,254,0.6);border-radius:8px;border-left:3px solid #38bdf8;text-decoration:none">&#127968; View accommodation plans for early bird booking &darr; &nbsp;up to <strong>40% off</strong> hotel.</a>' +
-          '<button type="button" id="ticketBtn_' + type + '" onclick="selectTicketType(\\'' + type + '\\')">Select This Ticket</button>';
+        if (type === 'general') {
+          card.innerHTML =
+            '<h3>' + data.icon + ' ' + data.name + '</h3>' +
+            '<p class="price">15,000 <span style="font-size:13px;font-weight:500;color:#94a3b8">TZS / day</span></p>' +
+            '<div style="display:inline-flex;align-items:center;gap:5px;background:#f1f5f9;color:#475569;border:1px solid rgba(100,116,139,0.22);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:14px">&#127482;&#127480; Local Rate &nbsp;&middot;&nbsp; Collected on-site at the convention</div>' +
+            '<p style="margin:0 0 12px;color:#666;font-size:13px;line-height:1.55">Reserved for local attending ministers. Payment is received directly at the convention floor — no online pre-payment required.</p>' +
+            '<div style="margin:0 0 14px;font-size:12px;color:#64748b;padding:8px 12px;background:#f8fafc;border-radius:8px;border-left:3px solid #94a3b8;line-height:1.6">&#128274; Fixed rate &nbsp;&middot;&nbsp; No royalty discount &nbsp;&middot;&nbsp; No early-bird tiers<br><strong style="color:#374151">5-day total: 75,000 TZS</strong></div>' +
+            '<button type="button" id="ticketBtn_' + type + '" onclick="selectTicketType(\\'' + type + '\\')">Select This Ticket</button>';
+        } else {
+          var priceStr = '$' + data.price.toLocaleString() + ' USD';
+          var royaltyPrice = Math.round(data.price * 0.95);
+          var royaltySaving = data.price - royaltyPrice;
+          card.innerHTML =
+            '<h3>' + data.icon + ' ' + data.name + '</h3>' +
+            '<p class="price">' + priceStr + ' <span style="font-size:13px;font-weight:500;color:#94a3b8">whole visit</span></p>' +
+            '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">' +
+              '<div style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:1px solid rgba(180,83,9,0.18);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px">&#129351; 5% Royalty &nbsp;&middot;&nbsp; save $' + royaltySaving + '</div>' +
+              '<span style="font-size:14px;font-weight:900;color:#059669">$' + royaltyPrice + ' USD</span>' +
+            '</div>' +
+            '<div style="display:inline-flex;align-items:center;gap:5px;background:#f0f9ff;color:#0284c7;border:1px solid rgba(2,132,199,0.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:14px">&#128274; FIXED BASE PRICE &nbsp;&middot;&nbsp; No early-bird discount</div>' +
+            '<p style="margin:0 0 12px;color:#666;font-size:13px;line-height:1.55">Includes access to convention sessions, networking, and event materials.</p>' +
+            '<a href="#packages" style="display:block;margin:0 0 14px;font-size:12px;color:#0284c7;line-height:1.6;padding:8px 12px;background:rgba(224,242,254,0.6);border-radius:8px;border-left:3px solid #38bdf8;text-decoration:none">&#127968; View accommodation plans for early bird booking &darr; &nbsp;up to <strong>40% off</strong> hotel.</a>' +
+            '<button type="button" id="ticketBtn_' + type + '" onclick="selectTicketType(\\'' + type + '\\')">Select This Ticket</button>';
+        }
         ticketsContainer.appendChild(card);
       });
     }
