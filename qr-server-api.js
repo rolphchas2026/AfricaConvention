@@ -788,7 +788,7 @@ app.get('/', (req, res) => {
         var priceStr = data.currency === 'USD' ? '$' + data.price.toLocaleString() + ' USD' : data.price.toLocaleString() + ' TZS';
         card.innerHTML =
           '<h3>' + data.icon + ' ' + data.name + '</h3>' +
-          '<p class="price">' + priceStr + '</p>' +
+          '<p class="price">' + priceStr + ' <span style="font-size:13px;font-weight:500;color:#94a3b8">/ day</span></p>' +
           '<div style="display:inline-flex;align-items:center;gap:5px;background:#f0f9ff;color:#0284c7;border:1px solid rgba(2,132,199,0.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:14px">&#128274; FIXED PRICE &nbsp;&middot;&nbsp; No early-bird discount</div>' +
           '<p style="margin:0 0 12px;color:#666;font-size:13px;line-height:1.55">Includes access to convention sessions, networking, and event materials.</p>' +
           '<p style="margin:0 0 14px;font-size:12px;color:#0284c7;line-height:1.6;padding:8px 12px;background:rgba(224,242,254,0.6);border-radius:8px;border-left:3px solid #38bdf8">&#128197; Looking for accommodation? See our early-bird <strong>Packages</strong> below &darr; with up to <strong>40% off</strong> hotel.</p>' +
@@ -936,7 +936,7 @@ app.get('/', (req, res) => {
         for (var ti3 = 0; ti3 < tkEntries.length; ti3++) {
           var tkType = tkEntries[ti3][0];
           var tkData = tkEntries[ti3][1];
-          var tkPriceStr = tkData.currency === 'USD' ? '$' + tkData.price.toLocaleString() + ' USD' : tkData.price.toLocaleString() + ' TZS';
+          var tkPriceStr = tkData.currency === 'USD' ? '$' + tkData.price.toLocaleString() + ' USD / day' : tkData.price.toLocaleString() + ' TZS / day';
           html += '<label style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1.5px solid transparent;border-radius:10px;padding:10px 12px;cursor:pointer;transition:all 0.2s">';
           html += '<input type="radio" name="ticket_' + idx + '" value="' + tkType + '" onchange="updatePkgCalc(' + idx + ')" style="width:16px;height:16px;accent-color:#e91e63">';
           html += '<span style="flex:1"><span style="font-weight:700;font-size:13px;color:#1e293b">' + tkData.icon + ' ' + tkData.name + '</span><br>';
