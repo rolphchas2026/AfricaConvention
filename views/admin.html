@@ -114,9 +114,13 @@
     .pb-share-btn { display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;transition:opacity 0.2s;white-space:nowrap;flex-shrink:0;border:none; }
     .pb-share-btn:hover { opacity:0.85; }
     @media print {
-      header,.tabs-outer,.tabs-fade,.content-wrapper > *:not(#pbPrintRegion) { display:none!important; }
+      header,.tabs-outer,.tabs-fade { display:none!important; }
       .content-wrapper { padding:0!important;height:auto!important;overflow:visible!important; }
+      .tab-content:not(#academy) { display:none!important; }
+      #academy { display:block!important; }
+      #academy > *:not(#pbPrintRegion) { display:none!important; }
       #pbPrintRegion { display:block!important; }
+      #pbBtn { display:none!important; }
       #pbContent { display:block!important;border:none!important;box-shadow:none!important;border-radius:0!important; }
       .pb-share-bar,.pb-share-bar * { display:none!important; }
       body { background:white!important; }
@@ -173,7 +177,7 @@
           <!-- Share bar -->
           <div class="pb-share-bar" style="background:linear-gradient(135deg,#1e293b,#334155);padding:14px 28px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;border-bottom:1px solid rgba(244,143,177,0.22)">
             <span style="font-size:11px;font-weight:700;color:rgba(244,143,177,0.9);text-transform:uppercase;letter-spacing:1.2px;flex-shrink:0">Share briefing:</span>
-            <button onclick="window.print()" class="pb-share-btn" style="background:white;color:#1e293b">&#128196; Save / Print PDF</button>
+            <button onclick="pbPrint()" class="pb-share-btn" style="background:white;color:#1e293b">&#128196; Save / Print PDF</button>
             <a href="https://wa.me/?text=Africa%20Convention%202026%20%E2%80%94%20Accommodation%20Packages.%20Early-bird%20savings%20up%20to%2040%25%20on%20hotel%20(Jun%2017%E2%80%9322%2C%20Arusha).%20Ordinary%20Single%20from%20%24525%20%C2%B7%20Double%20Single%20from%20%24615%20%C2%B7%20Suite%20VVIP%20from%20%241%2C290%20%C2%B7%20Double%20Suite%20from%20%24930.%20Book%20before%20May%2030%20for%2040%25%20off.%20Contact%3A%20%2B255%20787%20576%20900%20%7C%20wccm.tz%40gmail.com" target="_blank" rel="noopener" class="pb-share-btn" style="background:#25d366;color:white">&#128241; WhatsApp</a>
             <a href="mailto:?subject=Africa%20Convention%202026%20%E2%80%94%20Accommodation%20Package%20Pricing&body=Dear%20Guest%2C%0A%0AWe%20are%20pleased%20to%20share%20the%20accommodation%20pricing%20for%20Africa%20Convention%202026%20%E2%80%94%20June%2017%E2%80%9322%20in%20Arusha%2C%20Tanzania.%0A%0AOPTION%20B%20%E2%80%94%20Accommodation-Only%20Discount%20%2B%20Fixed%20Services%20%24240%0A%0AD-Tier%20(40%25%20off%2C%20before%20May%2030)%3A%0A%20%20Ordinary%20Single%3A%20%24525%20%7C%20Double%20Single%3A%20%24615%20%7C%20Triple%3A%20%24690%0A%20%20Suite%20VVIP%3A%20%241%2C290%20%7C%20Double%20Suite%3A%20%24930%0A%0AAll%20packages%20include%3A%205%20nights%20B%26B%20%2B%20Daily%20Lunch%20%2B%20Commute%20%2B%20Badge%20%2B%20Raffle%20Entry%0A%0AFor%20registration%20contact%3A%0A%2B255%20787%20576%20900%20%7C%20%2B255%20713%20276%20655%0Awccm.tz%40gmail.com%0A%0ABest%20regards%2C%0AAfrica%20Convention%202026%20Team" class="pb-share-btn" style="background:#4a90d9;color:white">&#9993; Email</a>
             <a href="https://wa.me/+255787576900?text=Hello%2C%20I%20saw%20the%20Africa%20Convention%202026%20pricing%20and%20would%20like%20more%20information." target="_blank" rel="noopener" class="pb-share-btn" style="background:#e91e63;color:white">&#128172; Direct Enquiry</a>
@@ -184,6 +188,38 @@
           <div style="background:#f8fafc;padding:24px 28px;border-bottom:1px solid rgba(244,143,177,0.12)">
             <p style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.8px;margin-bottom:10px">Internal Committee Document &nbsp;·&nbsp; Africa Convention 2026</p>
             <p style="font-size:14px;color:#475569;line-height:1.8">This briefing was prepared ahead of the general committee meeting to evaluate two proposed early-bird discount structures for the 2026 convention accommodation packages. The analysis below presents both options with full pricing matrices, a recommendation with supporting reasoning, and a review of the 10% hotel retention arrangement. These materials are intended as the main course of action for committee discussion and resolution.</p>
+          </div>
+
+          <!-- Recent Updates banner -->
+          <div style="background:linear-gradient(135deg,#fef9c3,#fef3c7);padding:18px 28px;border-bottom:2px solid rgba(234,179,8,0.3);display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start">
+            <div style="flex-shrink:0;padding-top:2px">
+              <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(234,179,8,0.18);color:#92400e;border:1px solid rgba(234,179,8,0.4);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">&#128197; Recent Updates — May 2026</span>
+            </div>
+            <div style="flex:1;min-width:220px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#22c55e;color:white;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:1px">&#10003;</span>
+                  <div>
+                    <p style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:2px">Convention Ticket Pricing added</p>
+                    <p style="font-size:12px;color:#64748b">Whole-visit 5-day rates for all ticket tiers (Youth · Business · Speaker · Foreigners · Local Ministers) with 5% royalty discount column. See <em>Convention Tickets</em> section at the end of this document.</p>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#22c55e;color:white;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:1px">&#10003;</span>
+                  <div>
+                    <p style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:2px">Recommendation finalised: <span style="color:#0284c7">Option B</span></p>
+                    <p style="font-size:12px;color:#64748b">Accommodation-only discount (10/20/30/40%) + fixed services $240 unchanged. Protects the 10% hotel retention margin and eliminates the double-squeeze risk identified under Option A.</p>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#22c55e;color:white;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:1px">&#10003;</span>
+                  <div>
+                    <p style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:2px">Early-bird tier window open</p>
+                    <p style="font-size:12px;color:#64748b">D-Tier (40% off) closes <strong>May 29, 2026</strong>. C-Tier (30%) opens May 30. All tiers follow equal 6–7 day intervals through to June 16.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Tier Schedule -->
@@ -1676,6 +1712,16 @@
     c.style.display = open ? 'none' : 'block';
     a.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
     if (!open) { setTimeout(function(){ document.getElementById('pbBtn').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
+  }
+
+  function pbPrint() {
+    var c = document.getElementById('pbContent');
+    var a = document.getElementById('pbArrow');
+    if (c && c.style.display === 'none') {
+      c.style.display = 'block';
+      if (a) a.style.transform = 'rotate(180deg)';
+    }
+    setTimeout(function(){ window.print(); }, 120);
   }
 
   function pbCopyLink() {
