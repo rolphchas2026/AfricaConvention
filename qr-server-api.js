@@ -2040,40 +2040,40 @@ app.get('/raffle', async (req, res) => {
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:36px 20px 48px;position:relative;overflow-x:hidden}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#fff0f6 0%,#fdf4ff 60%,#f0f9ff 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:36px 20px 48px;position:relative;overflow-x:hidden}
     /* header */
     .rp-header{text-align:center;margin-bottom:28px;max-width:480px;width:100%}
-    .rp-eyebrow{font-size:11px;font-weight:800;letter-spacing:3px;color:rgba(244,143,177,0.65);text-transform:uppercase;margin-bottom:10px}
+    .rp-eyebrow{font-size:11px;font-weight:800;letter-spacing:3px;color:#db2777;text-transform:uppercase;margin-bottom:10px}
     .rp-title{font-size:26px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;line-height:1.2}
-    .rp-sub{color:rgba(200,160,255,0.68);font-size:14px;line-height:1.6;margin-bottom:14px}
+    .rp-sub{color:#7c3aed;font-size:14px;line-height:1.6;margin-bottom:14px}
     .rp-badge{display:inline-block;padding:5px 15px;border-radius:20px;font-size:12px;font-weight:700}
-    .rp-badge-open{background:rgba(52,211,153,0.12);color:#6ee7b7;border:1px solid rgba(52,211,153,0.3)}
-    .rp-badge-closed{background:rgba(100,116,139,0.14);color:rgba(148,163,184,0.85);border:1px solid rgba(100,116,139,0.22)}
+    .rp-badge-open{background:rgba(52,211,153,0.15);color:#059669;border:1px solid rgba(52,211,153,0.35)}
+    .rp-badge-closed{background:rgba(100,116,139,0.1);color:#64748b;border:1px solid rgba(100,116,139,0.25)}
     /* podium */
     .rp-podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;max-width:460px;width:100%;margin:28px auto 6px}
     .rp-slot{display:flex;flex-direction:column;align-items:center;flex:1}
     .rp-av{border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:8px;filter:grayscale(1);transition:filter 0.7s,background 0.7s,border-color 0.7s,box-shadow 0.7s;border:2px solid rgba(100,116,139,0.18);background:rgba(100,116,139,0.12)}
-    .rp-nm{font-size:11px;font-weight:700;color:rgba(100,116,139,0.36);text-align:center;min-height:34px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:4px;padding:0 4px;transition:color 0.7s;word-break:break-word}
-    .rp-vt{font-size:10px;color:rgba(200,160,255,0.28);min-height:13px;margin-bottom:5px;transition:color 0.7s}
+    .rp-nm{font-size:11px;font-weight:700;color:rgba(100,116,139,0.6);text-align:center;min-height:34px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:4px;padding:0 4px;transition:color 0.7s;word-break:break-word}
+    .rp-vt{font-size:10px;color:rgba(124,58,237,0.42);min-height:13px;margin-bottom:5px;transition:color 0.7s}
     .rp-blk{width:100%;border-radius:10px 10px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;background:rgba(100,116,139,0.07);border:1px solid rgba(100,116,139,0.10);transition:background 0.7s,border-color 0.7s,box-shadow 0.7s}
-    .rp-podium-lbl{text-align:center;font-size:10px;color:rgba(100,116,139,0.36);letter-spacing:1.5px;text-transform:uppercase;margin-top:10px;max-width:460px;width:100%}
+    .rp-podium-lbl{text-align:center;font-size:10px;color:rgba(100,116,139,0.6);letter-spacing:1.5px;text-transform:uppercase;margin-top:10px;max-width:460px;width:100%}
     /* entry card */
-    .rp-card{background:rgba(255,255,255,0.05);border:1px solid rgba(200,160,255,0.13);border-radius:20px;padding:26px 22px;max-width:440px;width:100%;text-align:center;backdrop-filter:blur(10px);margin-top:28px}
-    .rp-card-title{font-size:14px;font-weight:700;color:rgba(240,220,255,0.82);margin-bottom:18px}
-    #scanner-box{width:100%;margin-bottom:16px;border-radius:12px;overflow:hidden;background:rgba(0,0,0,0.25);min-height:0}
+    .rp-card{background:rgba(255,255,255,0.82);border:1px solid rgba(244,143,177,0.25);border-radius:20px;padding:26px 22px;max-width:440px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(244,143,177,0.14);margin-top:28px}
+    .rp-card-title{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:18px}
+    #scanner-box{width:100%;margin-bottom:16px;border-radius:12px;overflow:hidden;background:rgba(244,143,177,0.06);min-height:0}
     .btn{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:all 0.2s;font-family:inherit}
     .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,143,177,0.4)}
-    .btn-ghost{background:rgba(255,255,255,0.07);color:rgba(240,220,255,0.82);border:1px solid rgba(200,160,255,0.2)}
-    .btn-ghost:hover{background:rgba(255,255,255,0.11);transform:none;box-shadow:none}
-    .divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:rgba(148,163,184,0.45);font-size:13px}
-    .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(200,160,255,0.1)}
-    input{width:100%;padding:12px 14px;border:1px solid rgba(200,160,255,0.18);border-radius:10px;font-size:14px;color:rgba(240,220,255,0.9);margin-bottom:12px;font-family:inherit;background:rgba(255,255,255,0.06);caret-color:#f48fb1}
-    input::placeholder{color:rgba(148,163,184,0.45)}
-    input:focus{outline:none;border-color:#f48fb1;box-shadow:0 0 0 3px rgba(244,143,177,0.1)}
+    .btn-ghost{background:rgba(244,143,177,0.08);color:#7c3aed;border:1px solid rgba(200,160,255,0.35)}
+    .btn-ghost:hover{background:rgba(244,143,177,0.14);transform:none;box-shadow:none}
+    .divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#94a3b8;font-size:13px}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(200,160,255,0.22)}
+    input{width:100%;padding:12px 14px;border:1px solid rgba(244,143,177,0.35);border-radius:10px;font-size:14px;color:#374151;margin-bottom:12px;font-family:inherit;background:rgba(255,255,255,0.95);caret-color:#f48fb1}
+    input::placeholder{color:#94a3b8}
+    input:focus{outline:none;border-color:#f48fb1;box-shadow:0 0 0 3px rgba(244,143,177,0.12)}
     .msg{padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;margin-top:12px;display:none}
-    .msg.error{background:rgba(254,202,202,0.1);color:#fca5a5;border-left:4px solid #f87171;display:block}
-    .msg.info{background:rgba(167,243,208,0.1);color:#6ee7b7;border-left:4px solid #34d399;display:block}
-    footer{text-align:center;padding:28px 16px 8px;font-style:italic;font-size:7px;color:rgba(100,116,139,0.45)}
+    .msg.error{background:rgba(254,202,202,0.22);color:#e11d48;border-left:4px solid #f87171;display:block}
+    .msg.info{background:rgba(167,243,208,0.22);color:#059669;border-left:4px solid #34d399;display:block}
+    footer{text-align:center;padding:28px 16px 8px;font-style:italic;font-size:7px;color:rgba(100,116,139,0.5)}
     @keyframes rp-medal-bounce{0%,100%{transform:scale(1)}45%{transform:scale(1.3) rotate(-7deg)}55%{transform:scale(1.3) rotate(7deg)}}
     @keyframes rp-pulse-gold{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,0.5)}70%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
     @keyframes rp-slot-in{0%{opacity:0;transform:translateY(22px)}100%{opacity:1;transform:translateY(0)}}
@@ -2114,7 +2114,7 @@ app.get('/raffle', async (req, res) => {
     </div>
   </div>
   <p id="rpPodiumLbl" class="rp-podium-lbl">Winners Podium &middot; Revealed when voting closes</p>
-  <p id="rpTotalVotes" style="text-align:center;font-size:11px;color:rgba(200,160,255,0.3);margin-top:5px;max-width:460px;width:100%"></p>
+  <p id="rpTotalVotes" style="text-align:center;font-size:11px;color:rgba(124,58,237,0.45);margin-top:5px;max-width:460px;width:100%"></p>
 
   <!-- Entry card -->
   <div class="rp-card">
@@ -2137,13 +2137,13 @@ app.get('/raffle', async (req, res) => {
       var slots = [
         { wi:1, avId:'rpAv2', nmId:'rpNm2', vtId:'rpVt2', bkId:'rpBk2',
           avBg:'linear-gradient(135deg,rgba(192,192,192,0.22),rgba(160,160,160,0.10))', avBr:'rgba(192,192,192,0.5)',
-          bkBg:'linear-gradient(180deg,rgba(192,192,192,0.15),rgba(192,192,192,0.04))', bkBr:'rgba(192,192,192,0.28)', nmCol:'rgba(220,220,235,0.88)' },
+          bkBg:'linear-gradient(180deg,rgba(192,192,192,0.15),rgba(192,192,192,0.04))', bkBr:'rgba(192,192,192,0.28)', nmCol:'#475569' },
         { wi:0, avId:'rpAv1', nmId:'rpNm1', vtId:'rpVt1', bkId:'rpBk1',
           avBg:'linear-gradient(135deg,rgba(255,215,0,0.26),rgba(255,180,0,0.12))', avBr:'rgba(255,215,0,0.6)',
-          bkBg:'linear-gradient(180deg,rgba(255,215,0,0.18),rgba(255,215,0,0.05))', bkBr:'rgba(255,215,0,0.36)', nmCol:'rgba(255,235,120,0.96)', pulse:true },
+          bkBg:'linear-gradient(180deg,rgba(255,215,0,0.18),rgba(255,215,0,0.05))', bkBr:'rgba(255,215,0,0.36)', nmCol:'#d97706', pulse:true },
         { wi:2, avId:'rpAv3', nmId:'rpNm3', vtId:'rpVt3', bkId:'rpBk3',
           avBg:'linear-gradient(135deg,rgba(205,127,50,0.22),rgba(180,100,30,0.10))', avBr:'rgba(205,127,50,0.45)',
-          bkBg:'linear-gradient(180deg,rgba(205,127,50,0.15),rgba(205,127,50,0.04))', bkBr:'rgba(205,127,50,0.28)', nmCol:'rgba(220,200,160,0.9)' }
+          bkBg:'linear-gradient(180deg,rgba(205,127,50,0.15),rgba(205,127,50,0.04))', bkBr:'rgba(205,127,50,0.28)', nmCol:'#92400e' }
       ];
       slots.forEach(function(s, si) {
         var w = winners[s.wi];
@@ -2155,13 +2155,13 @@ app.get('/raffle', async (req, res) => {
         var delay = (si * 0.38) + 's';
         if (av) { av.style.filter='none'; av.style.background=s.avBg; av.style.borderColor=s.avBr; if(s.pulse) av.style.animation='rp-medal-bounce 1.5s '+delay+' ease-in-out infinite, rp-pulse-gold 2s '+delay+' ease-in-out infinite'; }
         if (nm) { nm.style.color=s.nmCol; nm.textContent=w.name; }
-        if (vt) { vt.style.color='rgba(200,160,255,0.62)'; vt.textContent=w.votes+' votes'; }
+        if (vt) { vt.style.color='#7c3aed'; vt.textContent=w.votes+' votes'; }
         if (bk) { bk.style.background=s.bkBg; bk.style.borderColor=s.bkBr; }
       });
       var lbl = document.getElementById('rpPodiumLbl');
       var tot = document.getElementById('rpTotalVotes');
-      if (lbl) { lbl.textContent='Convention Winners'; lbl.style.color='rgba(255,215,0,0.5)'; }
-      if (tot) { tot.textContent='Total votes cast: '+total; tot.style.color='rgba(200,160,255,0.45)'; }
+      if (lbl) { lbl.textContent='Convention Winners'; lbl.style.color='#d97706'; }
+      if (tot) { tot.textContent='Total votes cast: '+total; tot.style.color='#7c3aed'; }
     }
 
     fetch('/api/raffle/status').then(function(r){ return r.json(); }).then(function(s){
@@ -2414,15 +2414,15 @@ app.get('/raffle/reveal', async (req, res) => {
   <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:hidden}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#fff0f6 0%,#fdf4ff 60%,#f0f9ff 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:hidden}
     .stage{text-align:center;max-width:700px;width:100%}
-    .title{font-size:14px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(244,143,177,0.7);margin-bottom:8px}
+    .title{font-size:14px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#db2777;margin-bottom:8px}
     h1{font-size:34px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
-    .subtitle{color:rgba(200,160,255,0.65);font-size:14px;margin-bottom:40px}
+    .subtitle{color:#7c3aed;font-size:14px;margin-bottom:40px}
     .waiting{text-align:center;padding:60px 0}
     .waiting .icon{font-size:64px;margin-bottom:16px;animation:pulse 2s ease-in-out infinite}
-    .waiting h2{color:rgba(240,220,255,0.85);font-size:22px;margin-bottom:10px}
-    .waiting p{color:rgba(200,160,255,0.55);font-size:14px}
+    .waiting h2{color:#1e293b;font-size:22px;margin-bottom:10px}
+    .waiting p{color:#64748b;font-size:14px}
     @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
     .winners{display:flex;flex-direction:column;gap:18px;margin-top:10px}
     .winner-card{border-radius:20px;padding:22px 28px;display:flex;align-items:center;gap:20px;opacity:0;transform:translateY(30px);transition:all 0.7s ease-out;position:relative;overflow:hidden}
@@ -2432,17 +2432,17 @@ app.get('/raffle/reveal', async (req, res) => {
     .winner-card.rank-3{background:linear-gradient(135deg,rgba(205,127,50,0.18),rgba(180,100,30,0.08));border:2px solid rgba(205,127,50,0.45);box-shadow:0 8px 24px rgba(205,127,50,0.15)}
     .rank-badge{font-size:38px;flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))}
     .winner-info{flex:1;text-align:left}
-    .winner-name{font-size:20px;font-weight:800;color:white;margin-bottom:4px}
-    .winner-meta{font-size:13px;color:rgba(200,160,255,0.7)}
+    .winner-name{font-size:20px;font-weight:800;color:#1e293b;margin-bottom:4px}
+    .winner-meta{font-size:13px;color:#64748b}
     .winner-votes{text-align:right;flex-shrink:0}
     .votes-count{font-size:28px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .votes-label{font-size:11px;color:rgba(200,160,255,0.5);text-transform:uppercase;letter-spacing:1px}
-    .gift-label{display:inline-block;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-top:6px;background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
-    .total-votes{text-align:center;margin-top:28px;color:rgba(200,160,255,0.5);font-size:13px}
+    .votes-label{font-size:11px;color:#7c3aed;text-transform:uppercase;letter-spacing:1px}
+    .gift-label{display:inline-block;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-top:6px;background:rgba(255,215,0,0.18);color:#d97706;border:1px solid rgba(255,215,0,0.38)}
+    .total-votes{text-align:center;margin-top:28px;color:#7c3aed;font-size:13px}
     .confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1}
     .particle{position:absolute;width:8px;height:8px;border-radius:50%;animation:fall linear infinite}
     @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
-    footer{text-align:center;padding:24px 16px;font-style:italic;font-size:7px;color:rgba(150,100,180,0.5);margin-top:20px}
+    footer{text-align:center;padding:24px 16px;font-style:italic;font-size:7px;color:rgba(100,116,139,0.5);margin-top:20px}
   </style>
 </head>
 <body>
