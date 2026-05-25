@@ -643,6 +643,165 @@ app.get('/', (req, res) => {
     </div>
   </div>
 
+  <!-- ── Raffle Game Showcase ── -->
+  <section id="raffle-showcase" style="padding:56px 24px 48px;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(244,143,177,0.08),transparent);pointer-events:none"></div>
+    <div style="max-width:900px;margin:0 auto;position:relative">
+      <div style="text-align:center;margin-bottom:36px">
+        <p style="font-size:11px;font-weight:800;letter-spacing:3px;color:rgba(244,143,177,0.7);text-transform:uppercase;margin-bottom:10px">Convention Game</p>
+        <h2 style="font-size:30px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px">🎰 Raffle &amp; Nominations</h2>
+        <p style="color:rgba(200,160,255,0.65);font-size:14px">Nominate a fellow delegate — top 3 most nominated win an organiser gift</p>
+      </div>
+      <!-- Winners Podium -->
+      <div style="max-width:520px;margin:0 auto 28px">
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:10px">
+          <!-- 2nd place — left -->
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+            <div id="hpAv2" style="width:58px;height:58px;border-radius:50%;background:rgba(100,116,139,0.14);border:2px solid rgba(100,116,139,0.18);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;filter:grayscale(1);transition:filter 0.7s,background 0.7s,border-color 0.7s">&#129352;</div>
+            <div id="hpNm2" style="font-size:11px;font-weight:700;color:rgba(100,116,139,0.38);text-align:center;min-height:34px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:5px;padding:0 3px;transition:color 0.7s">—</div>
+            <div id="hpVt2" style="font-size:10px;color:rgba(200,160,255,0.3);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
+            <div id="hpBk2" style="width:100%;height:72px;border-radius:10px 10px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-size:20px;background:rgba(100,116,139,0.07);border:1px solid rgba(100,116,139,0.11);transition:background 0.7s,border-color 0.7s">&#129352;</div>
+          </div>
+          <!-- 1st place — center tallest -->
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+            <div id="hpAv1" style="width:72px;height:72px;border-radius:50%;background:rgba(100,116,139,0.14);border:2px solid rgba(100,116,139,0.18);display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:8px;filter:grayscale(1);transition:filter 0.7s,background 0.7s,border-color 0.7s">&#129351;</div>
+            <div id="hpNm1" style="font-size:13px;font-weight:800;color:rgba(100,116,139,0.38);text-align:center;min-height:38px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:5px;padding:0 3px;transition:color 0.7s">—</div>
+            <div id="hpVt1" style="font-size:11px;color:rgba(200,160,255,0.3);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
+            <div id="hpBk1" style="width:100%;height:106px;border-radius:10px 10px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-size:24px;background:rgba(100,116,139,0.07);border:1px solid rgba(100,116,139,0.11);transition:background 0.7s,border-color 0.7s">&#129351;</div>
+          </div>
+          <!-- 3rd place — right shortest -->
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+            <div id="hpAv3" style="width:50px;height:50px;border-radius:50%;background:rgba(100,116,139,0.14);border:2px solid rgba(100,116,139,0.18);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:8px;filter:grayscale(1);transition:filter 0.7s,background 0.7s,border-color 0.7s">&#129353;</div>
+            <div id="hpNm3" style="font-size:11px;font-weight:700;color:rgba(100,116,139,0.38);text-align:center;min-height:34px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:5px;padding:0 3px;transition:color 0.7s">—</div>
+            <div id="hpVt3" style="font-size:10px;color:rgba(200,160,255,0.3);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
+            <div id="hpBk3" style="width:100%;height:56px;border-radius:10px 10px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-size:18px;background:rgba(100,116,139,0.07);border:1px solid rgba(100,116,139,0.11);transition:background 0.7s,border-color 0.7s">&#129353;</div>
+          </div>
+        </div>
+        <p id="hpLabel" style="text-align:center;font-size:10px;color:rgba(100,116,139,0.38);margin-top:12px;letter-spacing:1.5px;text-transform:uppercase">Winners Podium &middot; Revealed when voting closes</p>
+        <p id="hpTotal" style="text-align:center;font-size:11px;color:rgba(200,160,255,0.3);margin-top:5px"></p>
+      </div>
+      <!-- Entry CTA -->
+      <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(200,160,255,0.14);border-radius:20px;padding:28px 32px">
+        <div style="text-align:center;flex-shrink:0">
+          <div style="width:156px;height:156px;border-radius:14px;overflow:hidden;border:2px solid rgba(244,143,177,0.35);margin:0 auto 10px;background:white">
+            <img src="/sysimages/QR/https_africa-convention_vercel_app_raffle.png" alt="Scan to play raffle" style="width:100%;height:100%;object-fit:contain;display:block">
+          </div>
+          <p style="font-size:11px;color:rgba(200,160,255,0.5)">Scan to play</p>
+        </div>
+        <div style="flex:1;min-width:220px;text-align:center">
+          <h3 style="font-size:20px;font-weight:800;color:white;margin-bottom:10px">Ready to Nominate?</h3>
+          <p style="font-size:13px;color:rgba(200,160,255,0.65);margin-bottom:20px;line-height:1.7">Scan your delegate badge QR at the convention floor, or enter your Ticket ID to nominate a fellow delegate for an organiser gift.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+            <a href="/raffle" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;text-decoration:none;border-radius:12px;font-size:14px;font-weight:700">&#128247; Scan QR &amp; Play</a>
+            <a href="/raffle" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:rgba(255,255,255,0.08);color:rgba(240,220,255,0.85);text-decoration:none;border-radius:12px;font-size:14px;font-weight:600;border:1px solid rgba(200,160,255,0.22)">&#127915; Enter Ticket ID</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+    (function(){
+      /* ── inject celebration CSS ── */
+      var rwStyle = document.createElement('style');
+      rwStyle.textContent =
+        '@keyframes rws-fall{0%{transform:translateY(-30px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(800deg);opacity:0}}' +
+        '@keyframes rws-drift{0%{transform:translateY(-40px) rotate(-12deg);opacity:0.95}30%{transform:translateY(25vh) rotate(8deg);opacity:1}100%{transform:translateY(115vh) rotate(-20deg);opacity:0}}' +
+        '@keyframes rws-card-in{0%{opacity:0;transform:translateY(60px) scale(0.85)}60%{transform:translateY(-8px) scale(1.03)}100%{opacity:1;transform:translateY(0) scale(1)}}' +
+        '@keyframes rws-pulse-gold{0%,100%{box-shadow:0 8px 32px rgba(255,215,0,0.28),0 0 0 0 rgba(255,215,0,0.5)}70%{box-shadow:0 8px 32px rgba(255,215,0,0.28),0 0 0 22px rgba(255,215,0,0)}}' +
+        '@keyframes rws-pulse-silver{0%,100%{box-shadow:0 6px 24px rgba(192,192,192,0.22),0 0 0 0 rgba(192,192,192,0.4)}70%{box-shadow:0 6px 24px rgba(192,192,192,0.22),0 0 0 18px rgba(192,192,192,0)}}' +
+        '@keyframes rws-pulse-bronze{0%,100%{box-shadow:0 6px 24px rgba(205,127,50,0.22),0 0 0 0 rgba(205,127,50,0.35)}70%{box-shadow:0 6px 24px rgba(205,127,50,0.22),0 0 0 16px rgba(205,127,50,0)}}' +
+        '@keyframes rws-medal-bounce{0%,100%{transform:scale(1)}45%{transform:scale(1.35) rotate(-8deg)}55%{transform:scale(1.35) rotate(8deg)}}' +
+        '@keyframes rws-flash{0%{opacity:0}15%{opacity:0.18}100%{opacity:0}}' +
+        '.rws-card-animate{opacity:0;animation:rws-card-in 0.75s cubic-bezier(0.34,1.56,0.64,1) forwards}' +
+        '.rws-card-animate:nth-child(1){animation-delay:0.15s}' +
+        '.rws-card-animate:nth-child(2){animation-delay:0.55s}' +
+        '.rws-card-animate:nth-child(3){animation-delay:0.95s}' +
+        '.rws-medal-anim{display:inline-block;animation:rws-medal-bounce 1.4s ease-in-out infinite}';
+      document.head.appendChild(rwStyle);
+
+      /* ── confetti spawner ── */
+      function spawnCelebration(section) {
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3';
+        section.insertBefore(wrap, section.firstChild);
+
+        var colors = ['#ffd700','#ffb300','#f48fb1','#e91e63','#ce93d8','#9c27b0','#4fc3f7','#0288d1','#a5f3fc','#51cf66','#fce4ec','#fff59d','#ff8a65','#ffffff'];
+        var emojis = ['&#127881;','&#127882;','&#11088;','&#10024;','&#127942;','&#127873;','&#9733;','&#127775;'];
+
+        /* 100 shaped confetti pieces */
+        for(var i=0;i<100;i++){
+          var p = document.createElement('div');
+          var type = i % 4;
+          var color = colors[Math.floor(Math.random()*colors.length)];
+          var size = 5 + Math.random()*9;
+          var w = type===1 ? size*2.2 : type===2 ? size*0.45 : size;
+          var h = type===2 ? size*2.2 : type===1 ? size*0.45 : size;
+          var radius = type===3 ? '50%' : type===0 ? '1px' : '3px';
+          var dur = 3.5 + Math.random()*5;
+          var delay = Math.random()*6;
+          p.style.cssText = 'position:absolute;left:'+( Math.random()*102-1)+'%;top:-18px;'
+            +'width:'+w+'px;height:'+h+'px;background:'+color+';border-radius:'+radius+';'
+            +'opacity:0.88;animation:rws-fall '+dur+'s '+delay+'s linear infinite';
+          wrap.appendChild(p);
+        }
+
+        /* 16 floating emoji decorations */
+        for(var j=0;j<16;j++){
+          var e = document.createElement('div');
+          var edur = 6 + Math.random()*7;
+          var edelay = Math.random()*7;
+          e.innerHTML = emojis[Math.floor(Math.random()*emojis.length)];
+          e.style.cssText = 'position:absolute;left:'+(Math.random()*96)+'%;top:-44px;'
+            +'font-size:'+(16+Math.random()*18)+'px;user-select:none;pointer-events:none;'
+            +'animation:rws-drift '+edur+'s '+edelay+'s linear infinite';
+          wrap.appendChild(e);
+        }
+
+        /* full-section flash burst on reveal */
+        var flash = document.createElement('div');
+        flash.style.cssText = 'position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(255,215,0,0.22),transparent 65%);pointer-events:none;z-index:4;animation:rws-flash 1.6s ease-out forwards';
+        section.appendChild(flash);
+      }
+
+      /* ── data fetch & render ── */
+      fetch('/api/raffle/winners').then(function(r){ return r.json(); }).then(function(d){
+        if(!d.success||!d.winners||!d.winners.length) return;
+        // populate podium: index 1=2nd(left), 0=1st(center), 2=3rd(right)
+        var hpSlots = [
+          { wi:1, avId:'hpAv2', nmId:'hpNm2', vtId:'hpVt2', bkId:'hpBk2',
+            avBg:'linear-gradient(135deg,rgba(192,192,192,0.22),rgba(160,160,160,0.10))', avBr:'rgba(192,192,192,0.5)',
+            bkBg:'linear-gradient(180deg,rgba(192,192,192,0.16),rgba(192,192,192,0.05))', bkBr:'rgba(192,192,192,0.28)', nmCol:'rgba(220,220,235,0.88)' },
+          { wi:0, avId:'hpAv1', nmId:'hpNm1', vtId:'hpVt1', bkId:'hpBk1',
+            avBg:'linear-gradient(135deg,rgba(255,215,0,0.26),rgba(255,180,0,0.12))', avBr:'rgba(255,215,0,0.6)',
+            bkBg:'linear-gradient(180deg,rgba(255,215,0,0.18),rgba(255,215,0,0.06))', bkBr:'rgba(255,215,0,0.36)', nmCol:'rgba(255,235,120,0.96)', pulse:'rws-pulse-gold' },
+          { wi:2, avId:'hpAv3', nmId:'hpNm3', vtId:'hpVt3', bkId:'hpBk3',
+            avBg:'linear-gradient(135deg,rgba(205,127,50,0.22),rgba(180,100,30,0.10))', avBr:'rgba(205,127,50,0.45)',
+            bkBg:'linear-gradient(180deg,rgba(205,127,50,0.16),rgba(205,127,50,0.05))', bkBr:'rgba(205,127,50,0.28)', nmCol:'rgba(220,200,160,0.9)' }
+        ];
+        hpSlots.forEach(function(slot, si) {
+          var w = d.winners[slot.wi];
+          if (!w) return;
+          var av = document.getElementById(slot.avId);
+          var nm = document.getElementById(slot.nmId);
+          var vt = document.getElementById(slot.vtId);
+          var bk = document.getElementById(slot.bkId);
+          var delay = (si * 0.4) + 's';
+          if (av) { av.style.cssText += ';filter:none;background:'+slot.avBg+';border-color:'+slot.avBr+';animation:rws-medal-bounce 1.5s '+delay+' ease-in-out infinite'; }
+          if (nm) { nm.style.color = slot.nmCol; nm.textContent = w.name; }
+          if (vt) { vt.style.color = 'rgba(200,160,255,0.62)'; vt.textContent = w.votes + ' votes'; }
+          if (bk) { bk.style.background = slot.bkBg; bk.style.borderColor = slot.bkBr; if (slot.pulse) bk.style.animation = slot.pulse + ' 2.2s ease-in-out infinite'; }
+        });
+        var hpLbl = document.getElementById('hpLabel');
+        var hpTot = document.getElementById('hpTotal');
+        if (hpLbl) { hpLbl.textContent = 'Convention Winners'; hpLbl.style.color = 'rgba(255,215,0,0.55)'; }
+        if (hpTot) { hpTot.textContent = 'Total votes cast: ' + d.total_votes; hpTot.style.color = 'rgba(200,160,255,0.5)'; }
+
+        var section = document.getElementById('raffle-showcase');
+        if(section) spawnCelebration(section);
+      }).catch(function(){});
+    })();
+  </script>
+
   <footer>
     <div class="footer-inner">
       <div class="footer-top">
@@ -1065,6 +1224,8 @@ app.get('/', (req, res) => {
         var selectEl = document.getElementById('ticketType');
         if (selectEl) selectEl.value = sel.value;
       }
+      var accomEl = document.getElementById('accommodationType');
+      if (accomEl) accomEl.value = pkgName;
       if (banner && bannerText) {
         bannerText.innerHTML = msg + '. Fill in your details below and click Register Now.';
         banner.style.display = 'flex';
@@ -1797,62 +1958,148 @@ app.get('/raffle', async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎰 Raffle — Africa Convention 2026</title>
+  <title>&#127920; Raffle — Africa Convention 2026</title>
   <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#e8f4fd 0%,#fdf0f7 40%,#eef4ff 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-    .card{background:white;border-radius:24px;padding:36px 32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(244,143,177,0.25);text-align:center}
-    .icon{font-size:52px;margin-bottom:12px}
-    h1{font-size:22px;font-weight:800;color:#1e293b;margin-bottom:6px}
-    .sub{color:#64748b;font-size:14px;margin-bottom:28px;line-height:1.5}
-    #scanner-box{width:100%;margin-bottom:18px;border-radius:14px;overflow:hidden;background:#f8fafc}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:36px 20px 48px;position:relative;overflow-x:hidden}
+    /* header */
+    .rp-header{text-align:center;margin-bottom:28px;max-width:480px;width:100%}
+    .rp-eyebrow{font-size:11px;font-weight:800;letter-spacing:3px;color:rgba(244,143,177,0.65);text-transform:uppercase;margin-bottom:10px}
+    .rp-title{font-size:26px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;line-height:1.2}
+    .rp-sub{color:rgba(200,160,255,0.68);font-size:14px;line-height:1.6;margin-bottom:14px}
+    .rp-badge{display:inline-block;padding:5px 15px;border-radius:20px;font-size:12px;font-weight:700}
+    .rp-badge-open{background:rgba(52,211,153,0.12);color:#6ee7b7;border:1px solid rgba(52,211,153,0.3)}
+    .rp-badge-closed{background:rgba(100,116,139,0.14);color:rgba(148,163,184,0.85);border:1px solid rgba(100,116,139,0.22)}
+    /* podium */
+    .rp-podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;max-width:460px;width:100%;margin:28px auto 6px}
+    .rp-slot{display:flex;flex-direction:column;align-items:center;flex:1}
+    .rp-av{border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:8px;filter:grayscale(1);transition:filter 0.7s,background 0.7s,border-color 0.7s,box-shadow 0.7s;border:2px solid rgba(100,116,139,0.18);background:rgba(100,116,139,0.12)}
+    .rp-nm{font-size:11px;font-weight:700;color:rgba(100,116,139,0.36);text-align:center;min-height:34px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:4px;padding:0 4px;transition:color 0.7s;word-break:break-word}
+    .rp-vt{font-size:10px;color:rgba(200,160,255,0.28);min-height:13px;margin-bottom:5px;transition:color 0.7s}
+    .rp-blk{width:100%;border-radius:10px 10px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;background:rgba(100,116,139,0.07);border:1px solid rgba(100,116,139,0.10);transition:background 0.7s,border-color 0.7s,box-shadow 0.7s}
+    .rp-podium-lbl{text-align:center;font-size:10px;color:rgba(100,116,139,0.36);letter-spacing:1.5px;text-transform:uppercase;margin-top:10px;max-width:460px;width:100%}
+    /* entry card */
+    .rp-card{background:rgba(255,255,255,0.05);border:1px solid rgba(200,160,255,0.13);border-radius:20px;padding:26px 22px;max-width:440px;width:100%;text-align:center;backdrop-filter:blur(10px);margin-top:28px}
+    .rp-card-title{font-size:14px;font-weight:700;color:rgba(240,220,255,0.82);margin-bottom:18px}
+    #scanner-box{width:100%;margin-bottom:16px;border-radius:12px;overflow:hidden;background:rgba(0,0,0,0.25);min-height:0}
     .btn{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:all 0.2s;font-family:inherit}
-    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,143,177,0.45)}
-    .btn-outline{background:white;color:#e91e63;border:2px solid rgba(244,143,177,0.5)}
-    .btn-outline:hover{background:rgba(244,143,177,0.06);box-shadow:none}
-    .divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:#94a3b8;font-size:13px}
-    .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(244,143,177,0.25)}
-    input{width:100%;padding:12px 14px;border:2px solid rgba(244,143,177,0.3);border-radius:10px;font-size:15px;color:#374151;margin-bottom:12px;font-family:inherit;background:#fff}
-    input:focus{outline:none;border-color:#f06292;box-shadow:0 0 0 3px rgba(244,143,177,0.18)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,143,177,0.4)}
+    .btn-ghost{background:rgba(255,255,255,0.07);color:rgba(240,220,255,0.82);border:1px solid rgba(200,160,255,0.2)}
+    .btn-ghost:hover{background:rgba(255,255,255,0.11);transform:none;box-shadow:none}
+    .divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:rgba(148,163,184,0.45);font-size:13px}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(200,160,255,0.1)}
+    input{width:100%;padding:12px 14px;border:1px solid rgba(200,160,255,0.18);border-radius:10px;font-size:14px;color:rgba(240,220,255,0.9);margin-bottom:12px;font-family:inherit;background:rgba(255,255,255,0.06);caret-color:#f48fb1}
+    input::placeholder{color:rgba(148,163,184,0.45)}
+    input:focus{outline:none;border-color:#f48fb1;box-shadow:0 0 0 3px rgba(244,143,177,0.1)}
     .msg{padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;margin-top:12px;display:none}
-    .msg.error{background:rgba(254,202,202,0.25);color:#e11d48;border-left:4px solid #f87171;display:block}
-    .msg.info{background:rgba(167,243,208,0.22);color:#059669;border-left:4px solid #34d399;display:block}
-    .status-badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:20px}
-    .status-open{background:rgba(167,243,208,0.3);color:#059669;border:1px solid rgba(167,243,208,0.6)}
-    .status-closed{background:rgba(254,202,202,0.3);color:#e11d48;border:1px solid rgba(252,165,165,0.5)}
-    footer{text-align:center;padding:20px;font-style:italic;font-size:7px;color:#94a3b8;margin-top:18px}
+    .msg.error{background:rgba(254,202,202,0.1);color:#fca5a5;border-left:4px solid #f87171;display:block}
+    .msg.info{background:rgba(167,243,208,0.1);color:#6ee7b7;border-left:4px solid #34d399;display:block}
+    footer{text-align:center;padding:28px 16px 8px;font-style:italic;font-size:7px;color:rgba(100,116,139,0.45)}
+    @keyframes rp-medal-bounce{0%,100%{transform:scale(1)}45%{transform:scale(1.3) rotate(-7deg)}55%{transform:scale(1.3) rotate(7deg)}}
+    @keyframes rp-pulse-gold{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,0.5)}70%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
+    @keyframes rp-slot-in{0%{opacity:0;transform:translateY(22px)}100%{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="icon">🎰</div>
-    <h1>Africa Convention Raffle</h1>
-    <p class="sub">Nominate a fellow delegate for an organiser gift.<br>Scan your badge QR — or type your Ticket ID.</p>
-    <div id="statusBadge" class="status-badge status-closed">Checking status…</div>
+  <!-- Header -->
+  <div class="rp-header">
+    <div style="font-size:46px;margin-bottom:12px">&#127920;</div>
+    <p class="rp-eyebrow">Africa Convention 2026</p>
+    <h1 class="rp-title">Convention Raffle &amp; Nominations</h1>
+    <p class="rp-sub">Nominate a fellow delegate for an organiser gift.<br>Scan your badge QR — or type your Ticket ID to enter.</p>
+    <span id="rpBadge" class="rp-badge rp-badge-closed">Checking status&#x2026;</span>
+  </div>
 
+  <!-- Winners Podium -->
+  <div class="rp-podium">
+    <!-- 2nd — left -->
+    <div class="rp-slot">
+      <div id="rpAv2" class="rp-av" style="width:56px;height:56px;font-size:23px">&#129352;</div>
+      <div id="rpNm2" class="rp-nm">—</div>
+      <div id="rpVt2" class="rp-vt"></div>
+      <div id="rpBk2" class="rp-blk" style="height:70px;font-size:20px">&#129352;</div>
+    </div>
+    <!-- 1st — center -->
+    <div class="rp-slot">
+      <div id="rpAv1" class="rp-av" style="width:70px;height:70px;font-size:29px">&#129351;</div>
+      <div id="rpNm1" class="rp-nm" style="font-size:13px;font-weight:800;min-height:38px">—</div>
+      <div id="rpVt1" class="rp-vt" style="font-size:11px"></div>
+      <div id="rpBk1" class="rp-blk" style="height:104px;font-size:24px">&#129351;</div>
+    </div>
+    <!-- 3rd — right -->
+    <div class="rp-slot">
+      <div id="rpAv3" class="rp-av" style="width:48px;height:48px;font-size:19px">&#129353;</div>
+      <div id="rpNm3" class="rp-nm">—</div>
+      <div id="rpVt3" class="rp-vt"></div>
+      <div id="rpBk3" class="rp-blk" style="height:54px;font-size:18px">&#129353;</div>
+    </div>
+  </div>
+  <p id="rpPodiumLbl" class="rp-podium-lbl">Winners Podium &middot; Revealed when voting closes</p>
+  <p id="rpTotalVotes" style="text-align:center;font-size:11px;color:rgba(200,160,255,0.3);margin-top:5px;max-width:460px;width:100%"></p>
+
+  <!-- Entry card -->
+  <div class="rp-card">
+    <p class="rp-card-title">&#128247; Scan your badge QR or enter your Ticket ID below</p>
     <div id="scanner-box"><div id="qr-entry" style="width:100%"></div></div>
-    <button class="btn" id="startBtn" onclick="startScan()">📷 Scan My Badge QR</button>
-    <button class="btn btn-outline" id="stopBtn" onclick="stopScan()" style="display:none">⏹ Stop Camera</button>
-
+    <button class="btn" id="startBtn" onclick="startScan()">&#128247; Scan My Badge QR</button>
+    <button class="btn btn-ghost" id="stopBtn" onclick="stopScan()" style="display:none">&#9209; Stop Camera</button>
     <div class="divider">or enter manually</div>
     <input id="ticketInput" placeholder="Your Ticket ID (e.g. TKT-00001)" onkeydown="if(event.key==='Enter')enterTicket()">
-    <button class="btn" onclick="enterTicket()">▶ Continue to Vote</button>
-
+    <button class="btn" onclick="enterTicket()">&#9654; Continue to Vote</button>
     <div id="msg" class="msg"></div>
   </div>
-  <footer>© Faith&amp;Will Logi-Tec Solutions · Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI · raphayelchas@gmail.com · +255 743 868 755 · All Rights Reserved</footer>
+
+  <footer>&#169; Faith&amp;Will Logi-Tec Solutions &nbsp;&middot;&nbsp; Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;&middot;&nbsp; raphayelchas@gmail.com &nbsp;&middot;&nbsp; +255 743 868 755 &nbsp;&middot;&nbsp; All Rights Reserved</footer>
 
   <script>
     var scanner = null;
 
-    fetch('/api/raffle/status').then(r=>r.json()).then(function(s){
-      var el = document.getElementById('statusBadge');
-      if(s.reveal_ready){ el.textContent='🏆 Results Available'; el.className='status-badge status-open'; window.location.href='/raffle/reveal'; return; }
-      if(s.voting_open){ el.textContent='✅ Voting is Open'; el.className='status-badge status-open'; }
-      else { el.textContent='🔒 Voting not yet open'; el.className='status-badge status-closed'; }
-    });
+    function rpPopulatePodium(winners, total) {
+      var slots = [
+        { wi:1, avId:'rpAv2', nmId:'rpNm2', vtId:'rpVt2', bkId:'rpBk2',
+          avBg:'linear-gradient(135deg,rgba(192,192,192,0.22),rgba(160,160,160,0.10))', avBr:'rgba(192,192,192,0.5)',
+          bkBg:'linear-gradient(180deg,rgba(192,192,192,0.15),rgba(192,192,192,0.04))', bkBr:'rgba(192,192,192,0.28)', nmCol:'rgba(220,220,235,0.88)' },
+        { wi:0, avId:'rpAv1', nmId:'rpNm1', vtId:'rpVt1', bkId:'rpBk1',
+          avBg:'linear-gradient(135deg,rgba(255,215,0,0.26),rgba(255,180,0,0.12))', avBr:'rgba(255,215,0,0.6)',
+          bkBg:'linear-gradient(180deg,rgba(255,215,0,0.18),rgba(255,215,0,0.05))', bkBr:'rgba(255,215,0,0.36)', nmCol:'rgba(255,235,120,0.96)', pulse:true },
+        { wi:2, avId:'rpAv3', nmId:'rpNm3', vtId:'rpVt3', bkId:'rpBk3',
+          avBg:'linear-gradient(135deg,rgba(205,127,50,0.22),rgba(180,100,30,0.10))', avBr:'rgba(205,127,50,0.45)',
+          bkBg:'linear-gradient(180deg,rgba(205,127,50,0.15),rgba(205,127,50,0.04))', bkBr:'rgba(205,127,50,0.28)', nmCol:'rgba(220,200,160,0.9)' }
+      ];
+      slots.forEach(function(s, si) {
+        var w = winners[s.wi];
+        if (!w) return;
+        var av = document.getElementById(s.avId);
+        var nm = document.getElementById(s.nmId);
+        var vt = document.getElementById(s.vtId);
+        var bk = document.getElementById(s.bkId);
+        var delay = (si * 0.38) + 's';
+        if (av) { av.style.filter='none'; av.style.background=s.avBg; av.style.borderColor=s.avBr; if(s.pulse) av.style.animation='rp-medal-bounce 1.5s '+delay+' ease-in-out infinite, rp-pulse-gold 2s '+delay+' ease-in-out infinite'; }
+        if (nm) { nm.style.color=s.nmCol; nm.textContent=w.name; }
+        if (vt) { vt.style.color='rgba(200,160,255,0.62)'; vt.textContent=w.votes+' votes'; }
+        if (bk) { bk.style.background=s.bkBg; bk.style.borderColor=s.bkBr; }
+      });
+      var lbl = document.getElementById('rpPodiumLbl');
+      var tot = document.getElementById('rpTotalVotes');
+      if (lbl) { lbl.textContent='Convention Winners'; lbl.style.color='rgba(255,215,0,0.5)'; }
+      if (tot) { tot.textContent='Total votes cast: '+total; tot.style.color='rgba(200,160,255,0.45)'; }
+    }
+
+    fetch('/api/raffle/status').then(function(r){ return r.json(); }).then(function(s){
+      var el = document.getElementById('rpBadge');
+      if (s.reveal_ready) {
+        el.textContent='&#127942; Results Available'; el.className='rp-badge rp-badge-open';
+        fetch('/api/raffle/winners').then(function(r){ return r.json(); }).then(function(d){
+          if (d.success && d.winners && d.winners.length) rpPopulatePodium(d.winners, d.total_votes);
+          setTimeout(function(){ window.location.href='/raffle/reveal'; }, 2200);
+        }).catch(function(){ window.location.href='/raffle/reveal'; });
+        return;
+      }
+      if (s.voting_open) { el.textContent='&#9989; Voting is Open'; el.className='rp-badge rp-badge-open'; }
+      else { el.textContent='&#128274; Voting not yet open'; el.className='rp-badge rp-badge-closed'; }
+    }).catch(function(){});
 
     function startScan(){
       document.getElementById('startBtn').style.display='none';
@@ -1865,25 +2112,21 @@ app.get('/raffle', async (req, res) => {
         window.location.href='/raffle/vote/'+encodeURIComponent(tid.trim());
       },function(){});
     }
-
     function stopScan(){
       if(scanner){ try{ scanner.stop().then(function(){ scanner.clear(); scanner=null; }); }catch(_){} }
       document.getElementById('startBtn').style.display='block';
       document.getElementById('stopBtn').style.display='none';
     }
-
     function enterTicket(){
       var tid = document.getElementById('ticketInput').value.trim();
       if(!tid){ showMsg('Please enter your Ticket ID','error'); return; }
       window.location.href='/raffle/vote/'+encodeURIComponent(tid);
     }
-
     function showMsg(txt, type){
       var el = document.getElementById('msg');
-      el.textContent = txt;
-      el.className = 'msg ' + type;
+      el.textContent=txt; el.className='msg '+type;
     }
-  </script>
+  <\/script>
 </body>
 </html>`);
 });
@@ -2012,11 +2255,14 @@ app.get('/raffle/vote/:ticket_id', async (req, res) => {
     function renderNominees(list){
       var el = document.getElementById('nomineesList');
       if(!list.length){ el.innerHTML='<div class="empty">No delegates found</div>'; return; }
-      el.innerHTML = list.map(function(n){
+      el.innerHTML = list.map(function(n, i){
         return '<div class="nominee" id="nc-'+esc(n.ticket_id)+'" onclick="selectNominee('+JSON.stringify(n.ticket_id)+','+JSON.stringify(n.name)+')">'
-          + '<div class="nominee-name">'+esc(n.name)+'</div>'
+          + '<div style="display:flex;align-items:flex-start;gap:8px">'
+          + '<span style="min-width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">'+(i+1)+'</span>'
+          + '<div><div class="nominee-name">'+esc(n.name)+'</div>'
           + (n.organization ? '<div class="nominee-meta">'+esc(n.organization)+'</div>' : '')
           + '<span class="nominee-type">'+esc(n.ticket_type||'delegate')+'</span>'
+          + '</div></div>'
           + '</div>';
       }).join('');
     }

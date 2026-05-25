@@ -387,6 +387,36 @@
             </div>
           </div>
 
+          <!-- Convention Ticket Pricing -->
+          <div style="background:#f8fafc;padding:24px 28px;border-top:2px solid rgba(100,116,139,0.15)">
+            <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px">
+              <span style="padding:5px 14px;background:rgba(233,30,99,0.10);color:#be185d;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0">CONVENTION TICKETS</span>
+              <div>
+                <p style="font-size:14px;font-weight:800;color:#1e293b">🎫 Convention Ticket Pricing — Whole Visit (5 Days)</p>
+                <p style="font-size:12px;color:#64748b;margin-top:3px">All USD tickets cover the full 5-day convention · 5% royalty applies to international tiers · Local ministers collected on-site</p>
+              </div>
+            </div>
+            <div style="overflow-x:auto;margin-bottom:14px">
+              <table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead><tr style="background:rgba(233,30,99,0.06)">
+                  <th style="padding:9px 14px;text-align:left;color:#be185d;font-weight:700">Ticket Category</th>
+                  <th style="padding:9px 14px;text-align:center;color:#be185d;font-weight:700">Standard Price</th>
+                  <th style="padding:9px 14px;text-align:center;color:#be185d;font-weight:700">5% Royalty Price</th>
+                  <th style="padding:9px 14px;text-align:center;color:#be185d;font-weight:700">Royalty Saving</th>
+                  <th style="padding:9px 14px;text-align:center;color:#be185d;font-weight:700">Notes</th>
+                </tr></thead>
+                <tbody>
+                  <tr style="background:white"><td style="padding:9px 14px;font-weight:700;color:#1e293b">🎓 Youth</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#334155">$95 USD</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#059669">$90 USD</td><td style="padding:9px 14px;text-align:center;color:#d97706;font-weight:700">$5</td><td style="padding:9px 14px;text-align:center;font-size:12px;color:#64748b">Early-bird eligible</td></tr>
+                  <tr><td style="padding:9px 14px;font-weight:700;color:#1e293b">💼 Business</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#334155">$145 USD</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#059669">$138 USD</td><td style="padding:9px 14px;text-align:center;color:#d97706;font-weight:700">$7</td><td style="padding:9px 14px;text-align:center;font-size:12px;color:#64748b">Early-bird eligible</td></tr>
+                  <tr style="background:white"><td style="padding:9px 14px;font-weight:700;color:#1e293b">🎤 Speaker</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#334155">$195 USD</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#059669">$185 USD</td><td style="padding:9px 14px;text-align:center;color:#d97706;font-weight:700">$10</td><td style="padding:9px 14px;text-align:center;font-size:12px;color:#64748b">Early-bird eligible</td></tr>
+                  <tr style="background:rgba(253,230,138,0.15)"><td style="padding:9px 14px;font-weight:800;color:#92400e">✈️ Foreigners (VIP)</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#334155">$245 USD</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#059669">$233 USD</td><td style="padding:9px 14px;text-align:center;color:#d97706;font-weight:700">$12</td><td style="padding:9px 14px;text-align:center;font-size:12px;color:#64748b">VIP tier · early-bird eligible</td></tr>
+                  <tr style="background:rgba(71,85,105,0.04)"><td style="padding:9px 14px;font-weight:700;color:#334155">👔 Local Ministers</td><td style="padding:9px 14px;text-align:center;font-weight:800;color:#334155">15,000 TZS/day</td><td style="padding:9px 14px;text-align:center;color:#94a3b8">—</td><td style="padding:9px 14px;text-align:center;color:#dc2626;font-weight:800">None</td><td style="padding:9px 14px;text-align:center;font-size:12px;color:#64748b">On-site · 75,000 TZS total</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size:12px;color:#be185d;line-height:1.7;font-style:italic">All USD ticket prices cover the full 5-day convention and include: lunch ($125), transport/commute ($100), badge ($10), and raffle ticket ($5). The 5% royalty discount applies at checkout for early registered international and local USD-paying attendees. Royalty prices shown are rounded to the nearest dollar.</p>
+          </div>
+
         </div><!-- /pbContent -->
       </div>
       <!-- ══ /Pricing Strategy Briefing ══ -->
@@ -703,18 +733,16 @@
       <div style="display:flex;flex-wrap:wrap;gap:24px;margin-bottom:28px">
         <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(244,143,177,0.14);text-align:center;flex:1;min-width:200px">
           <h3 style="margin-top:0;margin-bottom:12px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">📱 Voting Entry QR</h3>
-          <div id="raffleEntryQR" style="margin:0 auto 10px;width:180px;height:180px;background:#f8fafc;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-            <img id="raffleEntryQRImg" src="" style="width:100%;height:100%;display:none">
-            <span id="raffleEntryQRWait" style="color:#94a3b8;font-size:12px">Generating…</span>
+          <div style="margin:0 auto 10px;width:180px;height:180px;border-radius:10px;overflow:hidden;border:2px solid rgba(244,143,177,0.25);background:#f8fafc">
+            <img src="/sysimages/QR/https_africa-convention_vercel_app_raffle.png" alt="Raffle Entry QR" style="width:100%;height:100%;object-fit:contain;display:block">
           </div>
           <p style="font-size:11px;color:#64748b">Display this at the venue so delegates can scan to vote</p>
           <a href="/raffle" target="_blank" style="font-size:12px;color:#e91e63;text-decoration:none;font-weight:700">/raffle ↗</a>
         </div>
         <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(244,143,177,0.14);text-align:center;flex:1;min-width:200px">
           <h3 style="margin-top:0;margin-bottom:12px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">🏆 Results Reveal QR</h3>
-          <div id="raffleRevealQR" style="margin:0 auto 10px;width:180px;height:180px;background:#f8fafc;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-            <img id="raffleRevealQRImg" src="" style="width:100%;height:100%;display:none">
-            <span style="color:#94a3b8;font-size:12px">Generating…</span>
+          <div style="margin:0 auto 10px;width:180px;height:180px;border-radius:10px;overflow:hidden;border:2px solid rgba(244,143,177,0.25);background:#f8fafc">
+            <img src="/sysimages/QR/https_africa-convention_vercel_app_raffle_reveal.png" alt="Raffle Reveal QR" style="width:100%;height:100%;object-fit:contain;display:block">
           </div>
           <p style="font-size:11px;color:#64748b">Display when ready — delegates scan to see the winners</p>
           <a href="/raffle/reveal" target="_blank" style="font-size:12px;color:#e91e63;text-decoration:none;font-weight:700">/raffle/reveal ↗</a>
@@ -731,6 +759,12 @@
           <div class="stat-number" id="raffleNomineesCount">—</div>
           <div class="stat-label">Unique Nominees</div>
         </div>
+      </div>
+
+      <!-- Top 3 Winners Panel -->
+      <div id="top3Panel" style="display:none;margin-bottom:22px">
+        <h3 style="margin-top:0;margin-bottom:12px;font-size:14px;color:#1e293b">🏆 Current Top 3</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:14px" id="top3Cards"></div>
       </div>
 
       <h3 style="margin-top:4px">Live Vote Leaderboard (Top 20)</h3>
@@ -1477,8 +1511,36 @@
             + '</tr>';
         }).join('');
       }
-      // Generate QR codes once
-      generateRaffleQRs();
+      // Populate top-3 winners panel
+      var panel = document.getElementById('top3Panel');
+      var cards = document.getElementById('top3Cards');
+      if (panel && cards) {
+        var top3 = r.leaderboard.slice(0, 3);
+        if (top3.length) {
+          var t3MedalColors = [
+            'linear-gradient(135deg,rgba(255,215,0,0.18),rgba(255,180,0,0.06))',
+            'linear-gradient(135deg,rgba(192,192,192,0.18),rgba(160,160,160,0.06))',
+            'linear-gradient(135deg,rgba(205,127,50,0.18),rgba(180,100,30,0.06))'
+          ];
+          var t3Borders = ['rgba(255,215,0,0.5)','rgba(192,192,192,0.5)','rgba(205,127,50,0.45)'];
+          var t3Medals = ['🥇','🥈','🥉'];
+          var t3Gifts = ['1st Prize','2nd Prize','3rd Prize'];
+          cards.innerHTML = top3.map(function(w, i) {
+            return '<div style="flex:1;min-width:180px;border-radius:14px;padding:16px 18px;background:'+t3MedalColors[i]+';border:2px solid '+t3Borders[i]+';display:flex;align-items:center;gap:12px">'
+              + '<div style="font-size:32px;flex-shrink:0">'+t3Medals[i]+'</div>'
+              + '<div style="flex:1">'
+              + '<div style="font-size:14px;font-weight:800;color:#1e293b">'+esc(w.name)+'</div>'
+              + '<div style="font-size:11px;color:#64748b;margin-top:2px">'+esc(w.organization||w.ticket_type||'delegate')+'</div>'
+              + '<div style="font-size:10px;font-weight:700;color:#d97706;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px">'+t3Gifts[i]+'</div>'
+              + '</div>'
+              + '<div style="text-align:right;flex-shrink:0"><div style="font-size:22px;font-weight:900;color:#e91e63">'+w.votes+'</div><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px">votes</div></div>'
+              + '</div>';
+          }).join('');
+          panel.style.display = 'block';
+        } else {
+          panel.style.display = 'none';
+        }
+      }
     } catch(e) { console.error('loadRaffle', e); }
   }
 
@@ -1489,22 +1551,6 @@
     tb.style.background = _raffleVotingOpen ? 'linear-gradient(135deg,#fca5a5,#f87171)' : 'linear-gradient(135deg,#a7f3d0,#34d399)';
     tb.style.color = _raffleVotingOpen ? 'white' : '#064e3b';
     rb.textContent  = _raffleRevealReady ? '🙈 Hide Results'  : '🏆 Reveal Winners';
-  }
-
-  var _raffleQRsGenerated = false;
-  async function generateRaffleQRs() {
-    if (_raffleQRsGenerated) return;
-    _raffleQRsGenerated = true;
-    var base = window.location.origin;
-    try {
-      var entryQR  = await QRCode.toDataURL(base + '/raffle',        { width: 180, margin: 1 });
-      var revealQR = await QRCode.toDataURL(base + '/raffle/reveal', { width: 180, margin: 1 });
-      var ei = document.getElementById('raffleEntryQRImg');
-      var ew = document.getElementById('raffleEntryQRWait');
-      if (ei) { ei.src = entryQR;  ei.style.display = 'block'; if (ew) ew.style.display='none'; }
-      var ri = document.getElementById('raffleRevealQRImg');
-      if (ri) { ri.src = revealQR; ri.style.display = 'block'; }
-    } catch(e) {}
   }
 
   async function raffleToggle() {
@@ -1525,7 +1571,7 @@
     if (!confirm('⚠️ Reset the entire raffle? This will delete ALL votes and close voting. This cannot be undone.')) return;
     if (!confirm('Are you sure? All raffle data will be permanently deleted.')) return;
     var r = await fetch('/api/raffle/reset', { method: 'POST' }).then(function(x){ return x.json(); });
-    if (r.success) { _raffleQRsGenerated = false; loadRaffle(); }
+    if (r.success) { loadRaffle(); }
     else alert('Error: ' + r.error);
   }
 
