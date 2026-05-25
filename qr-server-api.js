@@ -68,6 +68,83 @@ function getGalleryImages() {
 app.use('/sysimages', express.static(imagesPath));
 app.use('/documentation', express.static(docsPath));
 
+// ── MAINTENANCE PAGE ────────────────────────────────────────────────────────
+// Set  MAINTENANCE_MODE=true  in Vercel env vars to activate.
+// Remove (or set to false) to bring the site back live.
+// /sysimages and /documentation bypass this so the page can load its assets.
+const MAINTENANCE_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Africa Convention 2026 — Maintenance</title>
+  <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px 48px;overflow:hidden;position:relative}
+    .bg-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 40% at 50% 18%,rgba(244,143,177,0.09),transparent),radial-gradient(ellipse 50% 50% at 80% 82%,rgba(206,147,216,0.07),transparent);pointer-events:none}
+    .orb{position:absolute;border-radius:50%;filter:blur(50px);opacity:0.13;animation:orb-float ease-in-out infinite}
+    @keyframes orb-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.07)}}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(200,160,255,0.14);border-radius:24px;padding:44px 36px;max-width:500px;width:100%;text-align:center;position:relative;z-index:10;backdrop-filter:blur(14px)}
+    .icon-wrap{font-size:58px;margin-bottom:14px;display:inline-block;animation:icon-pulse 2.8s ease-in-out infinite}
+    @keyframes icon-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+    .eyebrow{font-size:11px;font-weight:800;letter-spacing:3px;color:rgba(244,143,177,0.62);text-transform:uppercase;margin-bottom:10px}
+    h1{font-size:28px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;line-height:1.25}
+    .subtitle{font-size:14px;color:rgba(200,160,255,0.68);line-height:1.75;margin-bottom:28px}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(200,160,255,0.18),transparent);margin:24px 0}
+    .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px}
+    .chip{background:rgba(255,255,255,0.055);border:1px solid rgba(200,160,255,0.13);border-radius:10px;padding:10px 15px;font-size:13px;color:rgba(220,200,255,0.8);line-height:1.4}
+    .chip strong{display:block;font-size:10px;font-weight:800;color:rgba(244,143,177,0.58);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+    .wa-btn{display:inline-flex;align-items:center;gap:9px;padding:13px 26px;background:linear-gradient(135deg,rgba(244,143,177,0.14),rgba(206,147,216,0.09));border:1px solid rgba(244,143,177,0.24);border-radius:13px;color:rgba(240,220,255,0.85);text-decoration:none;font-size:14px;font-weight:600;transition:all 0.22s}
+    .wa-btn:hover{background:linear-gradient(135deg,rgba(244,143,177,0.22),rgba(206,147,216,0.16));border-color:rgba(244,143,177,0.4)}
+    .progress-bar{width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-top:28px}
+    .progress-fill{height:100%;width:38%;background:linear-gradient(90deg,#f48fb1,#ce93d8,#f48fb1);background-size:200% 100%;border-radius:2px;animation:shimmer 2.2s linear infinite}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    footer{margin-top:28px;font-size:7px;font-style:italic;color:rgba(100,116,139,0.42);text-align:center;position:relative;z-index:10}
+    @media(max-width:480px){.card{padding:36px 22px}h1{font-size:24px}.chips{flex-direction:column;align-items:center}}
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="orb" style="width:320px;height:320px;background:#ce93d8;top:-120px;left:-90px;animation-duration:9s"></div>
+  <div class="orb" style="width:220px;height:220px;background:#f48fb1;bottom:-70px;right:-50px;animation-duration:12s;animation-delay:-5s"></div>
+  <div class="orb" style="width:150px;height:150px;background:#ffd700;top:40%;left:80%;animation-duration:7s;animation-delay:-2s"></div>
+
+  <div class="card">
+    <div class="icon-wrap">🎪</div>
+    <p class="eyebrow">Africa Convention 2026</p>
+    <h1>We'll Be Back<br>Shortly</h1>
+    <p class="subtitle">
+      Our portal is currently undergoing scheduled maintenance.<br>
+      We're making things better — please check back soon.
+    </p>
+
+    <div class="chips">
+      <div class="chip"><strong>Dates</strong>June 18 – 22, 2026</div>
+      <div class="chip"><strong>Venue</strong>Arusha, Tanzania</div>
+      <div class="chip"><strong>Theme</strong>Doing Business &amp; Bearing Fruitful</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <p style="font-size:13px;color:rgba(200,160,255,0.5);margin-bottom:16px">Need urgent assistance?</p>
+    <a href="https://wa.me/+255787576900?text=Hi%2C%20I%20am%20trying%20to%20access%20the%20Africa%20Convention%20portal." class="wa-btn">
+      &#128172; WhatsApp Us &nbsp;&middot;&nbsp; +255 787 576 900
+    </a>
+
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+  </div>
+
+  <footer>&#169; Faith&amp;Will Logi-Tec Solutions &nbsp;&middot;&nbsp; Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI &nbsp;&middot;&nbsp; raphayelchas@gmail.com &nbsp;&middot;&nbsp; +255 743 868 755 &nbsp;&middot;&nbsp; All Rights Reserved</footer>
+</body>
+</html>`;
+
+app.use((req, res, next) => {
+  if (process.env.MAINTENANCE_MODE !== 'true') return next();
+  res.status(503).set('Retry-After', '3600').send(MAINTENANCE_HTML);
+});
+// ── /MAINTENANCE PAGE ───────────────────────────────────────────────────────
+
 const TICKET_TYPES = {
   'general': { name: 'Local attending Ministers', price: 15000, currency: 'TZS', icon: '👔' },
   'foreigners': { name: 'Foreigners (VIP)', price: 245, currency: 'USD', icon: '✈️' },
