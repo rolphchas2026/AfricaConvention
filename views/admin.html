@@ -465,6 +465,14 @@
             <p style="font-weight:700;color:#1e293b;margin-bottom:8px">📁 Files per attendee</p>
             <p style="color:#64748b;font-size:13px;line-height:1.7">Click 📁 on any attendee row to open their file folder. Upload payment proof (PDF/image) or any supporting documents. Files are stored in the database.</p>
           </div>
+          <div style="background:rgba(255,255,255,0.92);border-radius:12px;padding:22px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 2px 14px rgba(244,143,177,0.1)">
+            <p style="font-weight:700;color:#1e293b;margin-bottom:8px">📈 Statistics tab</p>
+            <p style="color:#64748b;font-size:13px;line-height:1.7">Full attendee list with check-in status. Shows name, email, ticket type, accommodation package, organisation, check-in time and payment status. Same action buttons as Overview — use this for on-site headcount and bag-check during the convention.</p>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(252,231,243,0.5),rgba(240,236,255,0.5));border-radius:12px;padding:22px;border:1px solid rgba(206,147,216,0.3);box-shadow:0 2px 14px rgba(206,147,216,0.12)">
+            <p style="font-weight:700;color:#7c3aed;margin-bottom:8px">🎰 Raffle tab</p>
+            <p style="color:#64748b;font-size:13px;line-height:1.7">Controls the convention nomination game. Open and close voting, reveal winners, reset, and display the two venue QR codes (voting entry + results reveal). The <strong>Top 3</strong> panel shows gold/silver/bronze leaders live. See the <em>Raffle Game Operations</em> section below for the full step-by-step playbook.</p>
+          </div>
         </div>
       </div>
 
@@ -510,6 +518,17 @@
             <p style="color:#64748b;font-size:12px;line-height:1.75">Accidentally checked someone out? Use <strong>Revoke</strong> to undo it — the delegate returns to <em>Active / Checked In</em> status immediately.<br><br>
             <strong>Where:</strong> Check-out tab → Recent Check-outs table → <em>↩ Revoke</em> button on the row<br><br>
             <strong>Use case:</strong> Scanner mis-fired, delegate scanned from outside, or coordinator error. Revoke does not erase the check-in record — only clears the checkout.</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(30,10,60,0.08),rgba(109,40,217,0.08));border-radius:12px;padding:22px;border:1px solid rgba(109,40,217,0.22);box-shadow:0 2px 14px rgba(109,40,217,0.08)">
+            <p style="font-weight:800;color:#6d28d9;margin-bottom:10px;font-size:14px">🔧 Maintenance Mode</p>
+            <p style="color:#64748b;font-size:12px;line-height:1.75">Takes the entire portal offline with a branded "Coming Back Soon" page — all routes show the maintenance screen, including the raffle game and home page. Static images still load so the page looks polished.<br><br>
+            <strong>To activate:</strong><br>
+            1. Open <strong>Vercel Dashboard</strong> → your project → <em>Settings → Environment Variables</em><br>
+            2. Add <code style="background:rgba(109,40,217,0.1);padding:1px 5px;border-radius:4px;font-size:11px">MAINTENANCE_MODE</code> = <code style="background:rgba(109,40,217,0.1);padding:1px 5px;border-radius:4px;font-size:11px">true</code><br>
+            3. Click <strong>Redeploy</strong> (no code change needed)<br><br>
+            <strong>To deactivate:</strong> Delete the variable or set it to <code style="background:rgba(109,40,217,0.1);padding:1px 5px;border-radius:4px;font-size:11px">false</code> → Redeploy.<br><br>
+            The maintenance page shows a WhatsApp CTA so delegates can still reach you while the portal is down.</p>
           </div>
 
         </div>
@@ -559,7 +578,7 @@
         <p style="color:#94a3b8;font-size:12px;margin-bottom:18px">Every icon in the Overview and Statistics action columns</p>
         <div style="background:rgba(255,255,255,0.92);border-radius:14px;padding:24px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 2px 14px rgba(244,143,177,0.1)">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0">
-            <div style="padding:10px 12px;border-bottom:1px solid rgba(244,143,177,0.1);display:flex;align-items:flex-start;gap:10px"><span style="font-size:18px;flex-shrink:0">✏️</span><div><p style="font-weight:700;color:#1e293b;font-size:13px;margin-bottom:2px">Edit</p><p style="color:#64748b;font-size:12px">Update name, email, phone, type, status, verified flag</p></div></div>
+            <div style="padding:10px 12px;border-bottom:1px solid rgba(244,143,177,0.1);display:flex;align-items:flex-start;gap:10px"><span style="font-size:18px;flex-shrink:0">✏️</span><div><p style="font-weight:700;color:#1e293b;font-size:13px;margin-bottom:2px">Edit</p><p style="color:#64748b;font-size:12px">Update name, email, phone, type, status, verified flag, accommodation package/type</p></div></div>
             <div style="padding:10px 12px;border-bottom:1px solid rgba(244,143,177,0.1);display:flex;align-items:flex-start;gap:10px"><span style="font-size:18px;flex-shrink:0">🎫</span><div><p style="font-weight:700;color:#1e293b;font-size:13px;margin-bottom:2px">Download Badge</p><p style="color:#64748b;font-size:12px">Generates A5 PDF and saves to device. Marks badge_generated = true</p></div></div>
             <div style="padding:10px 12px;border-bottom:1px solid rgba(244,143,177,0.1);display:flex;align-items:flex-start;gap:10px"><span style="font-size:18px;flex-shrink:0">👁️</span><div><p style="font-weight:700;color:#1e293b;font-size:13px;margin-bottom:2px">Quick View</p><p style="color:#64748b;font-size:12px">Opens badge inline in browser — no download triggered</p></div></div>
             <div style="padding:10px 12px;border-bottom:1px solid rgba(244,143,177,0.1);display:flex;align-items:flex-start;gap:10px"><span style="font-size:18px;flex-shrink:0">📧</span><div><p style="font-weight:700;color:#1e293b;font-size:13px;margin-bottom:2px">Email Badge</p><p style="color:#64748b;font-size:12px">Sends badge PDF to delegate's email via SMTP. Marks badge_sent = true</p></div></div>
@@ -568,6 +587,80 @@
             <div style="padding:10px 12px;display:flex;align-items:flex-start;gap:10px"><span style="font-size:18px;flex-shrink:0">↩</span><div><p style="font-weight:700;color:#92400e;font-size:13px;margin-bottom:2px">Revoke Checkout</p><p style="color:#64748b;font-size:12px">Check-out tab only — undoes a checkout, returns to Active status</p></div></div>
             <div style="padding:10px 12px;display:flex;align-items:flex-start;gap:10px"><span style="font-size:18px;flex-shrink:0">✅</span><div><p style="font-weight:700;color:#059669;font-size:13px;margin-bottom:2px">Approve</p><p style="color:#64748b;font-size:12px">Approval tab — sets payment_status = APPROVED, generates QR code</p></div></div>
           </div>
+        </div>
+      </div>
+
+      <!-- ── Raffle Game Operations ── -->
+      <div style="margin-top:36px;max-width:900px">
+        <h3 style="margin-top:0;margin-bottom:6px">🎰 Raffle Game Operations — Step-by-Step Playbook</h3>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:18px">Full guide for running the nomination &amp; raffle game at the convention</p>
+
+        <!-- Public URLs -->
+        <div style="background:linear-gradient(135deg,rgba(30,10,60,0.07),rgba(206,147,216,0.1));border-radius:12px;padding:18px 22px;border:1px solid rgba(206,147,216,0.3);margin-bottom:20px">
+          <p style="font-weight:700;color:#7c3aed;font-size:13px;margin-bottom:10px">📡 Public Game URLs</p>
+          <div style="display:flex;flex-wrap:wrap;gap:12px">
+            <div style="background:rgba(255,255,255,0.7);border-radius:8px;padding:10px 14px;flex:1;min-width:200px">
+              <p style="font-size:11px;color:#94a3b8;margin-bottom:3px;font-weight:600">ENTRY &amp; VOTING</p>
+              <code style="font-size:12px;color:#6d28d9;word-break:break-all">africa-convention.vercel.app/raffle</code>
+              <p style="font-size:11px;color:#64748b;margin-top:4px">Delegates scan their badge QR or enter a ticket ID to vote for a fellow delegate</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.7);border-radius:8px;padding:10px 14px;flex:1;min-width:200px">
+              <p style="font-size:11px;color:#94a3b8;margin-bottom:3px;font-weight:600">WINNERS REVEAL</p>
+              <code style="font-size:12px;color:#6d28d9;word-break:break-all">africa-convention.vercel.app/raffle/reveal</code>
+              <p style="font-size:11px;color:#64748b;margin-top:4px">Display screen for the venue projector — automatically shows animated reveal once winners are set</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step-by-step cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+
+          <div style="background:rgba(255,255,255,0.92);border-radius:12px;padding:22px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 2px 14px rgba(244,143,177,0.08)">
+            <p style="font-weight:800;color:#1e293b;margin-bottom:10px;font-size:14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;font-size:11px;font-weight:900;margin-right:6px">1</span>Open Voting</p>
+            <p style="color:#64748b;font-size:12px;line-height:1.75">Before the session begins, go to the <strong>Raffle tab</strong> in the admin panel.<br><br>
+            Tap <strong>🗳️ Open Voting</strong>. The button turns green and the status badge changes to <em>Open</em>.<br><br>
+            Delegates can now visit <code style="background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:11px">/raffle</code>, scan their badge QR or enter their Ticket ID, and cast a vote for a fellow delegate.</p>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.92);border-radius:12px;padding:22px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 2px 14px rgba(244,143,177,0.08)">
+            <p style="font-weight:800;color:#1e293b;margin-bottom:10px;font-size:14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;font-size:11px;font-weight:900;margin-right:6px">2</span>Display QR Codes at Venue</p>
+            <p style="color:#64748b;font-size:12px;line-height:1.75">The Raffle tab shows two large QR code images ready to print or display on screen:<br><br>
+            <strong>Entry QR</strong> — links to <code style="background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:11px">/raffle</code> (voting page)<br>
+            <strong>Reveal QR</strong> — links to <code style="background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:11px">/raffle/reveal</code> (results page)<br><br>
+            Print these or project them so delegates can scan without typing the URL. Place entry QR at registration desks and reveal QR on the stage display.</p>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.92);border-radius:12px;padding:22px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 2px 14px rgba(244,143,177,0.08)">
+            <p style="font-weight:800;color:#1e293b;margin-bottom:10px;font-size:14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;font-size:11px;font-weight:900;margin-right:6px">3</span>Monitor Top-3 Panel</p>
+            <p style="color:#64748b;font-size:12px;line-height:1.75">While voting is open, the <strong>Current Top 3</strong> panel (gold / silver / bronze cards) updates live in the Raffle tab whenever you reload it.<br><br>
+            Use this to watch for surges or ties before closing. The leaderboard below shows all nominees with vote counts in descending order.<br><br>
+            Nominee cards on the public vote page are numbered <strong>1–</strong>N so delegates can easily reference who they're voting for.</p>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.92);border-radius:12px;padding:22px;border:1px solid rgba(244,143,177,0.18);box-shadow:0 2px 14px rgba(244,143,177,0.08)">
+            <p style="font-weight:800;color:#1e293b;margin-bottom:10px;font-size:14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;font-size:11px;font-weight:900;margin-right:6px">4</span>Close Voting</p>
+            <p style="color:#64748b;font-size:12px;line-height:1.75">When the voting window ends, tap <strong>🔒 Close Voting</strong> in the Raffle tab.<br><br>
+            The <code style="background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:11px">/raffle</code> entry page will show a <em>Voting Closed</em> status badge and prevent new votes.<br><br>
+            The leaderboard remains visible to you — final rankings are locked in at this point.</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,165,0,0.08));border-radius:12px;padding:22px;border:1px solid rgba(255,165,0,0.25);box-shadow:0 2px 14px rgba(255,165,0,0.08)">
+            <p style="font-weight:800;color:#b45309;margin-bottom:10px;font-size:14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:white;font-size:11px;font-weight:900;margin-right:6px">5</span>Reveal Winners 🏆</p>
+            <p style="color:#64748b;font-size:12px;line-height:1.75">Tap <strong>🏆 Reveal Winners</strong>. This locks the top-3 result and sets the game state to <em>reveal_ready</em>.<br><br>
+            <strong>What happens next:</strong><br>
+            • The <code style="background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:11px">/raffle/reveal</code> page fires confetti, emoji floaters, a gold flash, and staggered podium animations<br>
+            • The <code style="background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:11px">/raffle</code> entry page auto-redirects to the reveal page after 2 seconds<br>
+            • The home page raffle section colours up from greyscale to gold/silver/bronze<br><br>
+            Ideal moment: project the reveal URL on the main screen, then tap Reveal.</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(239,68,68,0.06),rgba(249,115,22,0.06));border-radius:12px;padding:22px;border:1px solid rgba(239,68,68,0.2);box-shadow:0 2px 14px rgba(239,68,68,0.06)">
+            <p style="font-weight:800;color:#b91c1c;margin-bottom:10px;font-size:14px"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#fca5a5,#fde68a);color:#b91c1c;font-size:11px;font-weight:900;margin-right:6px">6</span>Reset Raffle (New Round)</p>
+            <p style="color:#64748b;font-size:12px;line-height:1.75">After the ceremony, tap <strong>🗑️ Reset Raffle</strong> to clear all votes, nominees, and winners — ready for a fresh round.<br><br>
+            <strong>Warning:</strong> This action is permanent. All vote data is wiped. Only reset when the awards have been presented and you're sure no further tallying is needed.<br><br>
+            After reset the game status returns to <em>Closed</em> and all public pages show the default greyscale podium placeholder.</p>
+          </div>
+
         </div>
       </div>
 
