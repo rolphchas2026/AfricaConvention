@@ -281,6 +281,7 @@
           <!-- Share bar -->
           <div class="pb-share-bar" style="background:linear-gradient(135deg,#1e293b,#334155);padding:14px 28px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;border-bottom:1px solid rgba(244,143,177,0.22)">
             <span style="font-size:11px;font-weight:700;color:rgba(244,143,177,0.9);text-transform:uppercase;letter-spacing:1.2px;flex-shrink:0">Share briefing:</span>
+            <button onclick="pbSaveToDevice()" id="pbSaveBtn" class="pb-share-btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white">&#128190; Save to Device</button>
             <button onclick="pbPrint()" class="pb-share-btn" style="background:white;color:#1e293b">&#128196; Save / Print PDF</button>
             <a href="https://wa.me/?text=Africa%20Convention%202026%20%E2%80%94%20Accommodation%20Packages.%20Early-bird%20savings%20up%20to%2040%25%20on%20hotel%20(Jun%2017%E2%80%9322%2C%20Arusha).%20Ordinary%20Single%20from%20%24525%20%C2%B7%20Double%20Single%20from%20%24615%20%C2%B7%20Suite%20VVIP%20from%20%241%2C290%20%C2%B7%20Double%20Suite%20from%20%24930.%20Book%20before%20May%2030%20for%2040%25%20off.%20Contact%3A%20%2B255%20787%20576%20900%20%7C%20wccm.tz%40gmail.com" target="_blank" rel="noopener" class="pb-share-btn" style="background:#25d366;color:white">&#128241; WhatsApp</a>
             <a href="mailto:?subject=Africa%20Convention%202026%20%E2%80%94%20Accommodation%20Package%20Pricing&body=Dear%20Guest%2C%0A%0AWe%20are%20pleased%20to%20share%20the%20accommodation%20pricing%20for%20Africa%20Convention%202026%20%E2%80%94%20June%2017%E2%80%9322%20in%20Arusha%2C%20Tanzania.%0A%0AOPTION%20B%20%E2%80%94%20Accommodation-Only%20Discount%20%2B%20Fixed%20Services%20%24240%0A%0AD-Tier%20(40%25%20off%2C%20before%20May%2030)%3A%0A%20%20Ordinary%20Single%3A%20%24525%20%7C%20Double%20Single%3A%20%24615%20%7C%20Triple%3A%20%24690%0A%20%20Suite%20VVIP%3A%20%241%2C290%20%7C%20Double%20Suite%3A%20%24930%0A%0AAll%20packages%20include%3A%205%20nights%20B%26B%20%2B%20Daily%20Lunch%20%2B%20Commute%20%2B%20Badge%20%2B%20Raffle%20Entry%0A%0AFor%20registration%20contact%3A%0A%2B255%20787%20576%20900%20%7C%20%2B255%20713%20276%20655%0Awccm.tz%40gmail.com%0A%0ABest%20regards%2C%0AAfrica%20Convention%202026%20Team" class="pb-share-btn" style="background:#4a90d9;color:white">&#9993; Email</a>
@@ -1861,6 +1862,72 @@
     c.style.display = open ? 'none' : 'block';
     a.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
     if (!open) { setTimeout(function(){ document.getElementById('pbBtn').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
+  }
+
+  function pbSaveToDevice() {
+    var c = document.getElementById('pbContent');
+    var a = document.getElementById('pbArrow');
+    if (c && c.style.display === 'none') {
+      c.style.display = 'block';
+      if (a) a.style.transform = 'rotate(180deg)';
+    }
+    var btn = document.getElementById('pbSaveBtn');
+    if (btn) { btn.innerHTML = '&#9203; Preparing…'; btn.disabled = true; }
+
+    var content = document.getElementById('pbContent').innerHTML;
+    var ts = new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+    var html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n'
+      + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n'
+      + '<title>Africa Convention 2026 — Pricing Strategy Briefing</title>\n'
+      + '<style>\n'
+      + '*{margin:0;padding:0;box-sizing:border-box}\n'
+      + 'body{font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;background:#f1f5f9;color:#374151}\n'
+      + '.pb-share-bar,.pb-share-bar *{display:none!important}\n'
+      + 'table{width:100%;border-collapse:collapse;margin-top:8px;background:white;font-size:13px}\n'
+      + 'th{background:linear-gradient(135deg,#fce4ec,#e8eaf6);color:#374151;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:9px 13px;text-align:left}\n'
+      + 'td{padding:9px 13px;border-bottom:1px solid rgba(0,0,0,0.06)}\n'
+      + 'tr:nth-child(even) td{background:rgba(244,143,177,0.04)}\n'
+      + 'h2,h3{margin:18px 0 10px}\n'
+      + 'p{line-height:1.7}\n'
+      + '@media print{body{background:white}.doc-footer{display:none}}\n'
+      + '</style>\n</head>\n<body>\n'
+      + '<div style="max-width:920px;margin:0 auto;background:white;box-shadow:0 0 40px rgba(0,0,0,0.1)">\n'
+
+      /* ── Document header ── */
+      + '<div style="background:linear-gradient(135deg,#1e293b,#334155);color:white;padding:28px 32px;border-bottom:4px solid #f48fb1">\n'
+      + '<div style="font-size:10px;color:rgba(244,143,177,0.85);text-transform:uppercase;letter-spacing:1.8px;margin-bottom:10px">Internal Committee Document · Africa Convention 2026</div>\n'
+      + '<h1 style="font-size:22px;font-weight:900;margin-bottom:6px">💰 Pricing Strategy — Committee Briefing &amp; Recommendation</h1>\n'
+      + '<p style="font-size:12px;color:rgba(255,255,255,0.72)">Option A vs B · Equal-interval early-bird tiers · 10% hotel retention fee analysis</p>\n'
+      + '<div style="margin-top:14px;display:flex;gap:18px;flex-wrap:wrap">\n'
+      + '<span style="font-size:11px;color:rgba(255,255,255,0.55)">🗓 Downloaded: ' + ts + '</span>\n'
+      + '<span style="font-size:11px;color:rgba(255,255,255,0.55)">🌍 Convention: June 18–22, 2026 · Arusha, Tanzania</span>\n'
+      + '</div>\n</div>\n'
+
+      /* ── Briefing body ── */
+      + '<div style="padding:0">' + content + '</div>\n'
+
+      /* ── Document footer ── */
+      + '<div class="doc-footer" style="background:#f8fafc;border-top:1px solid rgba(244,143,177,0.2);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">\n'
+      + '<span style="font-size:11px;color:#94a3b8">© Faith&amp;Will Logi-Tec Solutions · Designed by LEAD ICT ENG. RAPHAEL CHARLES MSESI</span>\n'
+      + '<span style="font-size:11px;color:#94a3b8">raphayelchas@gmail.com · +255 743 868 755</span>\n'
+      + '</div>\n'
+      + '</div>\n</body>\n</html>';
+
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'Africa-Convention-2026-Pricing-Briefing.html';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 8000);
+
+    if (btn) {
+      btn.innerHTML = '✓ Saved!';
+      setTimeout(function(){ btn.innerHTML = '&#128190; Save to Device'; btn.disabled = false; }, 2500);
+    }
   }
 
   function pbPrint() {
