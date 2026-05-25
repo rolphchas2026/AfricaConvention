@@ -721,13 +721,13 @@ app.get('/', (req, res) => {
   </div>
 
   <!-- ── Raffle Game Showcase ── -->
-  <section id="raffle-showcase" style="padding:56px 24px 48px;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);position:relative;overflow:hidden">
+  <section id="raffle-showcase" style="padding:56px 24px 48px;background:linear-gradient(160deg,#fff0f6 0%,#fdf4ff 60%,#f0f9ff 100%);position:relative;overflow:hidden">
     <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(244,143,177,0.08),transparent);pointer-events:none"></div>
     <div style="max-width:900px;margin:0 auto;position:relative">
       <div style="text-align:center;margin-bottom:36px">
-        <p style="font-size:11px;font-weight:800;letter-spacing:3px;color:rgba(244,143,177,0.7);text-transform:uppercase;margin-bottom:10px">Convention Game</p>
+        <p style="font-size:11px;font-weight:800;letter-spacing:3px;color:#db2777;text-transform:uppercase;margin-bottom:10px">Convention Game</p>
         <h2 style="font-size:30px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px">🎰 Raffle &amp; Nominations</h2>
-        <p style="color:rgba(200,160,255,0.65);font-size:14px">Nominate a fellow delegate — top 3 most nominated win an organiser gift</p>
+        <p style="color:#7c3aed;font-size:14px">Nominate a fellow delegate — top 3 most nominated win an organiser gift</p>
       </div>
       <!-- Winners Podium -->
       <div style="max-width:520px;margin:0 auto 28px">
@@ -736,41 +736,41 @@ app.get('/', (req, res) => {
           <div style="display:flex;flex-direction:column;align-items:center;flex:1">
             <div id="hpAv2" style="width:58px;height:58px;border-radius:50%;background:rgba(100,116,139,0.14);border:2px solid rgba(100,116,139,0.18);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;filter:grayscale(1);transition:filter 0.7s,background 0.7s,border-color 0.7s">&#129352;</div>
             <div id="hpNm2" style="font-size:11px;font-weight:700;color:rgba(100,116,139,0.38);text-align:center;min-height:34px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:5px;padding:0 3px;transition:color 0.7s">—</div>
-            <div id="hpVt2" style="font-size:10px;color:rgba(200,160,255,0.3);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
+            <div id="hpVt2" style="font-size:10px;color:rgba(124,58,237,0.4);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
             <div id="hpBk2" style="width:100%;height:72px;border-radius:10px 10px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-size:20px;background:rgba(100,116,139,0.07);border:1px solid rgba(100,116,139,0.11);transition:background 0.7s,border-color 0.7s">&#129352;</div>
           </div>
           <!-- 1st place — center tallest -->
           <div style="display:flex;flex-direction:column;align-items:center;flex:1">
             <div id="hpAv1" style="width:72px;height:72px;border-radius:50%;background:rgba(100,116,139,0.14);border:2px solid rgba(100,116,139,0.18);display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:8px;filter:grayscale(1);transition:filter 0.7s,background 0.7s,border-color 0.7s">&#129351;</div>
             <div id="hpNm1" style="font-size:13px;font-weight:800;color:rgba(100,116,139,0.38);text-align:center;min-height:38px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:5px;padding:0 3px;transition:color 0.7s">—</div>
-            <div id="hpVt1" style="font-size:11px;color:rgba(200,160,255,0.3);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
+            <div id="hpVt1" style="font-size:11px;color:rgba(124,58,237,0.4);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
             <div id="hpBk1" style="width:100%;height:106px;border-radius:10px 10px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-size:24px;background:rgba(100,116,139,0.07);border:1px solid rgba(100,116,139,0.11);transition:background 0.7s,border-color 0.7s">&#129351;</div>
           </div>
           <!-- 3rd place — right shortest -->
           <div style="display:flex;flex-direction:column;align-items:center;flex:1">
             <div id="hpAv3" style="width:50px;height:50px;border-radius:50%;background:rgba(100,116,139,0.14);border:2px solid rgba(100,116,139,0.18);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:8px;filter:grayscale(1);transition:filter 0.7s,background 0.7s,border-color 0.7s">&#129353;</div>
             <div id="hpNm3" style="font-size:11px;font-weight:700;color:rgba(100,116,139,0.38);text-align:center;min-height:34px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3;margin-bottom:5px;padding:0 3px;transition:color 0.7s">—</div>
-            <div id="hpVt3" style="font-size:10px;color:rgba(200,160,255,0.3);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
+            <div id="hpVt3" style="font-size:10px;color:rgba(124,58,237,0.4);min-height:14px;margin-bottom:6px;transition:color 0.7s"></div>
             <div id="hpBk3" style="width:100%;height:56px;border-radius:10px 10px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-size:18px;background:rgba(100,116,139,0.07);border:1px solid rgba(100,116,139,0.11);transition:background 0.7s,border-color 0.7s">&#129353;</div>
           </div>
         </div>
-        <p id="hpLabel" style="text-align:center;font-size:10px;color:rgba(100,116,139,0.38);margin-top:12px;letter-spacing:1.5px;text-transform:uppercase">Winners Podium &middot; Revealed when voting closes</p>
-        <p id="hpTotal" style="text-align:center;font-size:11px;color:rgba(200,160,255,0.3);margin-top:5px"></p>
+        <p id="hpLabel" style="text-align:center;font-size:10px;color:rgba(100,116,139,0.6);margin-top:12px;letter-spacing:1.5px;text-transform:uppercase">Winners Podium &middot; Revealed when voting closes</p>
+        <p id="hpTotal" style="text-align:center;font-size:11px;color:rgba(124,58,237,0.45);margin-top:5px"></p>
       </div>
       <!-- Entry CTA -->
-      <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(200,160,255,0.14);border-radius:20px;padding:28px 32px">
+      <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:center;justify-content:center;background:rgba(255,255,255,0.78);border:1px solid rgba(244,143,177,0.28);border-radius:20px;padding:28px 32px;box-shadow:0 4px 24px rgba(244,143,177,0.14)">
         <div style="text-align:center;flex-shrink:0">
           <div style="width:156px;height:156px;border-radius:14px;overflow:hidden;border:2px solid rgba(244,143,177,0.35);margin:0 auto 10px;background:white">
             <img src="/sysimages/QR/https_africa-convention_vercel_app_raffle.png" alt="Scan to play raffle" style="width:100%;height:100%;object-fit:contain;display:block">
           </div>
-          <p style="font-size:11px;color:rgba(200,160,255,0.5)">Scan to play</p>
+          <p style="font-size:11px;color:#9333ea">Scan to play</p>
         </div>
         <div style="flex:1;min-width:220px;text-align:center">
-          <h3 style="font-size:20px;font-weight:800;color:white;margin-bottom:10px">Ready to Nominate?</h3>
-          <p style="font-size:13px;color:rgba(200,160,255,0.65);margin-bottom:20px;line-height:1.7">Scan your delegate badge QR at the convention floor, or enter your Ticket ID to nominate a fellow delegate for an organiser gift.</p>
+          <h3 style="font-size:20px;font-weight:800;color:#1e293b;margin-bottom:10px">Ready to Nominate?</h3>
+          <p style="font-size:13px;color:#64748b;margin-bottom:20px;line-height:1.7">Scan your delegate badge QR at the convention floor, or enter your Ticket ID to nominate a fellow delegate for an organiser gift.</p>
           <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
             <a href="/raffle" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:linear-gradient(135deg,#f48fb1,#ce93d8);color:white;text-decoration:none;border-radius:12px;font-size:14px;font-weight:700">&#128247; Scan QR &amp; Play</a>
-            <a href="/raffle" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:rgba(255,255,255,0.08);color:rgba(240,220,255,0.85);text-decoration:none;border-radius:12px;font-size:14px;font-weight:600;border:1px solid rgba(200,160,255,0.22)">&#127915; Enter Ticket ID</a>
+            <a href="/raffle" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:rgba(244,143,177,0.1);color:#9333ea;text-decoration:none;border-radius:12px;font-size:14px;font-weight:600;border:1px solid rgba(200,160,255,0.35)">&#127915; Enter Ticket ID</a>
           </div>
         </div>
       </div>
@@ -865,13 +865,13 @@ app.get('/', (req, res) => {
           var delay = (si * 0.4) + 's';
           if (av) { av.style.cssText += ';filter:none;background:'+slot.avBg+';border-color:'+slot.avBr+';animation:rws-medal-bounce 1.5s '+delay+' ease-in-out infinite'; }
           if (nm) { nm.style.color = slot.nmCol; nm.textContent = w.name; }
-          if (vt) { vt.style.color = 'rgba(200,160,255,0.62)'; vt.textContent = w.votes + ' votes'; }
+          if (vt) { vt.style.color = '#7c3aed'; vt.textContent = w.votes + ' votes'; }
           if (bk) { bk.style.background = slot.bkBg; bk.style.borderColor = slot.bkBr; if (slot.pulse) bk.style.animation = slot.pulse + ' 2.2s ease-in-out infinite'; }
         });
         var hpLbl = document.getElementById('hpLabel');
         var hpTot = document.getElementById('hpTotal');
-        if (hpLbl) { hpLbl.textContent = 'Convention Winners'; hpLbl.style.color = 'rgba(255,215,0,0.55)'; }
-        if (hpTot) { hpTot.textContent = 'Total votes cast: ' + d.total_votes; hpTot.style.color = 'rgba(200,160,255,0.5)'; }
+        if (hpLbl) { hpLbl.textContent = 'Convention Winners'; hpLbl.style.color = '#d97706'; }
+        if (hpTot) { hpTot.textContent = 'Total votes cast: ' + d.total_votes; hpTot.style.color = '#7c3aed'; }
 
         var section = document.getElementById('raffle-showcase');
         if(section) spawnCelebration(section);
