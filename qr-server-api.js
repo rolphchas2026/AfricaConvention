@@ -69,9 +69,12 @@ app.use('/sysimages', express.static(imagesPath));
 app.use('/documentation', express.static(docsPath));
 
 // ── MAINTENANCE PAGE ────────────────────────────────────────────────────────
-// Set  MAINTENANCE_MODE=true  in Vercel env vars to activate.
-// Remove (or set to false) to bring the site back live.
-// /sysimages and /documentation bypass this so the page can load its assets.
+// Toggle via Admin Dashboard header button, or:
+//   GET /api/admin/maintenance/on?key=Africa2026!   ← activates
+//   GET /api/admin/maintenance/off?key=Africa2026!  ← deactivates
+// Env var override: MAINTENANCE_MODE=true (Vercel env vars) forces it on regardless.
+// Admin routes (/admin, /api/admin-*) always bypass so you are never locked out.
+
 const MAINTENANCE_HTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,34 +84,31 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
   <link rel="icon" type="image/svg+xml" href="/sysimages/favicon.svg">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#1e0a2e 0%,#2d1040 50%,#1a0a28 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px 48px;overflow:hidden;position:relative}
-    .bg-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 40% at 50% 18%,rgba(244,143,177,0.09),transparent),radial-gradient(ellipse 50% 50% at 80% 82%,rgba(206,147,216,0.07),transparent);pointer-events:none}
-    .orb{position:absolute;border-radius:50%;filter:blur(50px);opacity:0.13;animation:orb-float ease-in-out infinite}
-    @keyframes orb-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.07)}}
-    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(200,160,255,0.14);border-radius:24px;padding:44px 36px;max-width:500px;width:100%;text-align:center;position:relative;z-index:10;backdrop-filter:blur(14px)}
-    .icon-wrap{font-size:58px;margin-bottom:14px;display:inline-block;animation:icon-pulse 2.8s ease-in-out infinite}
-    @keyframes icon-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
-    .eyebrow{font-size:11px;font-weight:800;letter-spacing:3px;color:rgba(244,143,177,0.62);text-transform:uppercase;margin-bottom:10px}
-    h1{font-size:28px;font-weight:900;background:linear-gradient(135deg,#ffd700,#f48fb1,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;line-height:1.25}
-    .subtitle{font-size:14px;color:rgba(200,160,255,0.68);line-height:1.75;margin-bottom:28px}
-    .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(200,160,255,0.18),transparent);margin:24px 0}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#fff0f6 0%,#fdf4ff 60%,#f0f9ff 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px 48px;overflow:hidden;position:relative}
+    .bg-orb{position:absolute;border-radius:50%;filter:blur(72px);pointer-events:none}
+    .card{background:white;border:1.5px solid rgba(233,30,99,0.15);border-radius:24px;padding:48px 40px;max-width:520px;width:100%;text-align:center;position:relative;z-index:10;box-shadow:0 24px 80px rgba(233,30,99,0.09),0 4px 24px rgba(168,85,247,0.07)}
+    .icon-wrap{font-size:64px;margin-bottom:16px;display:inline-block;animation:pulse 2.8s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+    .eyebrow{font-size:11px;font-weight:800;letter-spacing:3px;color:#db2777;text-transform:uppercase;margin-bottom:10px}
+    h1{font-size:30px;font-weight:900;background:linear-gradient(135deg,#e91e63,#ba68c8,#29b6f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;line-height:1.25}
+    .subtitle{font-size:14px;color:#64748b;line-height:1.75;margin-bottom:28px}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(233,30,99,0.2),transparent);margin:24px 0}
     .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px}
-    .chip{background:rgba(255,255,255,0.055);border:1px solid rgba(200,160,255,0.13);border-radius:10px;padding:10px 15px;font-size:13px;color:rgba(220,200,255,0.8);line-height:1.4}
-    .chip strong{display:block;font-size:10px;font-weight:800;color:rgba(244,143,177,0.58);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
-    .wa-btn{display:inline-flex;align-items:center;gap:9px;padding:13px 26px;background:linear-gradient(135deg,rgba(244,143,177,0.14),rgba(206,147,216,0.09));border:1px solid rgba(244,143,177,0.24);border-radius:13px;color:rgba(240,220,255,0.85);text-decoration:none;font-size:14px;font-weight:600;transition:all 0.22s}
-    .wa-btn:hover{background:linear-gradient(135deg,rgba(244,143,177,0.22),rgba(206,147,216,0.16));border-color:rgba(244,143,177,0.4)}
-    .progress-bar{width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-top:28px}
-    .progress-fill{height:100%;width:38%;background:linear-gradient(90deg,#f48fb1,#ce93d8,#f48fb1);background-size:200% 100%;border-radius:2px;animation:shimmer 2.2s linear infinite}
+    .chip{background:linear-gradient(135deg,#fff0f6,#f3e8ff);border:1px solid rgba(233,30,99,0.14);border-radius:10px;padding:10px 15px;font-size:13px;color:#374151;line-height:1.4}
+    .chip strong{display:block;font-size:10px;font-weight:800;color:#db2777;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+    .wa-btn{display:inline-flex;align-items:center;gap:9px;padding:13px 26px;background:linear-gradient(135deg,#fce4ec,#e8d5f5);border:1.5px solid rgba(233,30,99,0.2);border-radius:13px;color:#7c3aed;text-decoration:none;font-size:14px;font-weight:700;transition:all 0.22s}
+    .wa-btn:hover{background:linear-gradient(135deg,#f8bbd0,#e1bee7);border-color:rgba(233,30,99,0.35);transform:translateY(-2px);box-shadow:0 8px 24px rgba(233,30,99,0.15)}
+    .progress-bar{width:100%;height:3px;background:rgba(233,30,99,0.1);border-radius:2px;overflow:hidden;margin-top:28px}
+    .progress-fill{height:100%;width:38%;background:linear-gradient(90deg,#e91e63,#ba68c8,#e91e63);background-size:200% 100%;border-radius:2px;animation:shimmer 2.2s linear infinite}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    footer{margin-top:28px;font-size:7px;font-style:italic;color:rgba(100,116,139,0.42);text-align:center;position:relative;z-index:10}
+    footer{margin-top:28px;font-size:7px;font-style:italic;color:#94a3b8;text-align:center;position:relative;z-index:10}
     @media(max-width:480px){.card{padding:36px 22px}h1{font-size:24px}.chips{flex-direction:column;align-items:center}}
   </style>
 </head>
 <body>
-  <div class="bg-glow"></div>
-  <div class="orb" style="width:320px;height:320px;background:#ce93d8;top:-120px;left:-90px;animation-duration:9s"></div>
-  <div class="orb" style="width:220px;height:220px;background:#f48fb1;bottom:-70px;right:-50px;animation-duration:12s;animation-delay:-5s"></div>
-  <div class="orb" style="width:150px;height:150px;background:#ffd700;top:40%;left:80%;animation-duration:7s;animation-delay:-2s"></div>
+  <div class="bg-orb" style="width:420px;height:420px;background:#fce4ec;top:-160px;left:-130px;opacity:0.55"></div>
+  <div class="bg-orb" style="width:300px;height:300px;background:#e8d5f5;bottom:-100px;right:-80px;opacity:0.45"></div>
+  <div class="bg-orb" style="width:200px;height:200px;background:#bfdbfe;top:52%;left:76%;opacity:0.38"></div>
 
   <div class="card">
     <div class="icon-wrap">🎪</div>
@@ -116,18 +116,18 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
     <h1>We'll Be Back<br>Shortly</h1>
     <p class="subtitle">
       Our portal is currently undergoing scheduled maintenance.<br>
-      We're making things better — please check back soon.
+      We&rsquo;re making things better &mdash; please check back soon.
     </p>
 
     <div class="chips">
-      <div class="chip"><strong>Dates</strong>June 18 – 22, 2026</div>
+      <div class="chip"><strong>Dates</strong>June 18 &ndash; 22, 2026</div>
       <div class="chip"><strong>Venue</strong>Arusha, Tanzania</div>
       <div class="chip"><strong>Theme</strong>Doing Business &amp; Bearing Fruitful</div>
     </div>
 
     <div class="divider"></div>
 
-    <p style="font-size:13px;color:rgba(200,160,255,0.5);margin-bottom:16px">Need urgent assistance?</p>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:16px">Need urgent assistance?</p>
     <a href="https://wa.me/+255787576900?text=Hi%2C%20I%20am%20trying%20to%20access%20the%20Africa%20Convention%20portal." class="wa-btn">
       &#128172; WhatsApp Us &nbsp;&middot;&nbsp; +255 787 576 900
     </a>
@@ -139,8 +139,26 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
-app.use((req, res, next) => {
-  if (process.env.MAINTENANCE_MODE !== 'true') return next();
+// In-memory cache (6-second TTL) so every request doesn't hit the DB
+let _maintCache = { on: false, ts: 0 };
+async function isMaintenanceMode() {
+  if (process.env.MAINTENANCE_MODE === 'true') return true;
+  if (!pool) return false;
+  const now = Date.now();
+  if (now - _maintCache.ts < 6000) return _maintCache.on;
+  try {
+    const r = await pool.query('SELECT maintenance_mode FROM raffle_settings WHERE id=1');
+    _maintCache = { on: !!r.rows[0]?.maintenance_mode, ts: now };
+    return _maintCache.on;
+  } catch { return _maintCache.on; }
+}
+
+const _maintBypass = ['/admin', '/admin-login', '/api/admin-login', '/api/admin-logout', '/api/health', '/api/admin/maintenance'];
+app.use(async (req, res, next) => {
+  const p = req.path;
+  if (_maintBypass.some(b => p === b || p.startsWith(b + '/')) || p.startsWith('/sysimages') || p.startsWith('/documentation')) return next();
+  const maint = await isMaintenanceMode();
+  if (!maint) return next();
   res.status(503).set('Retry-After', '3600').send(MAINTENANCE_HTML);
 });
 // ── /MAINTENANCE PAGE ───────────────────────────────────────────────────────
@@ -249,6 +267,7 @@ async function initializeDatabase() {
         )
       `);
       await pool.query(`INSERT INTO raffle_settings (id, voting_open, reveal_ready) VALUES (1, false, false) ON CONFLICT (id) DO NOTHING`);
+      await pool.query(`ALTER TABLE raffle_settings ADD COLUMN IF NOT EXISTS maintenance_mode BOOLEAN DEFAULT false`);
 
       console.log('✅ Database dynamic storage schemas verified and ready');
       return true;
@@ -2152,6 +2171,43 @@ app.post('/api/send-badge/:ticket_id', async (req, res) => {
     await pool.query('UPDATE attendees SET badge_sent=true, badge_generated=true WHERE ticket_id=$1', [a.ticket_id]);
     res.json({ success: true, sent_to: a.email });
   } catch (e) { res.json({ success: false, error: e.message }); }
+});
+
+// ── Maintenance toggle endpoints ──────────────────────────────────────────────
+
+// GET status (admin dashboard polls this)
+app.get('/api/admin/maintenance', async (req, res) => {
+  const cookies = parseCookies(req);
+  if (!verifyAdminToken(cookies.admin_token)) return res.status(401).json({ error: 'Not authorized' });
+  _maintCache.ts = 0;
+  res.json({ maintenance: await isMaintenanceMode() });
+});
+
+// POST toggle (admin dashboard button)
+app.post('/api/admin/maintenance', async (req, res) => {
+  const cookies = parseCookies(req);
+  if (!verifyAdminToken(cookies.admin_token)) return res.status(401).json({ error: 'Not authorized' });
+  if (!pool) return res.json({ success: false, error: 'DB not ready' });
+  const { enabled } = req.body;
+  try {
+    await pool.query('UPDATE raffle_settings SET maintenance_mode=$1 WHERE id=1', [!!enabled]);
+    _maintCache = { on: !!enabled, ts: Date.now() };
+    res.json({ success: true, maintenance: !!enabled });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// One-tap GET links — usable from mobile browser (password in query param)
+// ON:  /api/admin/maintenance/on?key=Africa2026!
+// OFF: /api/admin/maintenance/off?key=Africa2026!
+app.get('/api/admin/maintenance/:action(on|off)', async (req, res) => {
+  if (req.query.key !== ADMIN_PASSWORD) return res.status(401).send('Unauthorized');
+  if (!pool) return res.status(503).send('DB not ready');
+  const enable = req.params.action === 'on';
+  try {
+    await pool.query('UPDATE raffle_settings SET maintenance_mode=$1 WHERE id=1', [enable]);
+    _maintCache = { on: enable, ts: Date.now() };
+    res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:linear-gradient(160deg,#fff0f6,#fdf4ff);flex-direction:column;gap:16px}</style></head><body><div style="font-size:56px">${enable ? '🔴' : '🟢'}</div><h2 style="color:#1e293b;font-weight:900;margin:0">Maintenance Mode ${enable ? 'ON' : 'OFF'}</h2><p style="color:#64748b;margin:0">Africa Convention 2026</p><a href="/admin" style="margin-top:12px;color:#e91e63;font-weight:700;text-decoration:none">→ Go to Admin Dashboard</a></body></html>`);
+  } catch(e) { res.status(500).send('Error: ' + e.message); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
