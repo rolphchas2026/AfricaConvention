@@ -331,33 +331,37 @@ async function generateBadgePDF(a) {
       if (a.photo) {
         try {
           const photoBuf = Buffer.from(a.photo.replace(/^data:[^;]+;base64,/, ''), 'base64');
-          const cx = W / 2, cy = 168, r = 32;
-          doc.circle(cx, cy, r + 4).fill('#fce4ec');
-          doc.circle(cx, cy, r + 2).fill('white');
+          const cx = W / 2, cy = 182, r = 40;
+          // Outer glow ring
+          doc.circle(cx, cy, r + 6).fill('#fce4ec');
+          // White border ring
+          doc.circle(cx, cy, r + 3).fill('white');
+          // Clip and draw photo
           doc.save();
           doc.circle(cx, cy, r).clip();
           doc.image(photoBuf, cx - r, cy - r, { width: r * 2, height: r * 2 });
           doc.restore();
-          doc.circle(cx, cy, r + 1).strokeColor(accent).lineWidth(2).stroke();
-          nameY = 212;
+          // Accent colour ring
+          doc.circle(cx, cy, r + 1.5).strokeColor(accent).lineWidth(3).stroke();
+          nameY = 238;
         } catch (_) { nameY = 140; }
       }
 
       // ── Delegate name ─────────────────────────────────────────────────────────
-      const nameSize = a.name.length > 22 ? 20 : 24;
+      const nameSize = a.name.length > 22 ? 19 : 23;
       doc.font('Helvetica-Bold').fontSize(nameSize).fillColor('#1e293b')
         .text(a.name, 20, nameY, { align: 'center', width: W - 40 });
 
-      let yPos = nameY + nameSize + 8;
+      let yPos = nameY + nameSize + 7;
       if (a.title) {
         doc.font('Helvetica').fontSize(11).fillColor('#64748b')
           .text(a.title, 20, yPos, { align: 'center', width: W - 40 });
-        yPos += 17;
+        yPos += 16;
       }
       if (a.organization) {
         doc.font('Helvetica-Bold').fontSize(11).fillColor('#e91e63')
           .text(a.organization, 20, yPos, { align: 'center', width: W - 40 });
-        yPos += 17;
+        yPos += 16;
       }
       if (a.accommodation_type && a.accommodation_type !== '') {
         doc.font('Helvetica').fontSize(8).fillColor('#7c3aed')
@@ -367,9 +371,9 @@ async function generateBadgePDF(a) {
 
       // ── QR Code — blush-bordered ──────────────────────────────────────────────
       const qrBuf = Buffer.from(qrDataURL.split(',')[1], 'base64');
-      const qrSize = 140;
+      const qrSize = a.photo ? 130 : 140;
       const qrX = (W - qrSize) / 2;
-      const qrY = Math.max(yPos + 14, a.photo ? 270 : 232);
+      const qrY = Math.max(yPos + 14, a.photo ? 308 : 232);
       doc.roundedRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 8).fill('#fce4ec');
       doc.rect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10).fill('white');
       doc.image(qrBuf, qrX, qrY, { width: qrSize, height: qrSize });
@@ -859,20 +863,42 @@ app.get('/', (req, res) => {
         <input type="text" id="title" placeholder="Your title">
       </div>
       <div class="form-group">
-        <label>Delegate Photo <span style="font-weight:400;font-size:12px;color:#94a3b8">(JPG/PNG &mdash; appears on your ID badge)</span></label>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-top:6px">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" style="font-size:13px;padding:6px 4px;border:1.5px solid rgba(244,143,177,0.4);border-radius:8px;background:#fff" onchange="previewPhoto(this)">
-            <button type="button" onclick="toggleCamera()" style="font-size:13px;padding:9px 18px;background:linear-gradient(135deg,#fce4ec,#e8d5f5);color:#7c3aed;border:1.5px solid rgba(124,58,237,0.25);border-radius:10px;cursor:pointer;font-weight:600">📷 Use Selfie Camera</button>
+        <label style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:4px;display:block">Delegate Photo <span style="font-weight:400;font-size:12px;color:#94a3b8;margin-left:4px">Photo prints on your ID badge</span></label>
+        <input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewPhoto(this)">
+        <canvas id="photoCanvas" style="display:none"></canvas>
+
+        <!-- Upload zone (default state) -->
+        <div id="photoUploadZone" style="border:2px dashed rgba(233,30,99,0.28);border-radius:18px;padding:28px 20px;text-align:center;background:linear-gradient(160deg,#fff0f6,#fdf4ff);cursor:pointer;transition:all 0.2s" onclick="document.getElementById('photoFile').click()" onmouseenter="this.style.borderColor='#e91e63';this.style.background='linear-gradient(160deg,#fce4ec,#f3e8ff)'" onmouseleave="this.style.borderColor='rgba(233,30,99,0.28)';this.style.background='linear-gradient(160deg,#fff0f6,#fdf4ff)'">
+          <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#fce4ec,#e8d5f5);border:2px dashed rgba(233,30,99,0.3);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 14px">🧑‍💼</div>
+          <p style="font-size:14px;font-weight:700;color:#374151;margin:0 0 4px">Click to upload your photo</p>
+          <p style="font-size:12px;color:#94a3b8;margin:0 0 16px">JPG &nbsp;·&nbsp; PNG &nbsp;·&nbsp; WebP</p>
+          <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap" onclick="event.stopPropagation()">
+            <button type="button" onclick="document.getElementById('photoFile').click()" style="font-size:13px;padding:9px 20px;background:linear-gradient(135deg,#e91e63,#ba68c8);color:white;border:none;border-radius:25px;cursor:pointer;font-weight:700;box-shadow:0 4px 14px rgba(233,30,99,0.28);transition:all 0.2s">⬆ Upload Photo</button>
+            <button type="button" onclick="toggleCamera()" style="font-size:13px;padding:9px 20px;background:white;color:#7c3aed;border:1.5px solid rgba(124,58,237,0.3);border-radius:25px;cursor:pointer;font-weight:700;transition:all 0.2s">📷 Open Camera</button>
           </div>
-          <div id="regCameraBox" style="display:none;flex-direction:column;align-items:center;gap:8px">
-            <video id="selfieVideo" autoplay playsinline style="width:160px;height:160px;border-radius:50%;object-fit:cover;border:3px solid #e91e63"></video>
-            <canvas id="photoCanvas" style="display:none"></canvas>
-            <button type="button" onclick="capturePhoto()" style="font-size:13px;padding:8px 20px;background:linear-gradient(135deg,#e91e63,#ba68c8);color:white;border:none;border-radius:10px;cursor:pointer;font-weight:600">📸 Capture</button>
+        </div>
+
+        <!-- Camera live view -->
+        <div id="regCameraBox" style="display:none;flex-direction:column;align-items:center;gap:12px;border:2px solid rgba(233,30,99,0.3);border-radius:18px;padding:24px;background:linear-gradient(160deg,#fff0f6,#fdf4ff)">
+          <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1.2px;margin:0">Live Camera</p>
+          <video id="selfieVideo" autoplay playsinline style="width:180px;height:180px;border-radius:50%;object-fit:cover;border:4px solid #e91e63;box-shadow:0 0 0 4px rgba(233,30,99,0.12)"></video>
+          <div style="display:flex;gap:10px">
+            <button type="button" onclick="capturePhoto()" style="font-size:13px;padding:10px 24px;background:linear-gradient(135deg,#e91e63,#ba68c8);color:white;border:none;border-radius:25px;cursor:pointer;font-weight:700;box-shadow:0 4px 14px rgba(233,30,99,0.28)">📸 Capture</button>
+            <button type="button" onclick="stopRegCamera()" style="font-size:13px;padding:10px 18px;background:white;color:#94a3b8;border:1.5px solid rgba(148,163,184,0.3);border-radius:25px;cursor:pointer;font-weight:600">✕ Cancel</button>
           </div>
-          <div id="regPhotoPreview" style="display:none;flex-direction:column;align-items:center;gap:6px">
-            <img id="regPhotoImg" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #e91e63" alt="Photo preview">
-            <button type="button" onclick="clearRegPhoto()" style="font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:0">✕ Remove</button>
+        </div>
+
+        <!-- Photo preview state -->
+        <div id="regPhotoPreview" style="display:none;flex-direction:column;align-items:center;gap:10px;border:2px solid rgba(5,150,105,0.25);border-radius:18px;padding:24px;background:linear-gradient(160deg,#f0fdf4,#ecfdf5)">
+          <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1.2px;margin:0">Badge Photo Preview</p>
+          <div style="position:relative;display:inline-block">
+            <img id="regPhotoImg" style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:4px solid #e91e63;box-shadow:0 0 0 4px rgba(233,30,99,0.12),0 8px 28px rgba(233,30,99,0.18);display:block" alt="Delegate photo">
+            <div style="position:absolute;bottom:4px;right:4px;background:#059669;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid white">✓</div>
+          </div>
+          <p style="font-size:13px;font-weight:600;color:#059669;margin:0">Photo ready — will appear on your badge</p>
+          <div style="display:flex;gap:10px">
+            <button type="button" onclick="document.getElementById('photoFile').click()" style="font-size:13px;padding:9px 20px;background:white;color:#7c3aed;border:1.5px solid rgba(124,58,237,0.3);border-radius:25px;cursor:pointer;font-weight:700">🔄 Change Photo</button>
+            <button type="button" onclick="clearRegPhoto()" style="font-size:13px;padding:9px 18px;background:white;color:#94a3b8;border:1.5px solid rgba(148,163,184,0.3);border-radius:25px;cursor:pointer;font-weight:600">✕ Remove</button>
           </div>
         </div>
       </div>
@@ -1294,28 +1320,29 @@ app.get('/', (req, res) => {
     var _regPhotoData = null;
     var _regCameraStream = null;
 
+    function _photoState(state) {
+      document.getElementById('photoUploadZone').style.display = state === 'upload' ? 'block' : 'none';
+      document.getElementById('regCameraBox').style.display  = state === 'camera'  ? 'flex'  : 'none';
+      document.getElementById('regPhotoPreview').style.display = state === 'preview' ? 'flex'  : 'none';
+    }
     async function toggleCamera() {
-      var box = document.getElementById('regCameraBox');
-      if (box.style.display === 'none' || box.style.display === '') {
-        try {
-          _regCameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-          document.getElementById('selfieVideo').srcObject = _regCameraStream;
-          box.style.display = 'flex';
-        } catch(e) { alert('Camera access denied: ' + e.message); }
-      } else {
-        stopRegCamera();
-      }
+      try {
+        _regCameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        document.getElementById('selfieVideo').srcObject = _regCameraStream;
+        _photoState('camera');
+      } catch(e) { alert('Camera access denied: ' + e.message); }
     }
     function stopRegCamera() {
       if (_regCameraStream) { _regCameraStream.getTracks().forEach(function(t){ t.stop(); }); _regCameraStream = null; }
-      document.getElementById('regCameraBox').style.display = 'none';
+      _photoState(_regPhotoData ? 'preview' : 'upload');
     }
     function capturePhoto() {
       var video = document.getElementById('selfieVideo');
       var canvas = document.getElementById('photoCanvas');
       canvas.width = 400; canvas.height = 400;
-      canvas.getContext('2d').drawImage(video, 0, 0, 400, 400);
-      _regPhotoData = canvas.toDataURL('image/jpeg', 0.85);
+      var ctx = canvas.getContext('2d');
+      ctx.save(); ctx.scale(-1, 1); ctx.drawImage(video, -400, 0, 400, 400); ctx.restore();
+      _regPhotoData = canvas.toDataURL('image/jpeg', 0.88);
       showRegPhotoPreview(_regPhotoData);
       stopRegCamera();
     }
@@ -1328,12 +1355,12 @@ app.get('/', (req, res) => {
     }
     function showRegPhotoPreview(src) {
       document.getElementById('regPhotoImg').src = src;
-      document.getElementById('regPhotoPreview').style.display = 'flex';
+      _photoState('preview');
     }
     function clearRegPhoto() {
       _regPhotoData = null;
-      document.getElementById('regPhotoPreview').style.display = 'none';
       document.getElementById('photoFile').value = '';
+      _photoState('upload');
     }
 
     async function registerAttendee() {
