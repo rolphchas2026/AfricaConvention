@@ -418,7 +418,7 @@ app.get('/', (req, res) => {
     .hero-cta-outline:hover { background: rgba(255,255,255,0.95); border-color: rgba(240,98,146,0.65); transform: translateY(-3px); }
 
     .section { padding: 60px 40px; max-width: 1200px; margin: 0 auto; text-align: center; }
-    .section h2 { font-size: 36px; margin-bottom: 10px; color: #1e293b; text-shadow: none; }
+    .section h2 { font-size: 36px; font-weight: 800; margin-bottom: 10px; background: linear-gradient(135deg, #e91e63, #ba68c8, #29b6f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: none; line-height: 1.2; }
     .section p { font-size: 16px; margin-bottom: 40px; color: #64748b; }
     
     .gallery-section { position:relative; overflow:hidden; border-radius:32px; padding:80px 40px; margin:40px auto; background:linear-gradient(135deg,#fce4ec 0%,#e8eaf6 25%,#e3f2fd 55%,#fce4ec 80%,#e8eaf6 100%); box-shadow:0 0 0 1px rgba(244,143,177,0.22),0 25px 60px rgba(244,143,177,0.18),0 0 80px rgba(129,212,250,0.12); }
@@ -430,7 +430,7 @@ app.get('/', (req, res) => {
     .orb-5 { width:140px; height:140px; background:radial-gradient(circle,rgba(79,195,247,0.85),transparent 70%); bottom:18%; left:18%; animation-duration:8s; animation-delay:-4s; }
     @keyframes orbFloat { 0%,100%{transform:translate(0,0) scale(1);opacity:0.28} 33%{transform:translate(18px,-22px) scale(1.09);opacity:0.38} 66%{transform:translate(-12px,14px) scale(0.94);opacity:0.16} }
     .gallery-heading { position:relative; z-index:1; text-align:center; margin-bottom:48px; }
-    .gallery-heading h2 { font-size:44px; font-weight:800; color:#1e293b; text-shadow:0 0 30px rgba(244,143,177,0.5),0 2px 8px rgba(0,0,0,0.06); letter-spacing:0.02em; animation:glowPulse 3s ease-in-out infinite; margin-bottom:0; }
+    .gallery-heading h2 { font-size:44px; font-weight:800; background:linear-gradient(135deg,#e91e63,#ba68c8,#29b6f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; text-shadow:0 0 32px rgba(233,30,99,0.22); letter-spacing:0.02em; animation:glowPulse 3s ease-in-out infinite; margin-bottom:0; }
     .gallery-heading p { font-size:17px; color:#64748b; text-shadow:none; margin-top:12px; margin-bottom:0; }
     @keyframes glowPulse { 0%,100%{text-shadow:0 0 30px rgba(244,143,177,0.5),0 2px 8px rgba(0,0,0,0.06)} 50%{text-shadow:0 0 55px rgba(244,143,177,0.75),0 0 80px rgba(186,104,200,0.35),0 2px 8px rgba(0,0,0,0.06)} }
     /* ── Landing CoverFlow ─────────────────────────────────────── */
@@ -479,7 +479,7 @@ app.get('/', (req, res) => {
     .form-group button:hover { box-shadow: 0 10px 25px rgba(244,143,177,0.45); transform: translateY(-1px); }
 
     .contact-section { background: rgba(255,255,255,0.95); border-radius: 24px; padding: 50px 40px; margin-top: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
-    .contact-section h2 { color: #333; text-shadow: none; margin-bottom: 30px; }
+    .contact-section h2 { background: linear-gradient(135deg, #e91e63, #ba68c8, #29b6f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: none; margin-bottom: 30px; }
     .contact-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
     .contact-card { background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; }
     .contact-card h3 { font-size: 18px; color: #4a5568; margin-bottom: 12px; }
