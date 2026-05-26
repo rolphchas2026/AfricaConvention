@@ -153,13 +153,33 @@ async function isMaintenanceMode() {
   } catch { return _maintCache.on; }
 }
 
-const _maintBypass = ['/admin', '/admin-login', '/api/admin-login', '/api/admin-logout', '/api/health', '/api/admin/maintenance'];
+// Secret stakeholder preview token — share /preview-access?token=AC2026-preview with private viewers
+const PREVIEW_TOKEN = process.env.PREVIEW_TOKEN || 'AC2026-preview';
+
+const _maintBypass = ['/admin', '/admin-login', '/api/admin-login', '/api/admin-logout', '/api/health', '/api/admin/maintenance', '/preview-access'];
 app.use(async (req, res, next) => {
   const p = req.path;
   if (_maintBypass.some(b => p === b || p.startsWith(b + '/')) || p.startsWith('/sysimages') || p.startsWith('/documentation')) return next();
+  // Stakeholder preview cookie bypasses maintenance
+  const cookies = parseCookies(req);
+  if (cookies.preview_pass === PREVIEW_TOKEN) return next();
   const maint = await isMaintenanceMode();
   if (!maint) return next();
   res.status(503).set('Retry-After', '3600').send(MAINTENANCE_HTML);
+});
+
+// Stakeholder preview access — visiting this link sets a 24-hour bypass cookie
+app.get('/preview-access', (req, res) => {
+  if (req.query.token !== PREVIEW_TOKEN) {
+    return res.status(403).send('Invalid preview token.');
+  }
+  res.cookie('preview_pass', PREVIEW_TOKEN, {
+    httpOnly: true,
+    secure: !!process.env.VERCEL,
+    sameSite: 'lax',
+    maxAge: 36 * 60 * 60 * 1000  // 36 hours — stakeholder review window until launch
+  });
+  res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="2;url=/"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:linear-gradient(160deg,#fff0f6,#fdf4ff,#f0f9ff);min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:32px}</style></head><body><div style="font-size:52px">🎪</div><h2 style="font-weight:900;color:#1e293b;text-align:center">Preview Access Granted</h2><p style="color:#64748b;font-size:14px;text-align:center">Africa Convention 2026 &mdash; Stakeholder Preview<br>Redirecting you to the platform&hellip;</p><div style="width:220px;height:3px;background:rgba(233,30,99,0.1);border-radius:2px;overflow:hidden"><div style="height:100%;width:100%;background:linear-gradient(90deg,#e91e63,#ba68c8);animation:s 2s linear forwards" id="bar"></div></div><style>@keyframes s{from{width:0}to{width:100%}}</style></body></html>`);
 });
 // ── /MAINTENANCE PAGE ───────────────────────────────────────────────────────
 
