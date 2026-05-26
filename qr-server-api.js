@@ -128,8 +128,8 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
     <div class="divider"></div>
 
     <p style="font-size:13px;color:#94a3b8;margin-bottom:16px">Need urgent assistance?</p>
-    <a href="https://wa.me/+255787576900?text=Hi%2C%20I%20am%20trying%20to%20access%20the%20Africa%20Convention%20portal." class="wa-btn">
-      &#128172; WhatsApp Us &nbsp;&middot;&nbsp; +255 787 576 900
+    <a href="https://wa.me/+255743868755?text=Hi%2C%20I%20am%20trying%20to%20access%20the%20Africa%20Convention%20portal." class="wa-btn">
+      &#128172; WhatsApp Us &nbsp;&middot;&nbsp; +255 743 868 755
     </a>
 
     <div class="progress-bar"><div class="progress-fill"></div></div>
