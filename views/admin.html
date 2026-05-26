@@ -88,7 +88,8 @@
     .btn-email  { padding:4px 9px; background:linear-gradient(135deg,#a7f3d0,#6ee7b7); color:#064e3b; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
     .btn-files  { padding:4px 9px; background:rgba(186,104,200,0.12); color:#8e24aa; border:1px solid rgba(186,104,200,0.3); border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; transition:all 0.2s; touch-action:manipulation; }
     .btn-view   { padding:4px 9px; background:linear-gradient(135deg,#e0f2fe,#bae6fd); color:#0369a1; border:none; border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; margin-right:3px; transition:all 0.2s; touch-action:manipulation; }
-    .btn-revoke { padding:4px 9px; background:rgba(254,249,195,0.6); color:#92400e; border:1px solid rgba(251,191,36,0.45); border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; transition:all 0.2s; touch-action:manipulation; }
+    .btn-revoke  { padding:4px 9px; background:rgba(254,249,195,0.6); color:#92400e; border:1px solid rgba(251,191,36,0.45); border-radius:6px; cursor:pointer; font-size:10px; font-weight:700; transition:all 0.2s; touch-action:manipulation; }
+    .btn-approve { padding:5px 12px; background:linear-gradient(135deg,#bbf7d0,#86efac); color:#14532d; border:1px solid rgba(22,163,74,0.3); border-radius:6px; cursor:pointer; font-size:11px; font-weight:700; transition:all 0.2s; touch-action:manipulation; }
     .badge-checkedout { background:rgba(254,249,195,0.5); color:#92400e; border:1px solid rgba(251,191,36,0.45); }
     .badge-active { background:rgba(167,243,208,0.28); color:#059669; border:1px solid rgba(167,243,208,0.5); }
     .btn-edit:hover,.btn-del:hover,.btn-badge:hover,.btn-email:hover,.btn-files:hover,.btn-view:hover,.btn-revoke:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(244,143,177,0.22); }
@@ -842,7 +843,7 @@
       <h3>All Registrations</h3>
       <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Ticket ID</th><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Registered</th><th>Status</th><th>Badge</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Ticket ID</th><th>Photo</th><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Registered</th><th>Status</th><th>Badge</th><th>Actions</th></tr></thead>
         <tbody id="overviewList"></tbody>
       </table>
       </div>
@@ -856,7 +857,7 @@
       <h2>Pending Registrations</h2>
       <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Organization</th><th>Status</th></tr></thead>
+        <thead><tr><th>Photo</th><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Organization</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="pendingList"></tbody>
       </table>
       </div>
@@ -870,7 +871,7 @@
       <h2>Approval Queue</h2>
       <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Status</th><th>Action</th></tr></thead>
+        <thead><tr><th>Photo</th><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="approvalList"></tbody>
       </table>
       </div>
@@ -889,7 +890,7 @@
       <h3>Recent Check-ins</h3>
       <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Ticket ID</th><th>Name</th><th>Time</th><th>Type</th><th>Status</th></tr></thead>
+        <thead><tr><th>Ticket ID</th><th>Photo</th><th>Name</th><th>Time</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="checkinList"></tbody>
       </table>
       </div>
@@ -974,7 +975,7 @@
       <h3>Full Attendee List</h3>
       <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Organization</th><th>Checked In</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Photo</th><th>Name</th><th>Email</th><th>Type</th><th>Accommodation</th><th>Organization</th><th>Checked In</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="attendeesList"></tbody>
       </table>
       </div>
@@ -1357,12 +1358,13 @@
       document.getElementById('stat-checked').textContent  = data.filter(function(a){ return a.checked_in; }).length;
       document.getElementById('stat-pending').textContent  = data.filter(function(a){ return a.payment_status === 'PENDING'; }).length;
       if (!data.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#94a3b8">📭 No registrations found. <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#94a3b8">📭 No registrations found. <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
         return;
       }
       tbody.innerHTML = data.map(function(a) {
         return '<tr>' +
           '<td><code style="font-size:11px;color:#e91e63">' + a.ticket_id + '</code></td>' +
+          '<td style="width:52px">' + photoThumb(a.photo, a.name, a.ticket_id) + '</td>' +
           '<td>' + esc(a.name) + '</td>' +
           '<td style="font-size:12px">' + esc(a.email) + '</td>' +
           '<td>' + a.ticket_type + '</td>' +
@@ -1374,13 +1376,13 @@
             '<button class="btn-edit"  title="Edit attendee"    onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
             '<button class="btn-badge" title="Download badge"   onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
             '<button class="btn-view"  title="Quick view badge" onclick="window.open(\'/api/badge/' + a.ticket_id + '/preview\',\'_blank\')">👁️</button>' +
-            '<button class="btn-email" title="Email badge"      onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📧</button>' +
+            '<button class="btn-email" title="Email welcome pkg" onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📧</button>' +
             '<button class="btn-files" title="Files &amp; docs" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📁</button>' +
             '<button class="btn-del"   title="Delete attendee"  onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
           '</td></tr>';
       }).join('');
     } catch(e) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:28px;color:#e11d48">⚠️ ' + (e.message || 'Failed to load') + ' — <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:28px;color:#e11d48">⚠️ ' + (e.message || 'Failed to load') + ' — <button onclick="loadOverview()" style="margin-left:10px;padding:5px 14px;font-size:12px">↺ Retry</button></td></tr>';
     }
   }
 
@@ -1390,30 +1392,55 @@
       var data = await fetchAttendees();
       var pending = data.filter(function(a){ return a.payment_status === 'PENDING'; });
       document.getElementById('pendingList').innerHTML = pending.length
-        ? pending.map(function(a){ return '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.accommodation_type || '—') + '</td><td>' + esc(a.organization || '—') + '</td><td><span class="badge badge-pending">Pending</span></td></tr>'; }).join('')
-        : '<tr><td colspan="6" style="text-align:center;color:#999;padding:30px">No pending registrations</td></tr>';
-    } catch(e) { document.getElementById('pendingList').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
+        ? pending.map(function(a){
+            return '<tr>' +
+              '<td style="width:52px">' + photoThumb(a.photo, a.name, a.ticket_id) + '</td>' +
+              '<td>' + esc(a.name) + '</td>' +
+              '<td style="font-size:12px">' + esc(a.email) + '</td>' +
+              '<td>' + a.ticket_type + '</td>' +
+              '<td style="font-size:12px">' + esc(a.accommodation_type || '—') + '</td>' +
+              '<td>' + esc(a.organization || '—') + '</td>' +
+              '<td><span class="badge badge-pending">Pending</span></td>' +
+              '<td><button class="btn-approve" onclick="approve(\'' + a.ticket_id + '\')">✓ Approve</button></td>' +
+            '</tr>';
+          }).join('')
+        : '<tr><td colspan="8" style="text-align:center;color:#999;padding:30px">No pending registrations</td></tr>';
+    } catch(e) { document.getElementById('pendingList').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
   }
 
   // ── Approval ──────────────────────────────────────────────────────────────────
+  var _accomOpts = ['','Ordinary Single','Double Single','Triple Single','Suite Single VVIP','Double Suite','External / Own Arrangement'];
+
   async function loadApproval() {
     try {
       var data = await fetchAttendees();
-      document.getElementById('approvalList').innerHTML = data.map(function(a){
-        return '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.email) + '</td><td>' + a.ticket_type + '</td>' +
-          '<td>' + esc(a.accommodation_type || '—') + '</td>' +
-          '<td><span class="badge ' + (a.payment_status === 'APPROVED' ? 'badge-approved' : 'badge-pending') + '">' + a.payment_status + '</span></td>' +
-          '<td><button onclick="approve(\'' + a.ticket_id + '\')">' + (a.payment_status === 'APPROVED' ? 'Re-approve' : 'Approve') + '</button></td></tr>';
-      }).join('');
-    } catch(e) { document.getElementById('approvalList').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
+      var approved = data.filter(function(a){ return a.payment_status === 'APPROVED'; });
+      document.getElementById('approvalList').innerHTML = approved.length
+        ? approved.map(function(a){
+            var selOpts = _accomOpts.map(function(o){ return '<option value="' + o + '"' + (a.accommodation_type === o ? ' selected' : '') + '>' + (o || 'None / Self-arranged') + '</option>'; }).join('');
+            return '<tr>' +
+              '<td style="width:52px">' + photoThumb(a.photo, a.name, a.ticket_id) + '</td>' +
+              '<td>' + esc(a.name) + '</td>' +
+              '<td style="font-size:12px">' + esc(a.email) + '</td>' +
+              '<td>' + a.ticket_type + '</td>' +
+              '<td style="white-space:nowrap">' +
+                '<select id="accom-' + a.ticket_id + '" style="font-size:12px;padding:4px 6px;border:1px solid rgba(244,143,177,0.4);border-radius:6px;max-width:150px" onchange="document.getElementById(\'saveAccom-' + a.ticket_id + '\').style.display=\'inline\'">' + selOpts + '</select>' +
+                '<button id="saveAccom-' + a.ticket_id + '" onclick="saveAccommodation(\'' + a.ticket_id + '\',document.getElementById(\'accom-' + a.ticket_id + '\').value)" style="display:none;margin-left:4px;font-size:11px;padding:3px 8px;cursor:pointer;border:1px solid rgba(5,150,105,0.4);border-radius:5px;background:#f0fdf4;color:#059669">Save</button>' +
+              '</td>' +
+              '<td><span class="badge badge-approved">APPROVED</span></td>' +
+              '<td><button class="btn-revoke" onclick="revokeApproval(\'' + a.ticket_id + '\')">&#8629; Revoke</button></td>' +
+            '</tr>';
+          }).join('')
+        : '<tr><td colspan="7" style="text-align:center;color:#999;padding:30px">No approved registrations</td></tr>';
+    } catch(e) { document.getElementById('approvalList').innerHTML = '<tr><td colspan="7" style="text-align:center;color:#e11d48;padding:24px">⚠️ ' + e.message + '</td></tr>'; }
   }
 
   async function approve(tid) {
-    if (!confirm('Approve ticket ' + tid + '?')) return;
+    if (!confirm('Approve ticket ' + tid + '? A welcome email will be sent automatically.')) return;
     try {
       var res = await fetch('/api/approve', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
       var result = await res.json();
-      if (result.success) { loadApproval(); loadOverview(); }
+      if (result.success) { loadApproval(); loadPending(); loadOverview(); }
       else alert('Error: ' + result.error);
     } catch(e) { alert('Network error'); }
   }
@@ -1427,13 +1454,20 @@
       document.getElementById('statsByType').innerHTML = Object.entries(counts)
         .map(function(e){ return '<div class="stat-box"><div class="stat-number">' + e[1] + '</div><div class="stat-label">' + e[0] + '</div></div>'; }).join('');
       document.getElementById('attendeesList').innerHTML = data.map(function(a){
-        return '<tr><td>' + esc(a.name) + '</td><td style="font-size:12px">' + esc(a.email) + '</td><td>' + a.ticket_type + '</td><td>' + esc(a.accommodation_type || '—') + '</td><td>' + esc(a.organization || '—') + '</td><td>' + (a.checked_in ? '✅' : '—') + '</td>' +
+        return '<tr>' +
+          '<td style="width:52px">' + photoThumb(a.photo, a.name, a.ticket_id) + '</td>' +
+          '<td>' + esc(a.name) + '</td>' +
+          '<td style="font-size:12px">' + esc(a.email) + '</td>' +
+          '<td>' + a.ticket_type + '</td>' +
+          '<td style="font-size:12px">' + esc(a.accommodation_type || '—') + '</td>' +
+          '<td>' + esc(a.organization || '—') + '</td>' +
+          '<td>' + (a.checked_in ? '✅' : '—') + '</td>' +
           '<td><span class="badge ' + (a.payment_status === 'APPROVED' ? 'badge-approved' : 'badge-pending') + '">' + a.payment_status + '</span></td>' +
           '<td style="white-space:nowrap">' +
             '<button class="btn-edit"  title="Edit attendee"    onclick="editAttendee(\'' + a.ticket_id + '\')">✏️</button>' +
             '<button class="btn-badge" title="Download badge"   onclick="downloadBadge(\'' + a.ticket_id + '\')">🎫</button>' +
             '<button class="btn-view"  title="Quick view badge" onclick="window.open(\'/api/badge/' + a.ticket_id + '/preview\',\'_blank\')">👁️</button>' +
-            '<button class="btn-email" title="Email badge"      onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📧</button>' +
+            '<button class="btn-email" title="Email welcome pkg" onclick="sendBadgeEmail(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📧</button>' +
             '<button class="btn-files" title="Files &amp; docs" onclick="openFileModal(\'' + a.ticket_id + '\',\'' + esc(a.name).replace(/'/g, "\\'") + '\')">📁</button>' +
             '<button class="btn-del"   title="Delete attendee"  onclick="deleteAttendee(\'' + a.ticket_id + '\')">🗑️</button>' +
           '</td></tr>';
@@ -1452,9 +1486,17 @@
             var badgeCls = isOut ? 'badge-checkedout' : 'badge-active';
             var badgeTxt = isOut ? '📤 Checked Out' : '✅ Active';
             var rowStyle = isOut ? 'background:rgba(254,249,195,0.18)' : '';
-            return '<tr style="' + rowStyle + '"><td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td><td>' + esc(a.name) + '</td><td>' + (a.checked_in_at ? new Date(a.checked_in_at).toLocaleString() : '—') + '</td><td>' + a.ticket_type + '</td><td><span class="badge ' + badgeCls + '">' + badgeTxt + '</span></td></tr>';
+            return '<tr style="' + rowStyle + '">' +
+              '<td><code style="font-size:12px;color:#667eea">' + a.ticket_id + '</code></td>' +
+              '<td style="width:52px">' + photoThumb(a.photo, a.name, a.ticket_id) + '</td>' +
+              '<td>' + esc(a.name) + '</td>' +
+              '<td>' + (a.checked_in_at ? new Date(a.checked_in_at).toLocaleString() : '—') + '</td>' +
+              '<td>' + a.ticket_type + '</td>' +
+              '<td><span class="badge ' + badgeCls + '">' + badgeTxt + '</span></td>' +
+              '<td><button class="btn-revoke" onclick="revokeCheckin(\'' + a.ticket_id + '\')">&#8629; Revoke</button></td>' +
+            '</tr>';
           }).join('')
-        : '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px">No check-ins yet</td></tr>';
+        : '<tr><td colspan="7" style="text-align:center;color:#999;padding:30px">No check-ins yet</td></tr>';
     } catch(e) { console.error(e); }
   }
 
@@ -1958,6 +2000,61 @@
     setTimeout(function(){ window.print(); }, 120);
   }
 
+  // ── Photo utilities ──────────────────────────────────────────────────────────
+  var _photoCache = {};
+
+  function photoThumb(photoData, name, key) {
+    if (photoData) _photoCache[key] = photoData;
+    if (!photoData) {
+      var initials = (name || '?').split(' ').map(function(w){ return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
+      return '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#fce4ec,#e8d5f5);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#7c3aed;border:2px solid rgba(124,58,237,0.15);flex-shrink:0">' + initials + '</div>';
+    }
+    return '<img src="' + photoData + '" onclick="openPhotoModal(\'' + key + '\')" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e91e63;cursor:pointer;flex-shrink:0;display:block" alt="' + esc(name) + '">';
+  }
+
+  function openPhotoModal(key) {
+    var src = _photoCache[key];
+    if (!src) return;
+    document.getElementById('photoModalImg').src = src;
+    document.getElementById('photoModal').style.display = 'flex';
+  }
+
+  function closePhotoModal() {
+    document.getElementById('photoModal').style.display = 'none';
+    document.getElementById('photoModalImg').src = '';
+  }
+
+  // ── Approval & check-in controls ────────────────────────────────────────────
+  async function revokeApproval(tid) {
+    if (!confirm('Revoke approval for ' + tid + '? They will return to Pending.')) return;
+    try {
+      var res = await fetch('/api/revoke-approve', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
+      var result = await res.json();
+      if (result.success) { loadApproval(); loadPending(); loadOverview(); }
+      else alert('Error: ' + result.error);
+    } catch(e) { alert('Network error'); }
+  }
+
+  async function revokeCheckin(tid) {
+    if (!confirm('Revoke check-in for ' + tid + '?')) return;
+    try {
+      var res = await fetch('/api/revoke-checkin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ticket_id: tid }) });
+      var result = await res.json();
+      if (result.success) { loadCheckins(); loadOverview(); }
+      else alert('Error: ' + result.error);
+    } catch(e) { alert('Network error'); }
+  }
+
+  async function saveAccommodation(tid, val) {
+    try {
+      var res = await fetch('/api/attendees/' + encodeURIComponent(tid) + '/accommodation', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accommodation_type: val }) });
+      var result = await res.json();
+      if (!result.success) { alert('Error: ' + result.error); return; }
+      var btn = document.getElementById('saveAccom-' + tid);
+      if (btn) { btn.textContent = '✓ Saved'; btn.style.color = '#059669'; setTimeout(function(){ btn.textContent = 'Save'; btn.style.color = ''; }, 2200); }
+    } catch(e) { alert('Network error'); }
+  }
+
   function pbCopyLink() {
     var url = window.location.href.split('?')[0];
     var btn = document.getElementById('pbCopyBtn');
@@ -1973,5 +2070,13 @@
     }
   }
 </script>
+
+<!-- Photo fullscreen modal -->
+<div id="photoModal" onclick="closePhotoModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center">
+  <div style="position:relative;max-width:90vw;max-height:90vh" onclick="event.stopPropagation()">
+    <img id="photoModalImg" src="" style="max-width:88vw;max-height:84vh;border-radius:16px;object-fit:contain;display:block" alt="Delegate photo">
+    <button onclick="closePhotoModal()" style="position:absolute;top:-18px;right:-18px;background:white;border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-weight:700;color:#374151">&#215;</button>
+  </div>
+</div>
 </body>
 </html>

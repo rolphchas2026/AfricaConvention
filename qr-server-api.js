@@ -230,6 +230,7 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS payment_proof_name VARCHAR(255)`);
       await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS documents JSONB DEFAULT '[]'`);
       await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS accommodation_type VARCHAR(100) DEFAULT ''`);
+      await pool.query(`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS photo TEXT DEFAULT NULL`);
 
       // Raffle tables
       await pool.query(`
@@ -294,7 +295,7 @@ async function generateBadgePDF(a) {
       const W = 419, H = 595;
       const accent = TICKET_TYPE_COLORS[a.ticket_type] || '#f06292';
 
-      // ── Background — light iOS blossom ────────────────────────────────────────
+      // ── Background ────────────────────────────────────────────────────────────
       doc.rect(0, 0, W, H).fill('#fdf8ff');
 
       // ── Header band — brochure image with soft blush tint overlay ─────────────
@@ -312,50 +313,72 @@ async function generateBadgePDF(a) {
         doc.rect(0, 0, W, 120).fill('#fce4ec');
       }
 
-      // ── Accent stripe ─────────────────────────────────────────────────────────
-      doc.rect(0, 120, W, 5).fill(accent);
+      // ── Accent stripe — 8px, colour-coded by ticket type ──────────────────────
+      doc.rect(0, 120, W, 8).fill(accent);
 
       // ── Event title — white over image ────────────────────────────────────────
       doc.font('Helvetica-Bold').fontSize(16).fillColor('white')
         .text('AFRICA CONVENTION 2026', 20, 18, { align: 'center', width: W - 40 });
       doc.font('Helvetica').fontSize(10).fillColor('rgba(255,255,255,0.9)')
-        .text('Arusha, Tanzania  ·  June 18–22, 2026', 20, 42, { align: 'center', width: W - 40 });
+        .text('Arusha, Tanzania  \xB7  June 18–22, 2026', 20, 42, { align: 'center', width: W - 40 });
       doc.font('Helvetica').fontSize(9).fillColor('rgba(255,255,255,0.75)')
         .text('Doing Business and Bearing Fruitful', 20, 60, { align: 'center', width: W - 40 });
       doc.font('Helvetica-Bold').fontSize(8.5).fillColor('white')
         .text('[ ' + (a.ticket_type || 'GENERAL').toUpperCase() + ' PASS ]', 20, 82, { align: 'center', width: W - 40 });
 
-      // ── Delegate name ─────────────────────────────────────────────────────────
-      const nameSize = a.name.length > 22 ? 20 : 26;
-      doc.font('Helvetica-Bold').fontSize(nameSize).fillColor('#1e293b')
-        .text(a.name, 20, 142, { align: 'center', width: W - 40 });
+      // ── Delegate photo (circular) — above name ────────────────────────────────
+      let nameY = 140;
+      if (a.photo) {
+        try {
+          const photoBuf = Buffer.from(a.photo.replace(/^data:[^;]+;base64,/, ''), 'base64');
+          const cx = W / 2, cy = 168, r = 32;
+          doc.circle(cx, cy, r + 4).fill('#fce4ec');
+          doc.circle(cx, cy, r + 2).fill('white');
+          doc.save();
+          doc.circle(cx, cy, r).clip();
+          doc.image(photoBuf, cx - r, cy - r, { width: r * 2, height: r * 2 });
+          doc.restore();
+          doc.circle(cx, cy, r + 1).strokeColor(accent).lineWidth(2).stroke();
+          nameY = 212;
+        } catch (_) { nameY = 140; }
+      }
 
-      let yPos = 142 + nameSize + 8;
+      // ── Delegate name ─────────────────────────────────────────────────────────
+      const nameSize = a.name.length > 22 ? 20 : 24;
+      doc.font('Helvetica-Bold').fontSize(nameSize).fillColor('#1e293b')
+        .text(a.name, 20, nameY, { align: 'center', width: W - 40 });
+
+      let yPos = nameY + nameSize + 8;
       if (a.title) {
-        doc.font('Helvetica').fontSize(12).fillColor('#64748b')
+        doc.font('Helvetica').fontSize(11).fillColor('#64748b')
           .text(a.title, 20, yPos, { align: 'center', width: W - 40 });
-        yPos += 18;
+        yPos += 17;
       }
       if (a.organization) {
         doc.font('Helvetica-Bold').fontSize(11).fillColor('#e91e63')
           .text(a.organization, 20, yPos, { align: 'center', width: W - 40 });
-        yPos += 18;
+        yPos += 17;
+      }
+      if (a.accommodation_type && a.accommodation_type !== '') {
+        doc.font('Helvetica').fontSize(8).fillColor('#7c3aed')
+          .text('Accommodation: ' + a.accommodation_type, 20, yPos, { align: 'center', width: W - 40 });
+        yPos += 13;
       }
 
       // ── QR Code — blush-bordered ──────────────────────────────────────────────
       const qrBuf = Buffer.from(qrDataURL.split(',')[1], 'base64');
-      const qrSize = 148;
+      const qrSize = 140;
       const qrX = (W - qrSize) / 2;
-      const qrY = Math.max(yPos + 18, 232);
-      doc.roundedRect(qrX - 13, qrY - 13, qrSize + 26, qrSize + 26, 8).fill('#fce4ec');
-      doc.rect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12).fill('white');
+      const qrY = Math.max(yPos + 14, a.photo ? 270 : 232);
+      doc.roundedRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 8).fill('#fce4ec');
+      doc.rect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10).fill('white');
       doc.image(qrBuf, qrX, qrY, { width: qrSize, height: qrSize });
 
       // ── Ticket ID + label ─────────────────────────────────────────────────────
       doc.font('Helvetica-Bold').fontSize(9).fillColor('#e91e63')
-        .text(a.ticket_id, 20, qrY + qrSize + 16, { align: 'center', width: W - 40 });
+        .text(a.ticket_id, 20, qrY + qrSize + 14, { align: 'center', width: W - 40 });
       doc.font('Helvetica').fontSize(8).fillColor('#94a3b8')
-        .text('Scan to verify entry', 20, qrY + qrSize + 29, { align: 'center', width: W - 40 });
+        .text('Scan to verify entry', 20, qrY + qrSize + 27, { align: 'center', width: W - 40 });
 
       // ── Info row ──────────────────────────────────────────────────────────────
       const infoY = H - 76;
@@ -365,7 +388,7 @@ async function generateBadgePDF(a) {
         .text('✉ ' + a.email, 30, infoY, { width: W - 60 });
       if (a.phone) {
         doc.font('Helvetica').fontSize(8).fillColor('#64748b')
-          .text('✆ ' + a.phone, 30, infoY + 13, { width: W - 60 });
+          .text('☎ ' + a.phone, 30, infoY + 13, { width: W - 60 });
       }
 
       // ── Footer — light blush band ─────────────────────────────────────────────
@@ -379,6 +402,163 @@ async function generateBadgePDF(a) {
 
       doc.end();
     } catch (e) { reject(e); }
+  });
+}
+
+async function generateInvitationPDF(a) {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ size: 'A4', margin: 60 });
+      const chunks = [];
+      doc.on('data', c => chunks.push(c));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+      const typeLabel = { general:'General Admin', foreigners:'Foreigner (VIP)', youth:'Youth', speaker:'Speaker', business:'Business' }[a.ticket_type] || a.ticket_type;
+      doc.font('Helvetica-Bold').fontSize(22).fillColor('#e91e63')
+        .text('Africa Convention 2026', { align: 'center' });
+      doc.font('Helvetica').fontSize(12).fillColor('#64748b')
+        .text('Arusha, Tanzania  \xB7  June 18–22, 2026', { align: 'center' });
+      doc.moveDown(0.4);
+      doc.font('Helvetica').fontSize(10).fillColor('#94a3b8')
+        .text('Doing Business and Bearing Fruitful', { align: 'center' });
+      doc.moveDown(2);
+      doc.font('Helvetica-Bold').fontSize(16).fillColor('#1e293b')
+        .text('Official Invitation Letter');
+      doc.moveDown(1);
+      doc.font('Helvetica').fontSize(12).fillColor('#374151')
+        .text('Dear ' + a.name + ',');
+      doc.moveDown(0.8);
+      doc.text('We are delighted to extend this official invitation for you to attend the Africa Convention 2026, hosted by WCCM Tanzania — Living Hope Church, to be held in Arusha, Tanzania from 18 to 22 June 2026.', { lineGap: 4, align: 'justify' });
+      doc.moveDown(0.8);
+      doc.text('This convention brings together ministers, business leaders, youth, and delegates from across Africa and beyond for five days of fellowship, worship, teaching, and business networking under the theme: “Doing Business and Bearing Fruitful.”', { lineGap: 4, align: 'justify' });
+      doc.moveDown(1);
+      doc.font('Helvetica-Bold').fontSize(12).fillColor('#1e293b').text('Your Registration Details:');
+      doc.moveDown(0.5);
+      const lines = [
+        'Name: ' + a.name,
+        'Ticket ID: ' + a.ticket_id,
+        'Pass Type: ' + typeLabel,
+        'Email: ' + a.email,
+        'Organisation: ' + (a.organization || 'N/A'),
+        'Accommodation: ' + (a.accommodation_type || 'Self-arranged'),
+      ];
+      lines.forEach(function(l) { doc.font('Helvetica').fontSize(11).fillColor('#374151').text(l); });
+      doc.moveDown(1);
+      doc.font('Helvetica').fontSize(11).fillColor('#374151')
+        .text('Venue: Arusha International Conference Centre (AICC), Arusha, Tanzania', { lineGap: 4 });
+      doc.moveDown(0.8);
+      doc.text('Please keep this letter as proof of your formal invitation. Present your ID badge (sent as a separate attachment) at the entrance for check-in.', { lineGap: 4, align: 'justify' });
+      doc.moveDown(2);
+      doc.font('Helvetica-Bold').fillColor('#e91e63').text('WCCM Tanzania — Living Hope Church');
+      doc.font('Helvetica').fillColor('#64748b')
+        .text('wccm.tz@gmail.com  |  www.livinghope.or.tz')
+        .text('+255 787 576 900  |  +255 713 276 655');
+      doc.end();
+    } catch (e) { reject(e); }
+  });
+}
+
+async function generateVaccinationPDF() {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ size: 'A4', margin: 60 });
+      const chunks = [];
+      doc.on('data', c => chunks.push(c));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+      doc.font('Helvetica-Bold').fontSize(20).fillColor('#e91e63')
+        .text('Africa Convention 2026', { align: 'center' });
+      doc.font('Helvetica').fontSize(11).fillColor('#64748b')
+        .text('Arusha, Tanzania  \xB7  June 18–22, 2026', { align: 'center' });
+      doc.moveDown(1.5);
+      doc.font('Helvetica-Bold').fontSize(16).fillColor('#1e293b')
+        .text('Health & Vaccination Guidelines');
+      doc.moveDown(0.8);
+      doc.font('Helvetica').fontSize(11).fillColor('#374151')
+        .text('To ensure the health and safety of all delegates attending Africa Convention 2026, please review and comply with the following vaccination and health requirements before travelling to Tanzania.', { lineGap: 4, align: 'justify' });
+      doc.moveDown(1);
+      doc.font('Helvetica-Bold').fontSize(13).fillColor('#e91e63').text('Required Vaccinations');
+      doc.moveDown(0.5);
+      [
+        'Yellow Fever — Required by Tanzanian law for all international travellers. Carry your Yellow Fever certificate (Carte Jaune) at all times.',
+        'COVID-19 — Recommended to be fully vaccinated. Carry proof of vaccination if required by your origin country.',
+        'Typhoid — Strongly recommended for travel to East Africa.',
+        'Hepatitis A & B — Strongly recommended for all travellers.',
+      ].forEach(function(item) {
+        doc.font('Helvetica').fontSize(11).fillColor('#374151').text('• ' + item, { indent: 12, lineGap: 4 });
+        doc.moveDown(0.3);
+      });
+      doc.moveDown(0.5);
+      doc.font('Helvetica-Bold').fontSize(13).fillColor('#0284c7').text('Recommended Precautions');
+      doc.moveDown(0.5);
+      [
+        'Malaria prophylaxis — Consult your doctor before travel. Arusha is in a malaria-risk zone.',
+        'Carry sufficient personal medications for the duration of your stay.',
+        'Drink bottled or boiled water only.',
+        'Use insect repellent, especially after sunset.',
+        'Carry a basic first-aid kit and any prescription medicines.',
+      ].forEach(function(item) {
+        doc.font('Helvetica').fontSize(11).fillColor('#374151').text('• ' + item, { indent: 12, lineGap: 4 });
+        doc.moveDown(0.3);
+      });
+      doc.moveDown(1);
+      doc.font('Helvetica-Bold').fontSize(12).fillColor('#dc2626').text('Important Notice');
+      doc.font('Helvetica').fontSize(11).fillColor('#374151')
+        .text('All delegates must carry valid health documentation at all times during the convention. Organisers reserve the right to request proof of Yellow Fever vaccination at registration.', { lineGap: 4, align: 'justify' });
+      doc.moveDown(1.5);
+      doc.font('Helvetica-Bold').fillColor('#e91e63').text('WCCM Tanzania — Living Hope Church');
+      doc.font('Helvetica').fillColor('#64748b').text('wccm.tz@gmail.com  |  www.livinghope.or.tz');
+      doc.end();
+    } catch (e) { reject(e); }
+  });
+}
+
+async function sendWelcomePackage(a) {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+  const typeLabel = { general:'General Admin', foreigners:'Foreigner (VIP)', youth:'Youth', speaker:'Speaker', business:'Business' }[a.ticket_type] || a.ticket_type;
+  const [badgeBuf, inviteBuf, vaccBuf] = await Promise.all([
+    generateBadgePDF(a),
+    generateInvitationPDF(a),
+    generateVaccinationPDF()
+  ]);
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+  });
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || '"Africa Convention 2026" <' + process.env.SMTP_USER + '>',
+    to: a.email,
+    subject: 'Welcome to Africa Convention 2026 — Your Complete Package — ' + a.name,
+    html: `
+    <div style="font-family:sans-serif;background:linear-gradient(160deg,#fff0f6,#fdf4ff,#f0f9ff);padding:40px 20px;min-height:100vh">
+      <div style="max-width:580px;margin:0 auto;background:white;border:1px solid rgba(244,143,177,0.3);border-radius:20px;padding:40px">
+        <h1 style="font-size:24px;font-weight:800;background:linear-gradient(135deg,#e91e63,#ba68c8,#29b6f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:0 0 4px">Africa Convention 2026</h1>
+        <p style="color:#64748b;font-size:13px;margin:0 0 28px">Arusha, Tanzania &middot; June 18&ndash;22, 2026</p>
+        <p style="color:#1e293b;font-size:16px;margin:0 0 14px">Dear <strong>${a.name}</strong>,</p>
+        <p style="color:#374151;line-height:1.7;margin:0 0 20px">Congratulations &mdash; your registration has been <strong style="color:#059669">approved</strong>! We are thrilled to welcome you to Africa Convention 2026. Please find your complete welcome package attached:</p>
+        <div style="background:#fdf4ff;border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:18px;margin-bottom:24px">
+          <p style="margin:0 0 10px;color:#1e293b;font-weight:700">&#128206; Attached Documents:</p>
+          <p style="margin:4px 0;color:#374151">&#127891; <strong>Badge PDF</strong> &mdash; your entry pass (print or show on device)</p>
+          <p style="margin:4px 0;color:#374151">&#128220; <strong>Invitation Letter</strong> &mdash; official invitation for travel/visa purposes</p>
+          <p style="margin:4px 0;color:#374151">&#128137; <strong>Vaccination Instructions</strong> &mdash; health requirements for entry to Tanzania</p>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid rgba(5,150,105,0.2);border-radius:12px;padding:18px;margin-bottom:24px">
+          <p style="margin:0 0 8px;color:#1e293b"><strong>Ticket ID:</strong> ${a.ticket_id}</p>
+          <p style="margin:0 0 8px;color:#1e293b"><strong>Pass Type:</strong> ${typeLabel}</p>
+          ${a.organization ? '<p style="margin:0 0 8px;color:#1e293b"><strong>Organisation:</strong> ' + a.organization + '</p>' : ''}
+          <p style="margin:0;color:#1e293b"><strong>Accommodation:</strong> ${a.accommodation_type || 'Self-arranged'}</p>
+        </div>
+        <p style="color:#374151;line-height:1.7;margin:0 0 20px">We look forward to seeing you in Arusha. If you have any questions, please do not hesitate to reach out to our team.</p>
+        <p style="color:#64748b;font-size:12px;text-align:center;margin:0">Africa Convention 2026 &middot; WCCM Tanzania &middot; wccm.tz@gmail.com &middot; www.livinghope.or.tz</p>
+      </div>
+    </div>`,
+    attachments: [
+      { filename: 'badge-' + a.ticket_id + '.pdf', content: badgeBuf, contentType: 'application/pdf' },
+      { filename: 'invitation-letter-' + a.ticket_id + '.pdf', content: inviteBuf, contentType: 'application/pdf' },
+      { filename: 'vaccination-instructions.pdf', content: vaccBuf, contentType: 'application/pdf' }
+    ]
   });
 }
 
@@ -655,6 +835,7 @@ app.get('/', (req, res) => {
           <option value="Triple Single">Triple Single</option>
           <option value="Suite Single VVIP">Suite Single VVIP</option>
           <option value="Double Suite">Double Suite</option>
+          <option value="External / Own Arrangement">External / Own Arrangement</option>
         </select>
       </div>
       <div class="form-group">
@@ -676,6 +857,24 @@ app.get('/', (req, res) => {
       <div class="form-group">
         <label>Title/Position</label>
         <input type="text" id="title" placeholder="Your title">
+      </div>
+      <div class="form-group">
+        <label>Delegate Photo <span style="font-weight:400;font-size:12px;color:#94a3b8">(JPG/PNG &mdash; appears on your ID badge)</span></label>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-top:6px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" style="font-size:13px;padding:6px 4px;border:1.5px solid rgba(244,143,177,0.4);border-radius:8px;background:#fff" onchange="previewPhoto(this)">
+            <button type="button" onclick="toggleCamera()" style="font-size:13px;padding:9px 18px;background:linear-gradient(135deg,#fce4ec,#e8d5f5);color:#7c3aed;border:1.5px solid rgba(124,58,237,0.25);border-radius:10px;cursor:pointer;font-weight:600">📷 Use Selfie Camera</button>
+          </div>
+          <div id="regCameraBox" style="display:none;flex-direction:column;align-items:center;gap:8px">
+            <video id="selfieVideo" autoplay playsinline style="width:160px;height:160px;border-radius:50%;object-fit:cover;border:3px solid #e91e63"></video>
+            <canvas id="photoCanvas" style="display:none"></canvas>
+            <button type="button" onclick="capturePhoto()" style="font-size:13px;padding:8px 20px;background:linear-gradient(135deg,#e91e63,#ba68c8);color:white;border:none;border-radius:10px;cursor:pointer;font-weight:600">📸 Capture</button>
+          </div>
+          <div id="regPhotoPreview" style="display:none;flex-direction:column;align-items:center;gap:6px">
+            <img id="regPhotoImg" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #e91e63" alt="Photo preview">
+            <button type="button" onclick="clearRegPhoto()" style="font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:0">✕ Remove</button>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <button onclick="registerAttendee()">Register Now</button>
@@ -1092,6 +1291,51 @@ app.get('/', (req, res) => {
       }
     }
 
+    var _regPhotoData = null;
+    var _regCameraStream = null;
+
+    async function toggleCamera() {
+      var box = document.getElementById('regCameraBox');
+      if (box.style.display === 'none' || box.style.display === '') {
+        try {
+          _regCameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+          document.getElementById('selfieVideo').srcObject = _regCameraStream;
+          box.style.display = 'flex';
+        } catch(e) { alert('Camera access denied: ' + e.message); }
+      } else {
+        stopRegCamera();
+      }
+    }
+    function stopRegCamera() {
+      if (_regCameraStream) { _regCameraStream.getTracks().forEach(function(t){ t.stop(); }); _regCameraStream = null; }
+      document.getElementById('regCameraBox').style.display = 'none';
+    }
+    function capturePhoto() {
+      var video = document.getElementById('selfieVideo');
+      var canvas = document.getElementById('photoCanvas');
+      canvas.width = 400; canvas.height = 400;
+      canvas.getContext('2d').drawImage(video, 0, 0, 400, 400);
+      _regPhotoData = canvas.toDataURL('image/jpeg', 0.85);
+      showRegPhotoPreview(_regPhotoData);
+      stopRegCamera();
+    }
+    function previewPhoto(input) {
+      var file = input.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) { _regPhotoData = e.target.result; showRegPhotoPreview(_regPhotoData); };
+      reader.readAsDataURL(file);
+    }
+    function showRegPhotoPreview(src) {
+      document.getElementById('regPhotoImg').src = src;
+      document.getElementById('regPhotoPreview').style.display = 'flex';
+    }
+    function clearRegPhoto() {
+      _regPhotoData = null;
+      document.getElementById('regPhotoPreview').style.display = 'none';
+      document.getElementById('photoFile').value = '';
+    }
+
     async function registerAttendee() {
       const ticket_type = document.getElementById('ticketType').value;
       const accommodation_type = document.getElementById('accommodationType').value;
@@ -1103,7 +1347,12 @@ app.get('/', (req, res) => {
       const msgDiv = document.getElementById('regMsg');
 
       if (!ticket_type || !name || !email || !phone) {
-        msgDiv.innerHTML = '<div style="color: #c92a2a; background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-weight: 600;">⚠️ Please fill in all required fields.</div>';
+        msgDiv.innerHTML = '<div style="color:#c92a2a;background:#fff5f5;padding:12px;border-radius:8px;margin-bottom:15px;font-weight:600">⚠️ Please fill in all required fields.</div>';
+        return;
+      }
+      const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRx.test(email)) {
+        msgDiv.innerHTML = '<div style="color:#c92a2a;background:#fff5f5;padding:12px;border-radius:8px;margin-bottom:15px;font-weight:600">⚠️ Please enter a valid email address.</div>';
         return;
       }
 
@@ -1111,22 +1360,23 @@ app.get('/', (req, res) => {
         const res = await fetch('/api/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticket_type, accommodation_type, name, email, phone, organization, title })
+          body: JSON.stringify({ ticket_type, accommodation_type, name, email, phone, organization, title, photo: _regPhotoData || null })
         });
         const data = await res.json();
         if (data.success) {
-          msgDiv.innerHTML = '<div style="color: #2b8a3e; background: #f4fce3; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-weight: 600;">🎉 Registration Complete! Ticket ID: ' + data.ticket_id + '</div>';
+          msgDiv.innerHTML = '<div style="color:#2b8a3e;background:#f0fdf4;padding:15px;border-radius:8px;margin-bottom:15px;font-weight:600">✅ Registration submitted! Your ticket ID is <strong>' + data.ticket_id + '</strong>. Your application is pending admin approval — you will receive a welcome email once approved.</div>';
           document.getElementById('name').value = '';
           document.getElementById('email').value = '';
           document.getElementById('phone').value = '';
           document.getElementById('organization').value = '';
           document.getElementById('title').value = '';
           document.getElementById('ticketType').value = '';
+          clearRegPhoto();
         } else {
-          msgDiv.innerHTML = '<div style="color: #c92a2a; background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px;">❌ Error: ' + data.error + '</div>';
+          msgDiv.innerHTML = '<div style="color:#c92a2a;background:#fff5f5;padding:12px;border-radius:8px;margin-bottom:15px">❌ Error: ' + data.error + '</div>';
         }
       } catch (err) {
-        msgDiv.innerHTML = '<div style="color: #c92a2a; background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px;">❌ Network error occurred.</div>';
+        msgDiv.innerHTML = '<div style="color:#c92a2a;background:#fff5f5;padding:12px;border-radius:8px;margin-bottom:15px">❌ Network error occurred.</div>';
       }
     }
 
@@ -1559,8 +1809,10 @@ app.get('/admin', (req, res) => {
 app.post('/api/register', async (req, res) => {
   try {
     if (!pool) return res.json({ success: false, error: 'Database not ready' });
-    const { ticket_type, accommodation_type, name, email, phone, organization, title } = req.body;
+    const { ticket_type, accommodation_type, name, email, phone, organization, title, photo } = req.body;
     if (!ticket_type || !name || !email || !phone) return res.json({ success: false, error: 'Missing required fields' });
+    const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRx.test(email)) return res.json({ success: false, error: 'Please enter a valid email address' });
     const ticket = TICKET_TYPES[ticket_type];
     if (!ticket) return res.json({ success: false, error: 'Invalid ticket type' });
     const ticketId = 'TKT-' + ticket_type.toUpperCase().slice(0, 3) + '-' + Date.now();
@@ -1568,8 +1820,8 @@ app.post('/api/register', async (req, res) => {
       JSON.stringify({ ticket_id: ticketId, name, type: ticket_type }), { width: 300, margin: 1 }
     );
     await pool.query(
-      'INSERT INTO attendees (ticket_id, name, email, phone, organization, title, ticket_type, ticket_price, currency, payment_status, qr_code, accommodation_type) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',
-      [ticketId, name, email, phone, organization || '', title || '', ticket_type, ticket.price, ticket.currency, 'APPROVED', qrCode, accommodation_type || '']
+      'INSERT INTO attendees (ticket_id, name, email, phone, organization, title, ticket_type, ticket_price, currency, payment_status, qr_code, accommodation_type, photo) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
+      [ticketId, name, email, phone, organization || '', title || '', ticket_type, ticket.price, ticket.currency, 'PENDING', qrCode, accommodation_type || '', photo || null]
     );
     res.json({ success: true, ticket_id: ticketId });
   } catch (error) {
@@ -1631,10 +1883,48 @@ app.post('/api/approve', async (req, res) => {
     if (result.rows.length === 0) return res.json({ success: false, error: 'Ticket not found' });
     const qrCode = await ensureQR(result.rows[0]);
     await pool.query('UPDATE attendees SET payment_status=$1, qr_code=$2 WHERE ticket_id=$3', ['APPROVED', qrCode, ticket_id]);
+    const approved = { ...result.rows[0], payment_status: 'APPROVED', qr_code: qrCode };
+    sendWelcomePackage(approved).catch(e => console.error('Welcome email error:', e.message));
     res.json({ success: true });
   } catch (error) {
     res.json({ success: false, error: error.message });
   }
+});
+
+app.post('/api/revoke-approve', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const { ticket_id } = req.body;
+    const result = await pool.query('SELECT * FROM attendees WHERE ticket_id = $1', [ticket_id]);
+    if (result.rows.length === 0) return res.json({ success: false, error: 'Ticket not found' });
+    await pool.query("UPDATE attendees SET payment_status='PENDING' WHERE ticket_id=$1", [ticket_id]);
+    res.json({ success: true });
+  } catch (error) { res.json({ success: false, error: error.message }); }
+});
+
+app.post('/api/revoke-checkin', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const { ticket_id } = req.body;
+    const result = await pool.query('SELECT * FROM attendees WHERE ticket_id = $1', [ticket_id]);
+    if (result.rows.length === 0) return res.json({ success: false, error: 'Ticket not found' });
+    if (!result.rows[0].checked_in) return res.json({ success: false, error: 'Not checked in' });
+    await pool.query('UPDATE attendees SET checked_in=false, checked_in_at=NULL, checked_out=false, checked_out_at=NULL WHERE ticket_id=$1', [ticket_id]);
+    res.json({ success: true });
+  } catch (error) { res.json({ success: false, error: error.message }); }
+});
+
+app.patch('/api/attendees/:ticket_id/accommodation', async (req, res) => {
+  try {
+    if (!pool) return res.json({ success: false, error: 'Database not ready' });
+    const { accommodation_type } = req.body;
+    const result = await pool.query(
+      'UPDATE attendees SET accommodation_type=$1 WHERE ticket_id=$2 RETURNING ticket_id',
+      [accommodation_type || '', req.params.ticket_id]
+    );
+    if (result.rowCount === 0) return res.json({ success: false, error: 'Attendee not found' });
+    res.json({ success: true });
+  } catch (error) { res.json({ success: false, error: error.message }); }
 });
 
 app.get('/api/registrations', async (req, res) => {
@@ -1831,40 +2121,7 @@ app.post('/api/send-badge/:ticket_id', async (req, res) => {
     const r = await pool.query('SELECT * FROM attendees WHERE ticket_id=$1', [req.params.ticket_id]);
     if (!r.rows[0]) return res.json({ success: false, error: 'Attendee not found' });
     const a = r.rows[0];
-
-    const pdfBuf = await generateBadgePDF(a);
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-    });
-
-    const typeLabel = { general:'General Admin', foreigners:'Foreigner (VIP)', youth:'Youth', speaker:'Speaker', business:'Business' }[a.ticket_type] || a.ticket_type;
-
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Africa Convention 2026" <' + process.env.SMTP_USER + '>',
-      to: a.email,
-      subject: 'Your Africa Convention 2026 Badge — ' + a.name,
-      html: `
-      <div style="font-family:sans-serif;background:#12002a;padding:40px 20px;min-height:100vh">
-        <div style="max-width:560px;margin:0 auto;background:rgba(255,255,255,0.05);border:1px solid rgba(196,77,255,0.25);border-radius:20px;padding:40px;color:white">
-          <h1 style="font-size:22px;font-weight:800;background:linear-gradient(135deg,#ff80f0,#c44dff,#ff4da6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:0 0 4px">🎪 Africa Convention 2026</h1>
-          <p style="color:rgba(200,160,255,0.65);font-size:13px;margin:0 0 28px">Arusha, Tanzania · June 18–22, 2026</p>
-          <p style="color:rgba(240,220,255,0.9);font-size:16px;margin:0 0 14px">Dear <strong>${a.name}</strong>,</p>
-          <p style="color:rgba(210,180,255,0.8);line-height:1.7;margin:0 0 24px">Your convention badge is attached to this email as a PDF. Please present it at the entrance — printed or on your device — for check-in.</p>
-          <div style="background:rgba(196,77,255,0.1);border:1px solid rgba(196,77,255,0.25);border-radius:12px;padding:20px;margin-bottom:28px">
-            <p style="margin:0 0 8px;color:rgba(255,220,255,0.9)"><strong>Ticket ID:</strong> ${a.ticket_id}</p>
-            <p style="margin:0 0 8px;color:rgba(255,220,255,0.9)"><strong>Pass Type:</strong> ${typeLabel}</p>
-            ${a.organization ? '<p style="margin:0;color:rgba(255,220,255,0.9)"><strong>Organisation:</strong> ' + a.organization + '</p>' : ''}
-          </div>
-          <p style="color:rgba(180,130,220,0.5);font-size:12px;text-align:center;margin:0">Africa Convention 2026 · WCCM Tanzania · wccm.tz@gmail.com</p>
-        </div>
-      </div>`,
-      attachments: [{ filename: 'badge-' + a.ticket_id + '.pdf', content: pdfBuf, contentType: 'application/pdf' }]
-    });
-
+    await sendWelcomePackage(a);
     await pool.query('UPDATE attendees SET badge_sent=true, badge_generated=true WHERE ticket_id=$1', [a.ticket_id]);
     res.json({ success: true, sent_to: a.email });
   } catch (e) { res.json({ success: false, error: e.message }); }
